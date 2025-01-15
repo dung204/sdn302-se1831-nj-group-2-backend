@@ -1,0 +1,31 @@
+services:
+  api:
+    container_name: api
+    depends_on:
+      - mongo
+    restart: always
+    build: .
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    networks:
+      - sdn302_se1831_nj_group_2_network
+
+  mongo:
+    container_name: mongo
+    image: mongo:7.0-jammy
+    ports:
+      - '27017:${DB_PORT}'
+    environment:
+      - MONGO_INITDB_DATABASE=${DB_DATABASE_NAME}
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    networks:
+      - sdn302_se1831_nj_group_2_network
+
+networks:
+  sdn302_se1831_nj_group_2_network:
+    driver: bridge
+
+volumes:
+  mongo_data:

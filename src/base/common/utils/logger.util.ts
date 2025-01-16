@@ -56,7 +56,6 @@ export class Logger {
         ErrorLogsFileTransport,
       ],
     });
-    this.info('Logger initialized');
   }
 
   public trace(msg: unknown) {

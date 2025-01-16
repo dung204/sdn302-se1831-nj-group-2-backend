@@ -37,7 +37,7 @@
   },
   "exclude": [
     "node_modules",
-    "eslint.config.mjs",
+    "*.config.mjs",
     "dist",
     "test",
     "**/*.spec.ts",

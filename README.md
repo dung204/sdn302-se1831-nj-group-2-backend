@@ -13,9 +13,9 @@
 This project is developed by Group 2, class SE1831-NJ of the SDN302 (Server-Side development with NodeJS, Express, and MongoDB) subject at FPT University. The group members are:
 
 - Hồ Anh Dũng - HE181529 ([@dung204](https://github.com/dung204))
-- Hoàng Gia Trọng - HE ([@tronghghe172557](https://github.com/tronghghe172557))
-- Lương Bảo Vũ - HE ([]())
-- Nguyễn Ngọc Anh - HE ([]())
+- Hoàng Gia Trọng - HE172557 ([@tronghghe172557](https://github.com/tronghghe172557))
+- Vũ Lương Bảo - HE172612 ([@Baovu2003](https://github.com/Baovu2003))
+- Nguyễn Ngọc Anh - HE176642 ([@anhnnhe176642](https://github.com/anhnnhe176642))
 - Nguyễn Hữu Tâm - HE187049 ([@Gentle226](https://github.com/Gentle226))
 
 ## 2. Introduction

@@ -20,9 +20,6 @@ export class Logger {
     addColors(logLevelColor);
 
     const loggerFormat = format.combine(
-      format.colorize({
-        all: true,
-      }),
       format.timestamp({
         format: 'YYYY-MM-DD HH:mm:ss',
       }),
@@ -32,13 +29,34 @@ export class Logger {
       ),
     );
 
+    const ConsoleTransport = new transports.Console({
+      format: format.combine(format.colorize({ all: true }), loggerFormat),
+    });
+
+    const InfoLogsFileTransport = new transports.File({
+      filename: 'logs/info.log',
+      level: logLevelString.INFO,
+      format: loggerFormat,
+    });
+
+    const ErrorLogsFileTransport = new transports.File({
+      filename: 'logs/errors.log',
+      level: logLevelString.ERROR,
+      format: loggerFormat,
+    });
+
     this.loggerName = name;
     this.instance = createLogger({
       format: loggerFormat,
       level: logLevelString.INFO,
       levels: logLevelNumber,
-      transports: [new transports.Console()],
+      transports: [
+        ConsoleTransport,
+        InfoLogsFileTransport,
+        ErrorLogsFileTransport,
+      ],
     });
+    this.info('Logger initialized');
   }
 
   public trace(msg: unknown) {
@@ -75,7 +93,9 @@ export class Logger {
     this.instance.log(logLevelString.FATAL, this.stringify(msg), {
       loggerName: this.loggerName,
     });
-    process.exit(1);
+    // eslint-disable-next-line no-console
+    console.error('App crashed - waiting file changes before restarting...');
+    process.kill(process.pid, 'SIGTERM');
   }
 
   private stringify(value: unknown): string {

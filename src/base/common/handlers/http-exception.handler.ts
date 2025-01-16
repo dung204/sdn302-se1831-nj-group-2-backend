@@ -1,5 +1,6 @@
 import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
+import { fromZodError } from 'zod-validation-error';
 
 import { HttpStatusCode, httpStatusName } from '@/base/common/enums';
 import { HttpException } from '@/base/common/exceptions';
@@ -23,15 +24,15 @@ export const HttpExceptionHandler: ErrorRequestHandler<
   }
 
   if (err instanceof ZodError) {
-    const fieldErrors = err.flatten().fieldErrors;
+    const messages = fromZodError(err)
+      .message.replaceAll('Validation error: ', '')
+      .split('; ')
+      .map((msg) => msg.replaceAll('"', '`'));
 
     res.status(HttpStatusCode.BAD_REQUEST).json({
       statusCode: HttpStatusCode.BAD_REQUEST,
       errorName: httpStatusName[HttpStatusCode.BAD_REQUEST],
-      messages: Object.keys(fieldErrors).map(
-        (field) =>
-          `${field}: ${fieldErrors[field as keyof typeof fieldErrors]?.[0]}`,
-      ),
+      messages,
     });
     return next();
   }

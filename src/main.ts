@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 
 import { HttpExceptionHandler } from '@/base/common/handlers';
@@ -11,6 +12,7 @@ async function bootstrap() {
 
   await database.connect();
 
+  app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 

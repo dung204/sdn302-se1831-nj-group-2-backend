@@ -10,7 +10,7 @@ class UserController {
   /**
    * `[GET]` `/api/v1/users`
    *
-   * Get all users
+   * Get all existing (non-deleted) users
    */
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
@@ -24,9 +24,25 @@ class UserController {
   }
 
   /**
+   * `[GET]` `/api/v1/users/deleted`
+   *
+   * Get all deleted users
+   */
+  async findAllDeleted(req: Request, res: Response, next: NextFunction) {
+    try {
+      const dto = commonQueryDto.parse(req.query);
+      res
+        .status(HttpStatusCode.OK)
+        .json(await userService.findAllDeletedAndCount(dto));
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
    * `[GET]` `/api/v1/users/:id`
    *
-   * Get a user by ID
+   * Get an existing user by ID
    * @throws {NotFoundException} - if a user is not found by the provided ID
    */
   async findOneById(req: Request, res: Response, next: NextFunction) {

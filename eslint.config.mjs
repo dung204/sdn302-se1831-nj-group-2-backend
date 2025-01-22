@@ -6,7 +6,7 @@ export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommended,
   {
-    ignores: ['dist', 'node_modules', '.husky/install.mjs'],
+    ignores: ['dist', 'node_modules', '.husky/install.mjs', '*.config.mjs'],
     rules: {
       'no-process-env': 'error',
       camelcase: [
@@ -24,6 +24,13 @@ export default tseslint.config(
       'no-console': 'error',
       'no-multi-assign': 'error',
       'no-nested-ternary': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ExportDefaultDeclaration',
+          message: 'Use named exports instead (i.e. export const foo = ...)',
+        },
+      ],
     },
   },
 );

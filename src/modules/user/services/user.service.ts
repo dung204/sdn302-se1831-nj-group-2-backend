@@ -50,8 +50,8 @@ class UserService {
           pageSize,
           total,
           totalPage,
-          hasPreviousPage: page < totalPage,
-          hasNextPage: page > 1,
+          hasPreviousPage: page > 1,
+          hasNextPage: page < totalPage,
         },
       },
     };

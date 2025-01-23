@@ -49,6 +49,7 @@ class UserService {
           page,
           pageSize,
           total,
+          totalPage,
           hasPreviousPage: page < totalPage,
           hasNextPage: page > 1,
         },

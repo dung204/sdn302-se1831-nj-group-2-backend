@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { commonQueryDto } from '@/base/common/dtos';
 import { HttpStatusCode } from '@/base/common/enums';
+import { userQueryDto } from '@/modules/user/dtos';
 import { createUserDto } from '@/modules/user/dtos/create-user.dto';
 import { updateUserDto } from '@/modules/user/dtos/update-user.dto';
 import { userService } from '@/modules/user/services';
@@ -14,10 +14,10 @@ class UserController {
    */
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const dto = commonQueryDto.parse(req.query);
+      const dto = userQueryDto.parse(req.query);
       res
         .status(HttpStatusCode.OK)
-        .json(await userService.findAllAndCount(dto));
+        .json(await userService.findAllAndCount({ ...dto, deleted: false }));
     } catch (err) {
       next(err);
     }
@@ -30,7 +30,7 @@ class UserController {
    */
   async findAllDeleted(req: Request, res: Response, next: NextFunction) {
     try {
-      const dto = commonQueryDto.parse(req.query);
+      const dto = userQueryDto.parse(req.query);
       res
         .status(HttpStatusCode.OK)
         .json(await userService.findAllDeletedAndCount(dto));

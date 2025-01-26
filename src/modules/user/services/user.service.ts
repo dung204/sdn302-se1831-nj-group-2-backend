@@ -1,36 +1,70 @@
-import { CommonQueryDto } from '@/base/common/dtos';
+import { RootFilterQuery, SortOrder } from 'mongoose';
+
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
+import { UserQueryDto } from '@/modules/user/dtos';
 import { CreateUserDto } from '@/modules/user/dtos/create-user.dto';
 import { UpdateUserDto } from '@/modules/user/dtos/update-user.dto';
-import { UserDto, userDto } from '@/modules/user/dtos/user.dto';
-import { UserModel } from '@/modules/user/models';
+import {
+  DeletedUserDto,
+  UserDto,
+  deletedUserDto,
+  userDto,
+} from '@/modules/user/dtos/user.dto';
+import { User, UserModel } from '@/modules/user/models';
 
 class UserService {
+  findAllAndCount(
+    commonQueryDto: UserQueryDto & { deleted?: false },
+  ): Promise<SuccessResponseBody<UserDto[]>>;
+  findAllAndCount(
+    commonQueryDto: UserQueryDto & { deleted: true },
+  ): Promise<SuccessResponseBody<DeletedUserDto[]>>;
   async findAllAndCount({
     page,
     pageSize,
-  }: CommonQueryDto): Promise<SuccessResponseBody<UserDto[]>> {
-    const users = await UserModel.find({ deleteTimestamp: null })
+    sorting,
+    deleted,
+  }: UserQueryDto): Promise<SuccessResponseBody<UserDto[] | DeletedUserDto[]>> {
+    const filter: RootFilterQuery<User> = {
+      deleteTimestamp: deleted ? { $ne: null } : null,
+    };
+
+    const query = UserModel.find(filter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
-      .exec();
+      .sort(
+        sorting.map(
+          ({ field, direction }) =>
+            [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
+        ),
+      );
 
-    const total = await UserModel.countDocuments().exec();
+    const users = await query.exec();
+
+    const total = await UserModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
-      data: users.map((user) => userDto.parse(user)),
+      data: users.map((user) =>
+        deleted ? deletedUserDto.parse(user) : userDto.parse(user),
+      ),
       meta: {
         pagination: {
           page,
           pageSize,
           total,
-          hasPreviousPage: page < totalPage,
-          hasNextPage: page > 1,
+          totalPage,
+          hasPreviousPage: page > 1,
+          hasNextPage: page < totalPage,
         },
+        sorting,
       },
     };
+  }
+
+  async findAllDeletedAndCount(userQueryDto: UserQueryDto) {
+    return this.findAllAndCount({ ...userQueryDto, deleted: true });
   }
 
   async findOneById(id: string): Promise<SuccessResponseBody<UserDto>> {

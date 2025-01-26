@@ -6,6 +6,8 @@ export const userRouter = Router();
 
 userRouter.get('/', userController.findAll);
 
+userRouter.get('/deleted', userController.findAllDeleted);
+
 userRouter.get('/:id', userController.findOneById);
 
 userRouter.post('/', userController.createUser);

@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
+import { loginRequestDto } from '@/modules/auth/dtos';
+import { authService } from '@/modules/auth/services';
 
 class AuthController {
   /**
@@ -8,7 +10,8 @@ class AuthController {
    */
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      res.status(HttpStatusCode.CREATED).json({ message: 'Login' });
+      const dto = loginRequestDto.parse(req.body);
+      res.status(HttpStatusCode.CREATED).json(await authService.login(dto));
     } catch (err) {
       next(err);
     }

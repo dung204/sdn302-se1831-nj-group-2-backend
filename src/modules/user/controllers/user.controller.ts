@@ -49,7 +49,7 @@ class UserController {
     try {
       res
         .status(HttpStatusCode.OK)
-        .json(await userService.findOneById(req.params.id!));
+        .json({ data: await userService.findOneById(req.params.id!) });
     } catch (err) {
       next(err);
     }
@@ -62,7 +62,7 @@ class UserController {
    */
   async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const dto = createUserDto.parse(req.body);
+      const dto = await createUserDto.parseAsync(req.body);
       res
         .status(HttpStatusCode.CREATED)
         .json(await userService.createUser(dto));

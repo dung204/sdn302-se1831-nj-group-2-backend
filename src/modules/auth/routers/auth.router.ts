@@ -9,7 +9,7 @@ authRouter.post('/login', authController.login);
 
 authRouter.post('/refresh-token', authController.refresh);
 
-authRouter.delete('/logout', authController.logout);
+authRouter.delete('/logout', AuthGuard(), authController.logout);
 
 authRouter.patch(
   '/change-password',

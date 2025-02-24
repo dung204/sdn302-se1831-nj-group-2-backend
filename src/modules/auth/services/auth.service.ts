@@ -66,8 +66,11 @@ class AuthService {
     };
   }
 
-  async logout() {
-    // TODO: implement this function
+  async logout({ id }: HydratedDocument<User>, accessToken: string) {
+    const refreshToken = await redis.getInstance().getdel(id);
+
+    await this.blacklistToken(accessToken);
+    await this.blacklistToken(refreshToken!);
   }
 
   async changePassword(
@@ -101,7 +104,7 @@ class AuthService {
 
     await redis
       .getInstance()
-      .set(userId, refreshToken, 'EXAT', envVariables.JWT_REFRESH_EXPIRATION);
+      .set(userId, refreshToken, 'EX', envVariables.JWT_REFRESH_EXPIRATION);
 
     return {
       accessToken,

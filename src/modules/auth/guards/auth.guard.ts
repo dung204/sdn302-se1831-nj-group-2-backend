@@ -33,11 +33,11 @@ export const AuthGuard =
         throw new UnauthorizedException('Malformed access token.');
       }
 
-      if (await authService.isTokenBlacklisted(bearerToken)) {
+      const jwtToken = bearerToken.replaceAll('Bearer ', '');
+      if (await authService.isTokenBlacklisted(jwtToken)) {
         throw new UnauthorizedException('Access token is blacklisted.');
       }
 
-      const jwtToken = bearerToken.replaceAll('Bearer ', '');
       const { sub: userId, role } = JwtUtils.verifyAccessToken(jwtToken);
 
       if (!allowRoles.includes(role!)) {
@@ -46,6 +46,7 @@ export const AuthGuard =
 
       const user = await userService.findOneById(userId as string);
       req.user = user;
+      req.accessToken = jwtToken;
       next();
     } catch (err) {
       next(err);

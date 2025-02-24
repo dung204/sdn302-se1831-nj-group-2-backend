@@ -40,7 +40,8 @@ class AuthController {
    */
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
-      res.status(HttpStatusCode.NO_CONTENT).json({ message: 'Logout' });
+      await authService.logout(req.user!, req.accessToken!);
+      res.status(HttpStatusCode.NO_CONTENT).end();
     } catch (err) {
       next(err);
     }

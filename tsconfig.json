@@ -1,4 +1,8 @@
 {
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  },
   "compilerOptions": {
     // Base options
     "esModuleInterop": true,

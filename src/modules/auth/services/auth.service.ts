@@ -2,7 +2,7 @@ import { BadRequestException } from '@/base/common/exceptions';
 import { SuccessResponseBody } from '@/base/common/types';
 import { LoginResponseDto } from '@/modules/auth/dtos';
 import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
-import { JwtPayload } from '@/modules/auth/types';
+import { CustomJwtPayload } from '@/modules/auth/types';
 import { JwtUtils, PasswordUtils } from '@/modules/auth/utils';
 import { Role } from '@/modules/user/enums';
 import { userService } from '@/modules/user/services';
@@ -44,12 +44,12 @@ class AuthService {
   }
 
   private getTokens(userId: string, role: Role) {
-    const accessPayload: JwtPayload = {
+    const refreshPayload: CustomJwtPayload = {
       sub: userId,
     };
 
-    const refreshPayload: JwtPayload = {
-      ...accessPayload,
+    const accessPayload: CustomJwtPayload = {
+      ...refreshPayload,
       role,
     };
 

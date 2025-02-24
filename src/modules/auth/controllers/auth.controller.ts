@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
-import { loginRequestDto } from '@/modules/auth/dtos';
+import { changePasswordDto, loginRequestDto } from '@/modules/auth/dtos';
 import { authService } from '@/modules/auth/services';
 
 class AuthController {
@@ -44,7 +44,9 @@ class AuthController {
    */
   async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
-      res.status(HttpStatusCode.OK).json({ message: 'Change password' });
+      const dto = changePasswordDto.parse(req.body);
+      await authService.changePassword(req.user!, dto);
+      res.status(HttpStatusCode.NO_CONTENT).end();
     } catch (err) {
       next(err);
     }

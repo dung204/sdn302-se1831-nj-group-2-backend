@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { authController } from '@/modules/auth/controllers';
+import { AuthGuard } from '@/modules/auth/guards';
 
 export const authRouter = Router();
 
@@ -10,4 +11,8 @@ authRouter.post('/refresh-token', authController.refreshToken);
 
 authRouter.delete('/logout', authController.logout);
 
-authRouter.post('/change-password', authController.changePassword);
+authRouter.patch(
+  '/change-password',
+  AuthGuard(),
+  authController.changePassword,
+);

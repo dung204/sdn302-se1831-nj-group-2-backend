@@ -1,10 +1,13 @@
+import { HydratedDocument } from 'mongoose';
+
 import { BadRequestException } from '@/base/common/exceptions';
 import { SuccessResponseBody } from '@/base/common/types';
-import { LoginResponseDto } from '@/modules/auth/dtos';
+import { ChangePasswordDto, LoginResponseDto } from '@/modules/auth/dtos';
 import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { CustomJwtPayload } from '@/modules/auth/types';
 import { JwtUtils, PasswordUtils } from '@/modules/auth/utils';
 import { Role } from '@/modules/user/enums';
+import { User } from '@/modules/user/models';
 import { userService } from '@/modules/user/services';
 
 class AuthService {
@@ -39,8 +42,20 @@ class AuthService {
     // TODO: implement this function
   }
 
-  async changePassword() {
-    // TODO: implement this function
+  async changePassword(
+    user: HydratedDocument<User>,
+    { oldPassword, newPassword }: ChangePasswordDto,
+  ) {
+    const isPasswordMatched = await PasswordUtils.isPasswordMatched(
+      oldPassword,
+      user.password,
+    );
+    if (!isPasswordMatched) {
+      throw new BadRequestException('Old password is incorrect.');
+    }
+
+    user.password = await PasswordUtils.hashPassword(newPassword);
+    await user.save();
   }
 
   private getTokens(userId: string, role: Role) {

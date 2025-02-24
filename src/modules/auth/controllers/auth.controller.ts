@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
-import { changePasswordDto, loginRequestDto } from '@/modules/auth/dtos';
+import {
+  changePasswordDto,
+  loginRequestDto,
+  refreshRequestDto,
+} from '@/modules/auth/dtos';
 import { authService } from '@/modules/auth/services';
 
 class AuthController {
@@ -20,9 +24,12 @@ class AuthController {
   /**
    * `[POST] /api/v1/auth/refresh-token`
    */
-  async refreshToken(req: Request, res: Response, next: NextFunction) {
+  async refresh(req: Request, res: Response, next: NextFunction) {
     try {
-      res.status(HttpStatusCode.CREATED).json({ message: 'Refresh token' });
+      const { refreshToken } = refreshRequestDto.parse(req.body);
+      res
+        .status(HttpStatusCode.CREATED)
+        .json(await authService.refresh(refreshToken));
     } catch (err) {
       next(err);
     }

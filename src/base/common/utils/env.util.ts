@@ -21,6 +21,9 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().nonempty(),
   JWT_ACCESS_EXPIRATION: z.coerce.number().int().positive(),
   JWT_REFRESH_EXPIRATION: z.coerce.number().int().positive(),
+  REDIS_HOST: z.string().nonempty(),
+  REDIS_PORT: z.coerce.number().int().positive(),
+  REDIS_PASSWORD: z.string().nonempty(),
 });
 
 // eslint-disable-next-line no-process-env

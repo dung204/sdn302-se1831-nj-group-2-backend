@@ -29,4 +29,8 @@ export class JwtUtils {
       envVariables.JWT_REFRESH_SECRET,
     ) as CustomJwtPayload;
   }
+
+  public static decodeToken(token: string): CustomJwtPayload {
+    return jwt.decode(token) as CustomJwtPayload;
+  }
 }

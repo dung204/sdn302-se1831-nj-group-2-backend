@@ -7,7 +7,7 @@ export const authRouter = Router();
 
 authRouter.post('/login', authController.login);
 
-authRouter.post('/refresh-token', authController.refreshToken);
+authRouter.post('/refresh-token', authController.refresh);
 
 authRouter.delete('/logout', authController.logout);
 
@@ -16,3 +16,7 @@ authRouter.patch(
   AuthGuard(),
   authController.changePassword,
 );
+
+authRouter.get('/private', AuthGuard(), (req, res) => {
+  res.json({ message: 'OK' });
+});

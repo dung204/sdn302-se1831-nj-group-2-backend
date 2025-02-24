@@ -32,6 +32,7 @@ You need to install all of these before continuing:
 - [Docker](https://www.docker.com/): To setup databases, and bundle the application as a container.
 - [MongoDB](https://www.mongodb.com/): The database system used in this project, set this up with Docker is recommended.
 - [MongoDB Compass](https://www.mongodb.com/products/compass): The GUI for MongoDB, to work with the database.
+- [Redis](https://redis.io/): The in-memory data structure store, used for storing blacklisted tokens, set this up with Docker is recommended.
 
 ## 4. Project setup
 

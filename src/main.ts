@@ -6,6 +6,7 @@ import { Logger, envVariables } from '@/base/common/utils';
 import { database } from '@/base/database';
 import { redis } from '@/base/redis';
 import { appRouter } from '@/base/router';
+import { configSwagger } from '@/base/swagger';
 
 async function bootstrap() {
   const logger = new Logger(bootstrap.name);
@@ -19,6 +20,7 @@ async function bootstrap() {
   app.use(express.urlencoded({ extended: true }));
 
   app.use('/api/v1', appRouter);
+  configSwagger(app);
 
   app.use(HttpExceptionHandler);
 

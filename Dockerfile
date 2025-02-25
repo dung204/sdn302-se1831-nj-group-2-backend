@@ -20,6 +20,7 @@ FROM base AS release
 ENV NODE_ENV=production
 COPY --from=prod-deps /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=build /usr/src/app/dist /usr/src/app/dist
+COPY docs/ /usr/src/app/docs
 COPY .env /usr/src/app/.env
 
 CMD [ "pnpm", "start:prod" ]

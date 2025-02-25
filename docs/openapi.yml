@@ -1,0 +1,355 @@
+openapi: 3.0.3
+info:
+  title: Internet Cafe Management System API
+  version: '1.0'
+  description: |-
+    This is the API documentation for the Internet Cafe Management System. It is an assignment project for the SDN302 - Server-side Development with Node.js, Express & MongoDB course at FPT University
+
+    Members of Group 2:
+    - Hồ Anh Dũng - HE181529 (Leader)
+    - Hoàng Gia Trọng - HE172557 
+    - Vũ Lương Bảo - HE172612 
+    - Nguyễn Ngọc Anh - HE176642 
+    - Nguyễn Hữu Tâm - HE187049 
+
+    The source code is available here: [https://github.com/dung204/sdn302-se1831-nj-group-2-backend](https://github.com/dung204/sdn302-se1831-nj-group-2-backend)
+  contact:
+    name: Hồ Anh Dũng - HE181529 - The leader of Group 2
+    email: dunghahe185129@fpt.edu.vn
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+tags:
+  - name: users
+    description: User management
+servers:
+  - url: http://localhost:3002
+    description: Development server
+paths:
+  /api/v1/users:
+    get:
+      summary: Get all users
+      description:
+        Allowed sorting fields are `createTimestamp`, `id`, `firstName`,
+        `lastName`, `deleteTimestamp`
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all users information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+    post:
+      summary: Create a new user
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Username already exists
+  /api/v1/users/{id}:
+    get:
+      summary: Get a user by ID
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          description: The user ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a user information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserDto'
+        '404':
+          description: User not found
+    patch:
+      summary: Update a user by ID
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          description: The user ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserDto'
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+    delete:
+      summary: Delete a user by ID
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          description: The user ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+  /api/v1/users/deleted:
+    get:
+      summary: Get all deleted users
+      description:
+        Allowed sorting fields are `createTimestamp`, `id`, `firstName`,
+        `lastName`, `deleteTimestamp`
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description:
+            Get all deleted users information successfully (with pagination
+            metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedUserDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+  /api/v1/users/restore/{id}:
+    patch:
+      summary: Restore a deleted user by ID
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          description: The user ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserDto'
+        '404':
+          description: User not found
+components:
+  schemas:
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        address:
+          type: string
+          example: 123 Main St
+          nullable: true
+        role:
+          $ref: '#/components/schemas/Role'
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedUserDto:
+      allOf:
+        - $ref: '#/components/schemas/UserDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    UpdateUserDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        address:
+          type: string
+          example: 123 Main St
+          nullable: true
+        role:
+          $ref: '#/components/schemas/Role'
+    CreateUserDto:
+      required:
+        - username
+        - password
+        - firstName
+        - lastName
+      allOf:
+        - type: object
+          properties:
+            username:
+              type: string
+              example: john.doe
+            password:
+              type: string
+              example: password
+        - $ref: '#/components/schemas/UpdateUserDto'
+    Role:
+      type: string
+      enum:
+        - ADMIN
+        - STAFF
+        - GUEST
+        - OWNER
+    ResponseMeta:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            pagination:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  example: 1
+                  description: The current page number
+                pageSize:
+                  type: integer
+                  example: 10
+                  description: The number of items per page
+                total:
+                  type: integer
+                  example: 100
+                  description: The total number of items (without pagination)
+                totalPage:
+                  type: integer
+                  example: 10
+                  description: The total number of pages
+                hasPreviousPage:
+                  type: boolean
+                  example: false
+                  description: Whether there is a previous page
+                hasNextPage:
+                  type: boolean
+                  example: true
+                  description: Whether there is a next page
+            sorting:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: createTimestamp
+                    description: The field to sort
+                  direction:
+                    type: string
+                    example: desc
+                    description: The order to sort
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The current page number
+      required: false
+      schema:
+        type: integer
+        default: 1
+    pageSize:
+      name: pageSize
+      in: query
+      description: The number of items per page
+      required: false
+      schema:
+        type: integer
+        default: 10
+    sorting:
+      name: sorting
+      in: query
+      description: The sorting for the query. The syntax is `{field}:{order}`,
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          default: createTimestamp:desc
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

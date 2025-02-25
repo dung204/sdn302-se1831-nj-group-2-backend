@@ -16,7 +16,3 @@ authRouter.patch(
   AuthGuard(),
   authController.changePassword,
 );
-
-authRouter.get('/private', AuthGuard(), (req, res) => {
-  res.json({ message: 'OK' });
-});

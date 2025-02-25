@@ -20,16 +20,115 @@ info:
     name: MIT License
     url: https://opensource.org/licenses/MIT
 tags:
+  - name: auth
+    description: Authentication & Authorization
   - name: users
     description: User management
 servers:
   - url: http://localhost:3002
     description: Development server
 paths:
+  /api/v1/auth/login:
+    post:
+      summary: Login to the system
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequestDto'
+      responses:
+        '201':
+          description: Login successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LoginSuccessDto'
+        '400':
+          description: Username or password is missing/invalid
+        '401':
+          description: Username or password is incorrect
+  /api/v1/auth/refresh-token:
+    post:
+      summary: Refresh the access token
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG4uZG9lIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNTE2MjM5MDIyfQ.4k7
+      responses:
+        '201':
+          description: Refresh token successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RefreshSuccessDto'
+        '400':
+          description: Refresh token is missing/invalid
+        '401':
+          description: Refresh token is incorrect
+  /api/v1/auth/logout:
+    delete:
+      summary: Logout from the system
+      tags:
+        - auth
+      responses:
+        '204':
+          description: Logout successfully
+        '401':
+          description: User has not logged in yet
+      security:
+        - JWT: []
+  /api/v1/auth/change-password:
+    patch:
+      summary: Change the password
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - oldPassword
+                - newPassword
+              properties:
+                oldPassword:
+                  type: string
+                  example: password
+                newPassword:
+                  type: string
+                  example: newpassword
+      responses:
+        '204':
+          description: Change password successfully
+        '400':
+          description: Old password or new password is missing/incorrect
+      security:
+        - JWT: []
   /api/v1/users:
     get:
       summary: Get all users
-      description: Allowed sorting fields are `createTimestamp`, `id`, `firstName`,
+      description:
+        Allowed sorting fields are `createTimestamp`, `id`, `firstName`,
         `lastName`, `deleteTimestamp`
       tags:
         - users
@@ -152,7 +251,8 @@ paths:
   /api/v1/users/deleted:
     get:
       summary: Get all deleted users
-      description: Allowed sorting fields are `createTimestamp`, `id`, `firstName`,
+      description:
+        Allowed sorting fields are `createTimestamp`, `id`, `firstName`,
         `lastName`, `deleteTimestamp`
       tags:
         - users
@@ -162,7 +262,8 @@ paths:
         - $ref: '#/components/parameters/sorting'
       responses:
         '200':
-          description: Get all deleted users information successfully (with pagination
+          description:
+            Get all deleted users information successfully (with pagination
             metadata).
           content:
             application/json:
@@ -202,6 +303,36 @@ paths:
           description: User not found
 components:
   schemas:
+    LoginRequestDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: john.doe
+        password:
+          type: string
+          example: password
+    LoginSuccessDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        role:
+          $ref: '#/components/schemas/Role'
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlYzczOWJkNi02ZGNlLTQzYWYtOTFkYi1iNzg2YmQwMWVkNzkiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NDA1MDI3NDEsImV4cCI6MTc0MDUwNjM0MX0.Mgl-FANwtPMGhO3_HeOeoBFn2PoEYfSYsC4ECFgl0TE
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlYzczOWJkNi02ZGNlLTQzYWYtOTFkYi1iNzg2YmQwMWVkNzkiLCJpYXQiOjE3NDA1MDI3NDEsImV4cCI6MTc0MzA5NDc0MX0.GWRNcc0jLR9KN97nH36W6gFqDRAV4PNycD_w8jcezXg
+    RefreshSuccessDto:
+      allOf:
+        - $ref: '#/components/schemas/LoginSuccessDto'
     UserDto:
       type: object
       properties:

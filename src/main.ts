@@ -4,6 +4,7 @@ import express from 'express';
 import { HttpExceptionHandler } from '@/base/common/handlers';
 import { Logger, envVariables } from '@/base/common/utils';
 import { database } from '@/base/database';
+import { redis } from '@/base/redis';
 import { appRouter } from '@/base/router';
 import { configSwagger } from '@/base/swagger';
 
@@ -11,7 +12,8 @@ async function bootstrap() {
   const logger = new Logger(bootstrap.name);
   const app = express();
 
-  await database.connect();
+  // Try to connect to mongodb & redis simultaneously
+  await Promise.all([database.connect(), redis.connect()]);
 
   app.use(cors());
   app.use(express.json());

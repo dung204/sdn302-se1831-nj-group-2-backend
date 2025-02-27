@@ -6,8 +6,8 @@ import { Role } from '@/modules/user/enums/role.enum';
 export interface User extends BaseModel {
   username: string;
   password: string;
-  firstName: string | null;
-  lastName: string | null;
+  firstName: string;
+  lastName: string;
   address: string | null;
   role: Role;
   citizenNumber: string | null;
@@ -19,8 +19,8 @@ const userSchema = new Schema<User>({
   ...baseModelSchemaDefinition,
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  firstName: { type: String, required: false },
-  lastName: { type: String, required: false },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   address: { type: String, default: null, required: false },
   role: {
     type: String,

@@ -8,8 +8,14 @@ export const createUserDto = z.object({
   password: z.string().transform((pwd) => PasswordUtils.hashPassword(pwd)),
   firstName: z.string(),
   lastName: z.string(),
-  address: z.string().optional(),
-  role: z.enum([Role.ADMIN, Role.GUEST, Role.OWNER, Role.STAFF]).optional(),
+  address: z.string().nullable().optional(),
+  role: z
+    .enum([Role.ADMIN, Role.GUEST, Role.OWNER, Role.STAFF])
+    .optional()
+    .default(Role.GUEST),
+  citizenNumber: z.string().nullable().optional(),
+  phoneNumber: z.string().nullable().optional(),
+  availableTime: z.number().nullable().optional(),
 });
 
 export type CreateUserDto = z.input<typeof createUserDto>;

@@ -55,5 +55,13 @@
     "*.{json,md,yml}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "bcrypt"
+    ],
+    "onlyBuiltDependencies": [
+      "bcrypt"
+    ]
   }
 }

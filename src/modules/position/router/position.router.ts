@@ -1,13 +1,44 @@
 import { Router } from 'express';
 
+import { AuthGuard } from '@/modules/auth/guards';
+import { Role } from '@/modules/user/enums';
+
 import { positionController } from '../controllers/position.controller';
 
 export const positionRouter = Router();
 
-positionRouter.get('/', positionController.findAll);
-positionRouter.get('/deleted', positionController.findAllDeleted);
-positionRouter.get('/:id', positionController.findOneById);
-positionRouter.post('/', positionController.createPosition);
-positionRouter.patch('/:id', positionController.updatePosition);
-positionRouter.delete('/:id', positionController.softDeletePosition);
-positionRouter.patch('/restore/:id', positionController.restorePosition);
+positionRouter.get(
+  '/',
+  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  positionController.findAll,
+);
+positionRouter.get(
+  '/deleted',
+  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  positionController.findAllDeleted,
+);
+positionRouter.get(
+  '/:id',
+  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  positionController.findOneById,
+);
+positionRouter.post(
+  '/',
+  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  positionController.createPosition,
+);
+positionRouter.patch(
+  '/:id',
+  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  positionController.updatePosition,
+);
+positionRouter.delete(
+  '/:id',
+  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  positionController.softDeletePosition,
+);
+positionRouter.patch(
+  '/restore/:id',
+  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  positionController.restorePosition,
+);

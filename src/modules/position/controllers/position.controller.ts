@@ -55,7 +55,7 @@ class PositionController {
   }
 
   /**
-   * [POST] /api/v1/api/v1/positions
+   * [POST] /api/v1/positions
    */
   async createPosition(req: Request, res: Response, next: NextFunction) {
     try {

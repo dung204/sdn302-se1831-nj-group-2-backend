@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
-
-import { PositionStatus } from '../enums';
+import { PositionStatus } from '@/modules/position/enums';
 
 export const basePositionSchema = z.object({
   _id: z.string(),

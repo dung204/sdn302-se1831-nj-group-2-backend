@@ -1,8 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 import { BaseModel, baseModelSchemaDefinition } from '@/base/common/models';
-
-import { PositionStatus } from '../enums';
+import { PositionStatus } from '@/modules/position/enums';
 
 export interface Position extends BaseModel {
   name: string;

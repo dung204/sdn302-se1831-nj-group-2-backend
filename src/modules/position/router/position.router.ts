@@ -1,9 +1,8 @@
 import { Router } from 'express';
 
 import { AuthGuard } from '@/modules/auth/guards';
+import { positionController } from '@/modules/position/controllers';
 import { Role } from '@/modules/user/enums';
-
-import { positionController } from '../controllers/position.controller';
 
 export const positionRouter = Router();
 

@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
-
-import { positionQueryDto, updatePositionDto } from '../dtos';
-import { createPositionDto } from '../dtos/create-position.dto';
-import { positionService } from '../services/position.service';
+import {
+  createPositionDto,
+  positionQueryDto,
+  updatePositionDto,
+} from '@/modules/position/dtos';
+import { positionService } from '@/modules/position/services';
 
 class PositionController {
   /**

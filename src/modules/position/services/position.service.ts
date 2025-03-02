@@ -3,17 +3,16 @@ import { HydratedDocument, RootFilterQuery, SortOrder } from 'mongoose';
 import { ConflictException } from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
-import { Position, PositionModel } from '@/modules/position/models';
-
-import { createPositionDto } from '../dtos/create-position.dto';
-import { PositionQueryDto } from '../dtos/position-query.dto';
 import {
   DeletedPositionDto,
   PositionDto,
+  PositionQueryDto,
+  UpdatePositionDto,
+  createPositionDto,
   deletedPositionDto,
   positionDto,
-} from '../dtos/position.dto';
-import { UpdatePositionDto } from './../dtos/update-position.dto';
+} from '@/modules/position/dtos';
+import { Position, PositionModel } from '@/modules/position/models';
 
 class PositionService {
   findAllAndCount(

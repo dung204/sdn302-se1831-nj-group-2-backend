@@ -325,6 +325,13 @@ paths:
                         items:
                           $ref: '#/components/schemas/ProviderDto'
                   - $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`, `ADMIN` or `STAFF`
+      security:
+        - JWT: []
+
     post:
       summary: Create a new provider
       tags:
@@ -347,8 +354,15 @@ paths:
                     $ref: '#/components/schemas/ProviderDto'
         '400':
           description: Bad request
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
         '409':
-          description: name already exists
+          description: Name already exists
+      security:
+        - JWT: []
+
   /api/v1/providers/{id}:
     get:
       summary: Get a provider by ID
@@ -372,8 +386,15 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/ProviderDto'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
         '404':
           description: Provider not found
+      security:
+        - JWT: []
+
     patch:
       summary: Update a provider by ID
       tags:
@@ -404,8 +425,15 @@ paths:
                     $ref: '#/components/schemas/ProviderDto'
         '400':
           description: Bad request
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
         '404':
           description: Provider not found
+      security:
+        - JWT: []
+
     delete:
       summary: Delete a provider by ID
       tags:
@@ -421,8 +449,15 @@ paths:
       responses:
         '204':
           description: Provider deleted successfully
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
         '404':
           description: Provider not found
+      security:
+        - JWT: []
+
   /api/v1/providers/deleted:
     get:
       summary: Get all deleted providers
@@ -450,6 +485,13 @@ paths:
                         items:
                           $ref: '#/components/schemas/DeletedProviderDto'
                   - $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+      security:
+        - JWT: []
+
   /api/v1/providers/restore/{id}:
     patch:
       summary: Restore a deleted provider by ID
@@ -473,8 +515,15 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/ProviderDto'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
         '404':
-          description: Provider not found,
+          description: Provider not found
+      security:
+        - JWT: []
+
 components:
   schemas:
     LoginRequestDto:

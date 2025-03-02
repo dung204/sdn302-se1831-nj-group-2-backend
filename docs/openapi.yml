@@ -24,6 +24,8 @@ tags:
     description: Authentication & Authorization
   - name: users
     description: User management
+  - name: positions
+    description: Position management
 paths:
   /api/v1/auth/login:
     post:
@@ -298,6 +300,177 @@ paths:
                     $ref: '#/components/schemas/UserDto'
         '404':
           description: User not found
+  /api/v1/positions:
+    get:
+      summary: Get all positions
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      tags:
+        - positions
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all positions information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PositionDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+    post:
+      summary: Create a new position
+      tags:
+        - positions
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePositionDto'
+      responses:
+        '201':
+          description: Position created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Position name already exists
+  /api/v1/positions/deleted:
+    get:
+      summary: Get all deleted positions
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      tags:
+        - positions
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all deleted positions information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedPositionDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+  /api/v1/positions/{id}:
+    get:
+      summary: Get a position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a position information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '404':
+          description: Position not found
+    patch:
+      summary: Update a position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdatePositionDto'
+      responses:
+        '200':
+          description: Position updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Position not found
+    delete:
+      summary: Delete a position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Position deleted successfully
+        '404':
+          description: Position not found
+  /api/v1/positions/restore/{id}:
+    patch:
+      summary: Restore a deleted position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Position restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '404':
+          description: Position not found
 components:
   schemas:
     LoginRequestDto:
@@ -446,6 +619,67 @@ components:
                     type: string
                     example: desc
                     description: The order to sort
+    PositionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        name:
+          type: string
+          example: Manager
+        branch:
+          type: string
+          example: Main Branch
+        status:
+          type: string
+          example: AVAILABLE
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedPositionDto:
+      allOf:
+        - $ref: '#/components/schemas/PositionDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreatePositionDto:
+      required:
+        - name
+        - branch
+      type: object
+      properties:
+        name:
+          type: string
+          example: Manager
+        branch:
+          type: string
+          example: Main Branch
+        status:
+          type: string
+          example: AVAILABLE
+    UpdatePositionDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Manager
+        branch:
+          type: string
+          example: Main Branch
+        status:
+          type: string
+          example: AVAILABLE
+    PositionStatus:
+      type: string
+      enum:
+        - AVAILABLE
+        - IN_USE
   parameters:
     page:
       name: page

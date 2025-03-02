@@ -303,8 +303,7 @@ paths:
   /api/v1/providers:
     get:
       summary: Get all providers
-      description: Allowed sorting fields are `createTimestamp`, `id`, `name`,
-        `description`, `deleteTimestamp`
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
       tags:
         - providers
       parameters:

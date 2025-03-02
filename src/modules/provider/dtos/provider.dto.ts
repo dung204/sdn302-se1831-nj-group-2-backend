@@ -5,7 +5,7 @@ import { deleteDto } from '@/base/common/dtos';
 const baseProviderSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   createTimestamp: z.date(),
 });
 

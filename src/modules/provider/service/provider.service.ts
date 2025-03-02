@@ -2,6 +2,8 @@ import { RootFilterQuery, SortOrder } from 'mongoose';
 
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
+import { ProviderQueryDto } from '@/modules/provider/dtos';
+import { UpdateProviderDto } from '@/modules/provider/dtos';
 import { CreateProviderDto } from '@/modules/provider/dtos/create-provider.dto';
 import {
   DeletedProviderDto,
@@ -9,10 +11,7 @@ import {
   deletedProviderDto,
   providerDto,
 } from '@/modules/provider/dtos/provider.dto';
-
-import { ProviderQueryDto } from '../dtos';
-import { UpdateProviderDto } from '../dtos/update-provider.dto';
-import { Provider, ProviderModel } from '../models';
+import { Provider, ProviderModel } from '@/modules/provider/models';
 
 class ProviderService {
   findAllAndCount(
@@ -72,7 +71,10 @@ class ProviderService {
   }
 
   async findOneById(id: string) {
-    const provider = await ProviderModel.findById(id).exec();
+    const provider = await ProviderModel.findOne({
+      _id: id,
+      deleteTimestamp: null,
+    }).exec();
     if (!provider) {
       throw new NotFoundException(`Provider with id:${id} is not found`);
     }
@@ -120,7 +122,7 @@ class ProviderService {
 
     if (updateResult.modifiedCount !== 1) {
       throw new NotFoundException(
-        'User not found or has been already deleted.',
+        'Provider not found or has been already deleted.',
       );
     }
   }
@@ -133,7 +135,7 @@ class ProviderService {
 
     if (!updatedProvider) {
       throw new NotFoundException(
-        'User not found or has been already restored.',
+        'Provider not found or has been already restored.',
       );
     }
 

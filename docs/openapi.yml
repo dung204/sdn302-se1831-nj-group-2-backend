@@ -300,7 +300,7 @@ paths:
                     $ref: '#/components/schemas/UserDto'
         '404':
           description: User not found,
-  /api/v1/provider:
+  /api/v1/providers:
     get:
       summary: Get all providers
       description: Allowed sorting fields are `createTimestamp`, `id`, `name`,
@@ -597,7 +597,6 @@ components:
     CreateProviderDto:
       required:
         - name
-        - description
       allOf:
         - type: object
           properties:

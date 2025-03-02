@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
 
-import { positionQueryDto } from '../dtos';
+import { positionQueryDto, updatePositionDto } from '../dtos';
 import { createPositionDto } from '../dtos/create-position.dto';
 import { positionService } from '../services/position.service';
 
@@ -26,15 +26,33 @@ class PositionController {
    * [GET] /api/v1/branch/:branchId/positions
    */
   //async findAllByBranchId(req: Request, res: Response, next: NextFunction) {}
+
   /**
    * [GET] /api/v1/positions/deleted
    */
-  // async findAllDeleted(req: Request, res: Response, next: NextFunction) {}
+  async findAllDeleted(req: Request, res: Response, next: NextFunction) {
+    try {
+      const dto = positionQueryDto.parse(req.query);
+      res
+        .status(HttpStatusCode.OK)
+        .json(await positionService.findAllAndCount({ ...dto, deleted: true }));
+    } catch (err) {
+      next(err);
+    }
+  }
 
   /**
    * [GET] /api/v1/positions/:id
    */
-  //async findOneById(req: Request, res: Response, next: NextFunction) {}
+  async findOneById(req: Request, res: Response, next: NextFunction) {
+    try {
+      res
+        .status(HttpStatusCode.OK)
+        .json({ data: await positionService.findOneById(req.params.id!) });
+    } catch (err) {
+      next(err);
+    }
+  }
 
   /**
    * [POST] /api/v1/api/v1/positions
@@ -53,17 +71,49 @@ class PositionController {
   /**
    * [PATCH] /api/v1/positions/:id
    */
-  //async updatePosition(req: Request, res: Response, next: NextFunction) {}
+  async updatePosition(req: Request, res: Response, next: NextFunction) {
+    try {
+      const updatedPosition = updatePositionDto.parse(req.body);
+      res
+        .status(HttpStatusCode.OK)
+        .json(
+          await positionService.updatePosition(req.params.id!, updatedPosition),
+        );
+    } catch (err) {
+      next(err);
+    }
+  }
 
   /**
    * [DELETE] /api/v1/positions/:id
+   *
+   * Soft delete a position
+   * @throws {NotFoundException} - if a position is not found by the provided ID
    */
-  //async softDeletePosition(req: Request, res: Response, next: NextFunction) {}
+  async softDeletePosition(req: Request, res: Response, next: NextFunction) {
+    try {
+      await positionService.softDeletePosition(req.params.id!);
+      res.status(HttpStatusCode.NO_CONTENT).json();
+    } catch (err) {
+      next(err);
+    }
+  }
 
   /**
    * [PATCH] /api/v1/positions/restore/:id
+   *
+   * Restore a soft deleted position
+   * @throws {NotFoundException} - if a position is not found by the provided ID
    */
-  //async restorePosition(req: Request, res: Response, next: NextFunction) {}
+  async restorePosition(req: Request, res: Response, next: NextFunction) {
+    try {
+      res
+        .status(HttpStatusCode.OK)
+        .json(await positionService.restorePosition(req.params.id!));
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 export const positionController = new PositionController();

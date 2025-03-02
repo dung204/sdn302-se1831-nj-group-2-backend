@@ -17,9 +17,8 @@ const positionSchema = new Schema<Position>({
     required: true,
   },
   branch: {
-    // type: Schema.Types.ObjectId,
-    // ref: 'Branch',
     type: String,
+    // ref: 'Branch',
     required: true,
   },
   status: {

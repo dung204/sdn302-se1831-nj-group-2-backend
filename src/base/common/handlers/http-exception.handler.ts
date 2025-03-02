@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from 'express';
+import { JsonWebTokenError } from 'jsonwebtoken';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 
@@ -33,6 +34,16 @@ export const HttpExceptionHandler: ErrorRequestHandler<
       statusCode: HttpStatusCode.BAD_REQUEST,
       errorName: httpStatusName[HttpStatusCode.BAD_REQUEST],
       messages,
+    });
+    return next();
+  }
+
+  if (err instanceof JsonWebTokenError) {
+    const { name, message } = err;
+    res.status(HttpStatusCode.UNAUTHORIZED).json({
+      statusCode: HttpStatusCode.UNAUTHORIZED,
+      errorName: name,
+      messages: [message],
     });
     return next();
   }

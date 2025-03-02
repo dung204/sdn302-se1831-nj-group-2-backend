@@ -6,6 +6,7 @@ import { userRouter } from '@/modules/user/router';
 
 export const appRouter = Router();
 
+appRouter.use('/auth', authRouter);
 appRouter.use('/users', userRouter);
 appRouter.use('/serviceCategory', serviceCategoryRouter);
 appRouter.use('/serviceTable', serviceTableRouter);

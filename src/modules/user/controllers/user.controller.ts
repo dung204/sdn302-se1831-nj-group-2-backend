@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
-import { userQueryDto } from '@/modules/user/dtos';
+import { userDto, userQueryDto } from '@/modules/user/dtos';
 import { createUserDto } from '@/modules/user/dtos/create-user.dto';
 import { updateUserDto } from '@/modules/user/dtos/update-user.dto';
 import { userService } from '@/modules/user/services';
@@ -47,9 +47,9 @@ class UserController {
    */
   async findOneById(req: Request, res: Response, next: NextFunction) {
     try {
-      res
-        .status(HttpStatusCode.OK)
-        .json(await userService.findOneById(req.params.id!));
+      res.status(HttpStatusCode.OK).json({
+        data: userDto.parse(await userService.findOneById(req.params.id!)),
+      });
     } catch (err) {
       next(err);
     }
@@ -62,7 +62,7 @@ class UserController {
    */
   async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const dto = createUserDto.parse(req.body);
+      const dto = await createUserDto.parseAsync(req.body);
       res
         .status(HttpStatusCode.CREATED)
         .json(await userService.createUser(dto));

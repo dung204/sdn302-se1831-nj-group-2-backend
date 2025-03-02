@@ -1,5 +1,6 @@
-import { RootFilterQuery, SortOrder } from 'mongoose';
+import { HydratedDocument, RootFilterQuery, SortOrder } from 'mongoose';
 
+import { ConflictException } from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
 import { UserQueryDto } from '@/modules/user/dtos';
@@ -67,22 +68,41 @@ class UserService {
     return this.findAllAndCount({ ...userQueryDto, deleted: true });
   }
 
-  async findOneById(id: string): Promise<SuccessResponseBody<UserDto>> {
+  async findOneById(id: string): Promise<HydratedDocument<User>> {
     const user = await UserModel.findOne({ _id: id, deleteTimestamp: null });
 
     if (!user) {
       throw new NotFoundException('User not found.');
     }
 
-    return {
-      data: userDto.parse(user),
-    };
+    return user;
+  }
+
+  async findOneByUsername(username: string): Promise<HydratedDocument<User>> {
+    const user = await UserModel.findOne({ username, deleteTimestamp: null });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    return user;
   }
 
   async createUser(
     createUserDto: CreateUserDto,
   ): Promise<SuccessResponseBody<UserDto>> {
+    const isUserExisted = await UserModel.exists({
+      username: createUserDto.username,
+    }).exec();
+
+    if (isUserExisted) {
+      throw new ConflictException(
+        `A user with username '${createUserDto.username}' has already existed.`,
+      );
+    }
+
     const newUser = new UserModel(createUserDto);
+
     return {
       data: userDto.parse(await newUser.save()),
     };

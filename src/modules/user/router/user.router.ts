@@ -1,19 +1,50 @@
 import { Router } from 'express';
 
+import { AuthGuard } from '@/modules/auth/guards';
 import { userController } from '@/modules/user/controllers';
+
+import { Role } from '../enums';
 
 export const userRouter = Router();
 
-userRouter.get('/', userController.findAll);
+userRouter.get(
+  '/',
+  AuthGuard([Role.ADMIN, Role.OWNER]),
+  userController.findAll,
+);
 
-userRouter.get('/deleted', userController.findAllDeleted);
+userRouter.get(
+  '/deleted',
+  AuthGuard([Role.ADMIN, Role.OWNER]),
+  userController.findAllDeleted,
+);
 
-userRouter.get('/:id', userController.findOneById);
+userRouter.get(
+  '/:id',
+  AuthGuard([Role.ADMIN, Role.OWNER]),
+  userController.findOneById,
+);
 
-userRouter.post('/', userController.createUser);
+userRouter.post(
+  '/',
+  AuthGuard([Role.ADMIN, Role.OWNER]),
+  userController.createUser,
+);
 
-userRouter.patch('/:id', userController.updateUser);
+userRouter.patch(
+  '/:id',
+  AuthGuard([Role.ADMIN, Role.OWNER]),
+  userController.updateUser,
+);
 
-userRouter.delete('/:id', userController.softDeleteUser);
+userRouter.delete(
+  '/:id',
+  AuthGuard([Role.ADMIN, Role.OWNER]),
+  userController.softDeleteUser,
+);
 
-userRouter.patch('/restore/:id', userController.restoreUser);
+userRouter.patch(
+  '/restore/:id',
+  AuthGuard([Role.ADMIN, Role.OWNER]),
+  userController.restoreUser,
+);

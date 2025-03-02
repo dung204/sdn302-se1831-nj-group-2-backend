@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
-import { providerQueryDto } from '@/modules/provider/dtos';
-import { createProviderDto } from '@/modules/provider/dtos';
-import { updateProviderDto } from '@/modules/provider/dtos';
+import {
+  createProviderDto,
+  providerQueryDto,
+  updateProviderDto,
+} from '@/modules/provider/dtos';
 import { providerService } from '@/modules/provider/service';
 
 class ProviderController {

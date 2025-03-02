@@ -1,16 +1,16 @@
 import { RootFilterQuery, SortOrder } from 'mongoose';
 
-import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
+import { NotFoundException } from '@/base/common/exceptions/http';
 import { SuccessResponseBody } from '@/base/common/types';
 import { ProviderQueryDto } from '@/modules/provider/dtos';
-import { UpdateProviderDto } from '@/modules/provider/dtos';
-import { CreateProviderDto } from '@/modules/provider/dtos/create-provider.dto';
 import {
+  CreateProviderDto,
   DeletedProviderDto,
   ProviderDto,
+  UpdateProviderDto,
   deletedProviderDto,
   providerDto,
-} from '@/modules/provider/dtos/provider.dto';
+} from '@/modules/provider/dtos';
 import { Provider, ProviderModel } from '@/modules/provider/models';
 
 class ProviderService {

@@ -17,7 +17,7 @@ const usageTrackingSchema = new Schema<UsageTracking>({
   endTimeStamp: { type: Date, required: true },
 });
 
-export const UserModel = model<UsageTracking>(
+export const UsageTrackingModel = model<UsageTracking>(
   'UsageTrackings',
   usageTrackingSchema,
 );

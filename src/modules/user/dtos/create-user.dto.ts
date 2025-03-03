@@ -15,7 +15,7 @@ export const createUserDto = z.object({
     .default(Role.GUEST),
   citizenNumber: z.string().nullable().optional(),
   phoneNumber: z.string().nullable().optional(),
-  availableTime: z.number().nullable().optional(),
+  availableTime: z.coerce.number().nullable().optional(),
 });
 
 export type CreateUserDto = z.input<typeof createUserDto>;

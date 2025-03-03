@@ -1,8 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
-
-import { usageTrackingService } from '../services';
+import {
+  createUsageTrackingDto,
+  updateUsageTrackingDto,
+  usageTrackingQueryDto,
+} from '@/modules/usage-tracking/dtos';
+import { usageTrackingService } from '@/modules/usage-tracking/services';
 
 class UsageTrackingController {
   /**
@@ -11,9 +15,13 @@ class UsageTrackingController {
    */
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
-      res
-        .status(HttpStatusCode.OK)
-        .json(await usageTrackingService.findAllAndCount());
+      const dto = usageTrackingQueryDto.parse(req.query);
+      res.status(HttpStatusCode.OK).json(
+        await usageTrackingService.findAllAndCount({
+          ...dto,
+          deleted: false,
+        }),
+      );
     } catch (err) {
       next(err);
     }
@@ -25,9 +33,13 @@ class UsageTrackingController {
    */
   async findAllDeleted(req: Request, res: Response, next: NextFunction) {
     try {
-      res
-        .status(HttpStatusCode.OK)
-        .json(await usageTrackingService.findAllDeletedAndCount());
+      const dto = usageTrackingQueryDto.parse(req.query);
+      res.status(HttpStatusCode.OK).json(
+        await usageTrackingService.findAllDeletedAndCount({
+          ...dto,
+          deleted: true,
+        }),
+      );
     } catch (err) {
       next(err);
     }
@@ -42,7 +54,7 @@ class UsageTrackingController {
     try {
       res
         .status(HttpStatusCode.OK)
-        .json({ data: await usageTrackingService.findOneById() });
+        .json({ data: await usageTrackingService.findOneById(req.params.id!) });
     } catch (err) {
       next(err);
     }
@@ -54,9 +66,10 @@ class UsageTrackingController {
    */
   async createUsageTracking(req: Request, res: Response, next: NextFunction) {
     try {
+      const dto = await createUsageTrackingDto.parseAsync(req.body);
       res
         .status(HttpStatusCode.CREATED)
-        .json(await usageTrackingService.createUsageTracking());
+        .json(await usageTrackingService.createUsageTracking(dto));
     } catch (err) {
       next(err);
     }
@@ -69,9 +82,12 @@ class UsageTrackingController {
    */
   async updateUsageTracking(req: Request, res: Response, next: NextFunction) {
     try {
+      const dto = await updateUsageTrackingDto.parseAsync(req.body);
       res
         .status(HttpStatusCode.OK)
-        .json(await usageTrackingService.updateUsageTracking());
+        .json(
+          await usageTrackingService.updateUsageTracking(req.params.id!, dto),
+        );
     } catch (err) {
       next(err);
     }
@@ -88,7 +104,7 @@ class UsageTrackingController {
     next: NextFunction,
   ) {
     try {
-      await usageTrackingService.softDeleteUsageTracking();
+      await usageTrackingService.softDeleteUsageTracking(req.params.id!);
       res.status(HttpStatusCode.NO_CONTENT).json();
     } catch (err) {
       next(err);
@@ -104,7 +120,7 @@ class UsageTrackingController {
     try {
       res
         .status(HttpStatusCode.OK)
-        .json(await usageTrackingService.restoreUsageTracking());
+        .json(await usageTrackingService.restoreUsageTracking(req.params.id!));
     } catch (err) {
       next(err);
     }

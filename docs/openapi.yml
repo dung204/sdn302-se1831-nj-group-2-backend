@@ -301,6 +301,173 @@ paths:
                     $ref: '#/components/schemas/UserDto'
         '404':
           description: User not found
+  /api/v1/usage-tracking:
+    get:
+      summary: Get all usage tracking records
+      tags:
+        - usage-tracking
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all usage tracking records successfully (with pagination metadata)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UsageTrackingDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+    post:
+      summary: Create a new usage tracking record
+      tags:
+        - usage-tracking
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateUsageTrackingDto'
+      responses:
+        '201':
+          description: Usage tracking record created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageTrackingDto'
+        '400':
+          description: Bad request
+  /api/v1/usage-tracking/{id}:
+    get:
+      summary: Get a usage tracking record by ID
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get usage tracking record successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageTrackingDto'
+        '404':
+          description: Usage tracking record not found
+    patch:
+      summary: Update a usage tracking record by ID
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateUsageTrackingDto'
+      responses:
+        '200':
+          description: Usage tracking record updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageTrackingDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Usage tracking record not found
+    delete:
+      summary: Delete a usage tracking record by ID
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Usage tracking record deleted successfully
+        '404':
+          description: Usage tracking record not found
+  /api/v1/usage-tracking/deleted:
+    get:
+      summary: Get all deleted usage tracking records
+      tags:
+        - usage-tracking
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all deleted usage tracking records successfully (with pagination metadata)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedUsageTrackingDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+  /api/v1/usage-tracking/restore/{id}:
+    patch:
+      summary: Restore a deleted usage tracking record
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Usage tracking record restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageTrackingDto'
+        '404':
+          description: Usage tracking record not found
 components:
   schemas:
     LoginRequestDto:
@@ -419,6 +586,107 @@ components:
               type: string
               example: password
         - $ref: '#/components/schemas/UpdateUserDto'
+    UsageTrackingDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        user:
+          type: string
+          description: User ID reference
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        computer:
+          type: string
+          description: Computer ID reference
+          example: bb3269d8-6ede-588c-9707-8f97bd01ed45
+        startTimeStamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+        endTimeStamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T02:00:00Z
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    CreateUsageTrackingDto:
+      type: object
+      required:
+        - user
+        - computer
+        - startTimeStamp
+        - endTimeStamp
+      properties:
+        user:
+          type: string
+          format: uuid
+          description: User ID reference
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        computer:
+          type: string
+          format: uuid
+          description: Computer ID reference
+          example: bb3269d8-6ede-588c-9707-8f97bd01ed45
+        startTimeStamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+        endTimeStamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T02:00:00Z
+    UpdateUsageTrackingDto:
+      type: object
+      properties:
+        user:
+          type: string
+          format: uuid
+          description: User ID reference
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        computer:
+          type: string
+          format: uuid
+          description: Computer ID reference
+          example: bb3269d8-6ede-588c-9707-8f97bd01ed45
+        startTimeStamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+        endTimeStamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T02:00:00Z
+    UsageTrackingQueryDto:
+      allOf:
+        - type: object
+          properties:
+            sorting:
+              type: array
+              items:
+                type: string
+                enum:
+                  - id
+                  - user
+                  - computer
+                  - startTimeStamp
+                  - endTimeStamp
+                  - createTimestamp
+                  - deleteTimestamp
+                example: createTimestamp:desc
+        - $ref: '#/components/schemas/ResponseMeta'
+    DeletedUsageTrackingDto:
+      allOf:
+        - $ref: '#/components/schemas/UsageTrackingDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
     Role:
       type: string
       enum:

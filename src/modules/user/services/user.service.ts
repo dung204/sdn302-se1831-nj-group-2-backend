@@ -3,6 +3,8 @@ import { HydratedDocument, RootFilterQuery, SortOrder } from 'mongoose';
 import { ConflictException } from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
+import { redis } from '@/base/redis';
+import { authService } from '@/modules/auth/services';
 import { UserQueryDto } from '@/modules/user/dtos';
 import { CreateUserDto } from '@/modules/user/dtos/create-user.dto';
 import { UpdateUserDto } from '@/modules/user/dtos/update-user.dto';
@@ -129,16 +131,30 @@ class UserService {
     };
   }
 
-  async softDeleteUser(id: string) {
+  async softDeleteUser(id: string, userId: string) {
+    // Check your own account
+    if (id === userId) {
+      throw new ConflictException(
+        'You can not delete your own account. Please contact the administrator.',
+      );
+    }
+
     const updateResult = await UserModel.updateOne(
       { _id: id, deleteTimestamp: null },
       { deleteTimestamp: Date.now() },
     );
 
-    if (updateResult.modifiedCount !== 1) {
+    if (updateResult.modifiedCount === 0) {
       throw new NotFoundException(
         'User not found or has been already deleted.',
       );
+    }
+
+    // Check if refresh token exists in Redis -> delete and get it
+    const refreshTokenExists = await redis.getInstance().getdel(id);
+    // If refresh token exists, relocate it from blacklist
+    if (refreshTokenExists) {
+      await authService.blacklistToken(refreshTokenExists);
     }
   }
 

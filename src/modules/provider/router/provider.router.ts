@@ -9,7 +9,7 @@ export const providerRouter = Router();
 
 providerRouter.get(
   '/',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   providerController.findAll,
 );
 providerRouter.get(

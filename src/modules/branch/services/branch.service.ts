@@ -10,7 +10,7 @@ import {
   deletedBranchDto,
 } from '@/modules/branch/dtos/branch.dto';
 import { CreateBranchDto } from '@/modules/branch/dtos/create-branch.dto';
-// import { UpdateBranchDto } from '@/modules/branch/dtos/update-branch.dto';
+import { UpdateBranchDto } from '@/modules/branch/dtos/update-branch.dto';
 import { Branch, BranchModel } from '@/modules/branch/models';
 
 class BranchService {
@@ -102,16 +102,11 @@ class BranchService {
 
   async updateBranch(
     id: string,
-    updateData: {
-      name?: string;
-      address?: string | null;
-      admin?: string;
-      services?: string[];
-    },
+    updateBranchDto: UpdateBranchDto,
   ): Promise<SuccessResponseBody<BranchDto>> {
     const updatedBranch = await BranchModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
-      updateData,
+      updateBranchDto,
       {
         new: true,
       },

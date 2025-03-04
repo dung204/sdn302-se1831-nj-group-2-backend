@@ -11,7 +11,6 @@ const baseBranchSchema = z.object({
   admin: z.string().or(userDto),
   // services: z.array(z.string().or(serviceDto)),
   createTimestamp: z.date(),
-  deleteTimestamp: z.date().nullable(),
 });
 
 export const branchDto = baseBranchSchema.transform(({ _id, ...data }) => ({

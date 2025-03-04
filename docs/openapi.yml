@@ -333,7 +333,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/CreateBranchDto'
       responses:
@@ -418,7 +418,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/UpdateBranchDto'
       responses:
@@ -596,11 +596,11 @@ components:
           type: string
           example: aa2158c7-5bd1-477b-8606-7e96ea09e334
           description: ID of the admin user
-        services:
-          type: array
-          items:
-            type: string
-          example: ['Gaming', 'Printing', 'Internet']
+        # services:
+        #   type: array
+        #   items:
+        #     type: string
+        #   example: ['Gaming', 'Printing', 'Internet']
         createTimestamp:
           type: string
           format: date-time

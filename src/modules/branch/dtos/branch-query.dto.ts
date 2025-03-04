@@ -9,7 +9,6 @@ export const branchQueryDto = commonQueryDto
     sorting: SortingUtils.getSortingValueSchema([
       'id',
       'name',
-      'address',
       'createTimestamp',
       'deleteTimestamp',
     ]),

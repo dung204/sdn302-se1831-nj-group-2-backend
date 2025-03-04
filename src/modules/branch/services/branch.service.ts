@@ -25,12 +25,19 @@ class BranchService {
     pageSize,
     sorting,
     deleted,
+    name,
+    ...rest
   }: BranchQueryDto): Promise<
     SuccessResponseBody<BranchDto[] | DeletedBranchDto[]>
   > {
     const filter: RootFilterQuery<Branch> = {
       deleteTimestamp: deleted ? { $ne: null } : null,
+      ...rest,
     };
+
+    if (name) {
+      filter.name = { $regex: name, $options: 'i' };
+    }
 
     const query = BranchModel.find(filter)
       .limit(pageSize)

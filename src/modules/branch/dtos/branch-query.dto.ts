@@ -5,6 +5,7 @@ import { SortingUtils } from '@/base/common/utils';
 
 export const branchQueryDto = commonQueryDto
   .extend({
+    name: z.string().optional(),
     sorting: SortingUtils.getSortingValueSchema([
       'id',
       'name',

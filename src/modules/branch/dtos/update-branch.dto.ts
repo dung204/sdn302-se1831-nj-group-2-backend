@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const updateBranchDtoSchema = z.object({
   name: z.string().optional(),
   address: z.string().nullable().optional(),
-  admin: z.string().optional(),
+  adminId: z.string().optional(),
   services: z.array(z.string()).optional(),
 });
 

@@ -14,7 +14,7 @@ branchRouter.get(
 
 branchRouter.get(
   '/deleted',
-  AuthGuard([Role.ADMIN]),
+  AuthGuard([Role.OWNER]),
   branchController.findAllDeleted,
 );
 
@@ -24,26 +24,22 @@ branchRouter.get(
   branchController.findOneById,
 );
 
-branchRouter.post(
-  '/',
-  AuthGuard([Role.ADMIN, Role.OWNER]),
-  branchController.createBranch,
-);
+branchRouter.post('/', AuthGuard([Role.OWNER]), branchController.createBranch);
 
 branchRouter.patch(
   '/:id',
-  AuthGuard([Role.ADMIN, Role.OWNER]),
+  AuthGuard([Role.OWNER]),
   branchController.updateBranch,
 );
 
 branchRouter.delete(
   '/:id',
-  AuthGuard([Role.ADMIN]),
+  AuthGuard([Role.OWNER]),
   branchController.softDeleteBranch,
 );
 
 branchRouter.patch(
   '/restore/:id',
-  AuthGuard([Role.ADMIN]),
+  AuthGuard([Role.OWNER]),
   branchController.restoreBranch,
 );

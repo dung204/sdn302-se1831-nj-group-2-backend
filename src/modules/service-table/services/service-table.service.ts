@@ -98,7 +98,7 @@ class ServiceTableService {
     updateTableDto: UpdateServiceTableDto,
   ): Promise<SuccessResponseBody<ServiceTableDto>> {
     await serviceCategoryService.findOneById(updateTableDto.categoryId!);
-    const updatedTable = await ServiceTableModel.findOneAndUpdate(
+    const updatedServiceTable = await ServiceTableModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updateTableDto,
       {
@@ -106,12 +106,12 @@ class ServiceTableService {
       },
     );
 
-    if (!updatedTable) {
+    if (!updatedServiceTable) {
       throw new NotFoundException('ServiceTable not update.');
     }
 
     return {
-      data: serviceTableDto.parse(updatedTable),
+      data: serviceTableDto.parse(updatedServiceTable),
     };
   }
   async softDeleteServiceTable(id: string) {
@@ -129,19 +129,19 @@ class ServiceTableService {
   async restoreServiceTable(
     id: string,
   ): Promise<SuccessResponseBody<ServiceTableDto>> {
-    const updatedServiceCategory = await ServiceTableModel.findOneAndUpdate(
+    const updatedServiceTable = await ServiceTableModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: { $ne: null } },
       { deleteTimestamp: null },
     );
 
-    if (!updatedServiceCategory) {
+    if (!updatedServiceTable) {
       throw new NotFoundException(
         'ServiceTable not found or has been already restored.',
       );
     }
 
     return {
-      data: serviceTableDto.parse(updatedServiceCategory),
+      data: serviceTableDto.parse(updatedServiceTable),
     };
   }
 }

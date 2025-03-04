@@ -24,6 +24,10 @@ tags:
     description: Authentication & Authorization
   - name: users
     description: User management
+  - name: service-category
+    description: Service category management
+  - name: services
+    description: Services management
 paths:
   /api/v1/auth/login:
     post:
@@ -298,6 +302,346 @@ paths:
                     $ref: '#/components/schemas/UserDto'
         '404':
           description: User not found
+
+  /api/v1/service-category:
+    get:
+      summary: Get all service categories
+      tags:
+        - service-category
+      responses:
+        '200':
+          description: Get all service categories successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceCategoryDto'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new servicess
+      tags:
+        - service-category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServiceCategoryDto'
+      responses:
+        '201':
+          description: Service category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+  /api/v1/service-category/{id}:
+    get:
+      summary: Get a service category by ID
+      tags:
+        - service-category
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get service category successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a service category by ID
+      tags:
+        - service-category
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateServiceCategoryDto'
+      responses:
+        '200':
+          description: Service category updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a service category by ID
+      tags:
+        - service-category
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Service category deleted successfully
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+  /api/v1/service-category/deleted:
+    get:
+      summary: Get all deleted service categories
+      tags:
+        - service-category
+      responses:
+        '200':
+          description: Get all deleted service categories successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceCategoryDto'
+      security:
+        - JWT: []
+  /api/v1/service-category/restore/{id}:
+    patch:
+      summary: Restore a deleted service category by ID
+      tags:
+        - service-category
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Service category restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+
+  /api/v1/services:
+    get:
+      summary: Get all services
+      tags:
+        - services
+      responses:
+        '200':
+          description: Get all services successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServicesDto'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new services
+      tags:
+        - services
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServicesDto'
+      responses:
+        '201':
+          description: Services created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServicesDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+  /api/v1/services/{id}:
+    get:
+      summary: Get a services  by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get services successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServicesDto'
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a services by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateServicesDto'
+      responses:
+        '200':
+          description: Services updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServicesDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a services by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Services deleted successfully
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
+  /api/v1/services/deleted:
+    get:
+      summary: Get all deleted services
+      tags:
+        - services
+      responses:
+        '200':
+          description: Get all deleted services successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServicesDto'
+      security:
+        - JWT: []
+  /api/v1/services/restore/{id}:
+    patch:
+      summary: Restore a deleted services by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Services restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServicesDto'
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
 components:
   schemas:
     LoginRequestDto:
@@ -400,6 +744,95 @@ components:
         - STAFF
         - GUEST
         - OWNER
+    ServiceCategoryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Gaming ServiceCategoryDto
+        description:
+          type: string
+          example: ServiceCategoryDto related to gaming PCs and consoles
+    CreateServiceCategoryDto:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Gaming ServiceCategoryDto
+        description:
+          type: string
+          example: ServiceCategoryDto related to gaming PCs and consoles
+    UpdateServiceCategoryDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming ServiceCategoryDto
+        description:
+          type: string
+          example: Updated description of gaming ServiceCategoryDto
+    ServicesDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Gaming Services
+        description:
+          type: string
+          example: Services related to gaming PCs and consoles
+        price:
+          type: number
+          example: 20000
+        categoryId:
+          type: string
+          format: uuid
+          example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+    CreateServicesDto:
+      type: object
+      required:
+        - name
+        - price
+        - categoryId
+      properties:
+        name:
+          type: string
+          example: Gaming Services
+        description:
+          type: string
+          example: Services related to gaming PCs and consoles
+        price:
+          type: number
+          example: 20000
+        categoryId:
+          type: string
+          format: uuid
+          example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+    UpdateServicesDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming Services
+        description:
+          type: string
+          example: Updated description of gaming services
+        price:
+          type: number
+          example: 25000
+        categoryId:
+          type: string
+          format: uuid
+          example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
     ResponseMeta:
       type: object
       properties:

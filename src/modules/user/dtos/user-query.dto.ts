@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { commonQueryDto } from '@/base/common/dtos';
-import { SortingUtils } from '@/base/common/utils';
+import { SearchUtils, SortingUtils } from '@/base/common/utils';
 
 export const userQueryDto = commonQueryDto
   .extend({
@@ -16,7 +16,23 @@ export const userQueryDto = commonQueryDto
       'createTimestamp',
       'deleteTimestamp',
     ]),
+    search: SearchUtils.getSearchValueSchema([
+      'firstName',
+      'lastName',
+      'username',
+      'citizenNumber',
+      'phoneNumber',
+    ]),
   })
-  .transform((payload) => SortingUtils.transformSorting(payload));
+  .transform((payload) => {
+    const searchTransformed = SearchUtils.transformSearch(payload);
+    const sortingTransformed = SortingUtils.transformSorting(payload);
+
+    return {
+      ...payload,
+      search: searchTransformed.search,
+      sorting: sortingTransformed.sorting,
+    };
+  });
 
 export type UserQueryDto = z.infer<typeof userQueryDto>;

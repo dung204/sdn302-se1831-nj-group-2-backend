@@ -27,11 +27,33 @@ class UserService {
     page,
     pageSize,
     sorting,
+    search,
     deleted,
   }: UserQueryDto): Promise<SuccessResponseBody<UserDto[] | DeletedUserDto[]>> {
     const filter: RootFilterQuery<User> = {
       deleteTimestamp: deleted ? { $ne: null } : null,
     };
+
+    // Thêm điều kiện search
+    if (search && search.length > 0) {
+      filter.$or = search.map(({ field, value }) => {
+        // Các trường tìm kiếm chính xác
+        const exactMatchFields = ['username', 'citizenNumber', 'phoneNumber'];
+
+        // Các trường tìm kiếm một phần
+        const partialMatchFields = ['firstName', 'lastName'];
+
+        if (exactMatchFields.includes(field)) {
+          return { [field]: value }; // Tìm kiếm chính xác
+        }
+
+        if (partialMatchFields.includes(field)) {
+          return { [field]: { $regex: value, $options: 'i' } }; // Tìm kiếm một phần, không phân biệt hoa thường
+        }
+
+        return {}; // Trường hợp field không hợp lệ
+      });
+    }
 
     const query = UserModel.find(filter)
       .limit(pageSize)

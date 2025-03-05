@@ -9,5 +9,5 @@ export const appRouter = Router();
 
 appRouter.use('/auth', authRouter);
 appRouter.use('/users', userRouter);
-appRouter.use('/service-category', serviceCategoryRouter);
+appRouter.use('/service-categories', serviceCategoryRouter);
 appRouter.use('/services', serviceTableRouter);

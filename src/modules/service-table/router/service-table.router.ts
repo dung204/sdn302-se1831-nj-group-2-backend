@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { AuthGuard } from '@/modules/auth/guards';
-import { serviceTableController } from '@/modules/service-table//controllers/service-table.controller';
+import { serviceTableController } from '@/modules/service-table/controllers';
 import { Role } from '@/modules/user/enums';
 
 export const serviceTableRouter = Router();

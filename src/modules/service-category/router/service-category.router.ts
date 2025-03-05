@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { AuthGuard } from '@/modules/auth/guards';
-import { serviceCategoryController } from '@/modules/service-category/controllers/service-category.controller';
+import { serviceCategoryController } from '@/modules/service-category/controllers';
 import { Role } from '@/modules/user/enums';
 
 export const serviceCategoryRouter = Router();

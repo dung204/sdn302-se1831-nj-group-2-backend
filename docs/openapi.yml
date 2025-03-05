@@ -24,6 +24,8 @@ tags:
     description: Authentication & Authorization
   - name: users
     description: User management
+  - name: branches
+    description: Branch management
   - name: providers
     description: Provider management
 paths:
@@ -523,6 +525,189 @@ paths:
       security:
         - JWT: []
 
+  /api/v1/branches:
+    get:
+      summary: Get all non-deleted branches
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`
+      tags:
+        - branches
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all branches information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BranchDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new branch
+      tags:
+        - branches
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateBranchDto'
+      responses:
+        '201':
+          description: Branch created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+  /api/v1/branches/deleted:
+    get:
+      summary: Get all deleted branches
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      tags:
+        - branches
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all deleted branches information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedBranchDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+  /api/v1/branches/{id}:
+    get:
+      summary: Get a branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get branch information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateBranchDto'
+      responses:
+        '200':
+          description: Branch updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Branch deleted successfully
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
+  /api/v1/branches/restore/{id}:
+    patch:
+      summary: Restore a deleted branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Branch restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
 components:
   schemas:
     LoginRequestDto:
@@ -618,13 +803,90 @@ components:
               type: string
               example: password
         - $ref: '#/components/schemas/UpdateUserDto'
+    BranchDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: bb3158c7-5bd1-477b-8606-7e96ea09e456
+        name:
+          type: string
+          example: Downtown Branch
+        address:
+          type: string
+          example: 123 Main St, Downtown
+          nullable: true
+        admin:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+          description: ID of the admin user
+        # services:
+        #   type: array
+        #   items:
+        #     type: string
+        #   example: ['Gaming', 'Printing', 'Internet']
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedBranchDto:
+      allOf:
+        - $ref: '#/components/schemas/BranchDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreateBranchDto:
+      type: object
+      required:
+        - name
+        - admin
+      properties:
+        name:
+          type: string
+          example: Downtown Branch
+        address:
+          type: string
+          example: 123 Main St, Downtown
+          nullable: true
+        admin:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+          description: ID of the admin user
+        services:
+          type: array
+          items:
+            type: string
+          example: ['Gaming', 'Printing', 'Internet']
+    UpdateBranchDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Downtown Branch
+        address:
+          type: string
+          example: 123 Main St, Downtown
+          nullable: true
+        admin:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+          description: ID of the admin user
+        services:
+          type: array
+          items:
+            type: string
+          example: ['Gaming', 'Printing', 'Internet']
     Role:
       type: string
       enum:
-        - ADMIN
+        - OWNER
+        - BRANCH_ADMIN
         - STAFF
         - GUEST
-        - OWNER
     ProviderDto:
       type: object
       properties:

@@ -8,7 +8,7 @@ export const branchRouter = Router();
 
 branchRouter.get(
   '/',
-  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER]),
   branchController.findAll,
 );
 
@@ -20,7 +20,7 @@ branchRouter.get(
 
 branchRouter.get(
   '/:id',
-  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER]),
   branchController.findOneById,
 );
 

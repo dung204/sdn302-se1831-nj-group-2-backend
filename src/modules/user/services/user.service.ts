@@ -42,7 +42,6 @@ class UserService {
       );
 
     const users = await query.exec();
-
     const total = await UserModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
 

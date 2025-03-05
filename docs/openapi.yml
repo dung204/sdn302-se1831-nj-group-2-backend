@@ -10,7 +10,7 @@ info:
     - Hoàng Gia Trọng - HE172557 
     - Vũ Lương Bảo - HE172612 
     - Nguyễn Ngọc Anh - HE176642 
-    - Nguyễn Hữu Tâm - HE187049 
+    - Nguyễn Hữu Tâm - HE187049
 
     The source code is available here: [https://github.com/dung204/sdn302-se1831-nj-group-2-backend](https://github.com/dung204/sdn302-se1831-nj-group-2-backend)
   contact:
@@ -26,6 +26,8 @@ tags:
     description: User management
   - name: branches
     description: Branch management
+  - name: providers
+    description: Provider management
 paths:
   /api/v1/auth/login:
     post:
@@ -299,7 +301,230 @@ paths:
                   data:
                     $ref: '#/components/schemas/UserDto'
         '404':
-          description: User not found
+          description: User not found,
+  /api/v1/providers:
+    get:
+      summary: Get all providers
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      tags:
+        - providers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all providers information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ProviderDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`, `ADMIN` or `STAFF`
+      security:
+        - JWT: []
+
+    post:
+      summary: Create a new provider
+      tags:
+        - providers
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateProviderDto'
+      responses:
+        '201':
+          description: Provider created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '400':
+          description: Bad request
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '409':
+          description: Name already exists
+      security:
+        - JWT: []
+
+  /api/v1/providers/{id}:
+    get:
+      summary: Get a provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a provider information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
+    patch:
+      summary: Update a provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateProviderDto'
+      responses:
+        '200':
+          description: Provider updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '400':
+          description: Bad request
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
+    delete:
+      summary: Delete a provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider deleted successfully
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
+  /api/v1/providers/deleted:
+    get:
+      summary: Get all deleted providers
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`,
+        `description`, `deleteTimestamp`
+      tags:
+        - providers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description:
+            Get all deleted providers information successfully (with pagination
+            metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedProviderDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+      security:
+        - JWT: []
+
+  /api/v1/providers/restore/{id}:
+    patch:
+      summary: Restore a deleted provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Provider restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
   /api/v1/branches:
     get:
       summary: Get all non-deleted branches
@@ -658,10 +883,58 @@ components:
     Role:
       type: string
       enum:
-        - ADMIN
+        - OWNER
+        - BRANCH_ADMIN
         - STAFF
         - GUEST
-        - OWNER
+    ProviderDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        name:
+          type: string
+          example: PHONGVU
+        description:
+          type: string
+          example: MOUSE
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    CreateProviderDto:
+      required:
+        - name
+      allOf:
+        - type: object
+          properties:
+            name:
+              type: string
+              example: PhongVu
+            description:
+              type: string
+              example: Mouse
+
+    UpdateProviderDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: PhongVu
+        description:
+          type: string
+          example: keyboard
+    DeletedProviderDto:
+      allOf:
+        - $ref: '#/components/schemas/ProviderDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
     ResponseMeta:
       type: object
       properties:

@@ -9,7 +9,7 @@ const baseUserSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   address: z.string().nullable(),
-  role: z.enum([Role.ADMIN, Role.GUEST, Role.OWNER, Role.STAFF]),
+  role: z.enum([Role.BRANCH_ADMIN, Role.GUEST, Role.OWNER, Role.STAFF]),
   createTimestamp: z.date(),
 });
 

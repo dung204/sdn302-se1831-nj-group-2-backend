@@ -10,7 +10,7 @@ info:
     - Hoàng Gia Trọng - HE172557 
     - Vũ Lương Bảo - HE172612 
     - Nguyễn Ngọc Anh - HE176642 
-    - Nguyễn Hữu Tâm - HE187049 
+    - Nguyễn Hữu Tâm - HE187049
 
     The source code is available here: [https://github.com/dung204/sdn302-se1831-nj-group-2-backend](https://github.com/dung204/sdn302-se1831-nj-group-2-backend)
   contact:
@@ -737,10 +737,88 @@ components:
               type: string
               example: password
         - $ref: '#/components/schemas/UpdateUserDto'
+    BranchDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: bb3158c7-5bd1-477b-8606-7e96ea09e456
+        name:
+          type: string
+          example: Downtown Branch
+        address:
+          type: string
+          example: 123 Main St, Downtown
+          nullable: true
+        admin:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+          description: ID of the admin user
+        # services:
+        #   type: array
+        #   items:
+        #     type: string
+        #   example: ['Gaming', 'Printing', 'Internet']
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedBranchDto:
+      allOf:
+        - $ref: '#/components/schemas/BranchDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreateBranchDto:
+      type: object
+      required:
+        - name
+        - admin
+      properties:
+        name:
+          type: string
+          example: Downtown Branch
+        address:
+          type: string
+          example: 123 Main St, Downtown
+          nullable: true
+        admin:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+          description: ID of the admin user
+        services:
+          type: array
+          items:
+            type: string
+          example: ['Gaming', 'Printing', 'Internet']
+    UpdateBranchDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Downtown Branch
+        address:
+          type: string
+          example: 123 Main St, Downtown
+          nullable: true
+        admin:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+          description: ID of the admin user
+        services:
+          type: array
+          items:
+            type: string
+          example: ['Gaming', 'Printing', 'Internet']
     Role:
       type: string
       enum:
-        - ADMIN
+        - OWNER
+        - BRANCH_ADMIN
         - STAFF
         - GUEST
         - OWNER

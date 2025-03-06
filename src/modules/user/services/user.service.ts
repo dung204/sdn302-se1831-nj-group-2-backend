@@ -26,9 +26,23 @@ class UserService {
     pageSize,
     sorting,
     deleted,
+    fromCreateTimestamp,
+    toCreateTimestamp,
+    fromDeleteTimestamp,
+    toDeleteTimestamp,
   }: UserQueryDto): Promise<SuccessResponseBody<UserDto[] | DeletedUserDto[]>> {
     const filter: RootFilterQuery<User> = {
-      deleteTimestamp: deleted ? { $ne: null } : null,
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
+      createTimestamp: {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      },
     };
 
     const query = UserModel.find(filter)

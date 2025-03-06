@@ -44,11 +44,14 @@ class UserService {
             ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
             ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
           },
-      createTimestamp: {
+    };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      filter.createTimestamp = {
         ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
         ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
-      },
-    };
+      };
+    }
 
     const query = UserModel.find(filter)
       .limit(pageSize)

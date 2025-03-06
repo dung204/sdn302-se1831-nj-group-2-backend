@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose';
 import { BaseModel, baseModelSchemaDefinition } from '@/base/common/models';
 
 export interface Provider extends BaseModel {
-  name?: string;
+  name: string;
   description?: string;
 }
 

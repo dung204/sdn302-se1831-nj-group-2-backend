@@ -1,18 +1,17 @@
 import { RootFilterQuery, SortOrder } from 'mongoose';
 
-import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
+import { NotFoundException } from '@/base/common/exceptions/http';
 import { SuccessResponseBody } from '@/base/common/types';
-import { CreateProviderDto } from '@/modules/provider/dtos/create-provider.dto';
+import { ProviderQueryDto } from '@/modules/provider/dtos';
 import {
+  CreateProviderDto,
   DeletedProviderDto,
   ProviderDto,
+  UpdateProviderDto,
   deletedProviderDto,
   providerDto,
-} from '@/modules/provider/dtos/provider.dto';
-
-import { ProviderQueryDto } from '../dtos';
-import { UpdateProviderDto } from '../dtos/update-provider.dto';
-import { Provider, ProviderModel } from '../models';
+} from '@/modules/provider/dtos';
+import { Provider, ProviderModel } from '@/modules/provider/models';
 
 class ProviderService {
   findAllAndCount(
@@ -30,9 +29,9 @@ class ProviderService {
   }: ProviderQueryDto): Promise<
     SuccessResponseBody<ProviderDto[] | DeletedProviderDto[]>
   > {
-    const filter: RootFilterQuery<Provider> = {
-      deleteTimestamp: deleted ? { $ne: null } : null,
-    };
+    const filter: RootFilterQuery<Provider> = deleted
+      ? { deleteTimestamp: { $ne: null } }
+      : { deleteTimestamp: null };
 
     const query = ProviderModel.find(filter)
       .limit(pageSize)
@@ -40,11 +39,12 @@ class ProviderService {
       .sort(
         sorting.map(
           ({ field, direction }) =>
-            [field === 'id' ? '_id:' : field, direction] as [string, SortOrder],
+            [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
       );
+
     const providers = await query.exec();
-    const total = await ProviderModel.countDocuments().exec();
+    const total = await ProviderModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -72,7 +72,10 @@ class ProviderService {
   }
 
   async findOneById(id: string) {
-    const provider = await ProviderModel.findById(id).exec();
+    const provider = await ProviderModel.findOne({
+      _id: id,
+      deleteTimestamp: null,
+    }).exec();
     if (!provider) {
       throw new NotFoundException(`Provider with id:${id} is not found`);
     }
@@ -120,7 +123,7 @@ class ProviderService {
 
     if (updateResult.modifiedCount !== 1) {
       throw new NotFoundException(
-        'User not found or has been already deleted.',
+        'Provider not found or has been already deleted.',
       );
     }
   }
@@ -133,7 +136,7 @@ class ProviderService {
 
     if (!updatedProvider) {
       throw new NotFoundException(
-        'User not found or has been already restored.',
+        'Provider not found or has been already restored.',
       );
     }
 

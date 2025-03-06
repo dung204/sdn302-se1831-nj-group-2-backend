@@ -8,8 +8,8 @@ export const providerQueryDto = commonQueryDto
     sorting: SortingUtils.getSortingValueSchema([
       'id',
       'name',
-      'description',
       'createTimestamp',
+      'deleteTimestamp',
     ]),
     name: z.string().optional(),
   })

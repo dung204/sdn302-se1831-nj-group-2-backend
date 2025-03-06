@@ -40,16 +40,16 @@ class ServiceTableService {
         ),
       );
 
-    const serviceCategories = await query.exec();
+    const serviceTable = await query.exec();
 
     const total = await ServiceTableModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
-      data: serviceCategories.map((user) =>
+      data: serviceTable.map((serviceTable) =>
         deleted
-          ? deletedServiceTableDto.parse(user)
-          : serviceTableDto.parse(user),
+          ? deletedServiceTableDto.parse(serviceTable)
+          : serviceTableDto.parse(serviceTable),
       ),
       meta: {
         pagination: {

@@ -8,42 +8,42 @@ export const serviceTableRouter = Router();
 
 serviceTableRouter.get(
   '/',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   serviceTableController.findAll,
 );
 
 serviceTableRouter.get(
   '/deleted',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   serviceTableController.findAllDeleted,
 );
 
 serviceTableRouter.get(
   '/:id',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   serviceTableController.findOneById,
 );
 
 serviceTableRouter.post(
   '/',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   serviceTableController.createServiceTable,
 );
 
 serviceTableRouter.patch(
   '/:id',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   serviceTableController.updateServiceTable,
 );
 
 serviceTableRouter.delete(
   '/:id',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   serviceTableController.softDeleteServiceController,
 );
 
 serviceTableRouter.patch(
   '/restore/:id',
-  AuthGuard([Role.OWNER, Role.ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   serviceTableController.restoreServiceController,
 );

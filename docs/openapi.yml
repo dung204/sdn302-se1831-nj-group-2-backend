@@ -740,6 +740,8 @@ paths:
                         items:
                           $ref: '#/components/schemas/PositionDto'
                   - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
     post:
       summary: Create a new position
       tags:
@@ -764,6 +766,8 @@ paths:
           description: Bad request
         '409':
           description: Position name already exists
+      security:
+        - JWT: []
   /api/v1/positions/deleted:
     get:
       summary: Get all deleted positions
@@ -788,6 +792,8 @@ paths:
                         items:
                           $ref: '#/components/schemas/DeletedPositionDto'
                   - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
   /api/v1/positions/{id}:
     get:
       summary: Get a position by ID
@@ -813,6 +819,8 @@ paths:
                     $ref: '#/components/schemas/PositionDto'
         '404':
           description: Position not found
+      security:
+        - JWT: []
     patch:
       summary: Update a position by ID
       tags:
@@ -845,6 +853,8 @@ paths:
           description: Bad request
         '404':
           description: Position not found
+      security:
+        - JWT: []
     delete:
       summary: Delete a position by ID
       tags:
@@ -862,6 +872,8 @@ paths:
           description: Position deleted successfully
         '404':
           description: Position not found
+      security:
+        - JWT: []
   /api/v1/positions/restore/{id}:
     patch:
       summary: Restore a deleted position by ID
@@ -887,6 +899,8 @@ paths:
                     $ref: '#/components/schemas/PositionDto'
         '404':
           description: Position not found
+      security:
+        - JWT: []
 components:
   schemas:
     LoginRequestDto:

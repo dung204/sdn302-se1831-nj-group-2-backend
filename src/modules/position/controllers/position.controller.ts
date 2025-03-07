@@ -48,9 +48,15 @@ class PositionController {
    */
   async findOneById(req: Request, res: Response, next: NextFunction) {
     try {
-      res
-        .status(HttpStatusCode.OK)
-        .json({ data: await positionService.findOneById(req.params.id!) });
+      const position = await positionService.findOneById(req.params.id!);
+      const formattedData = {
+        id: position._id,
+        name: position.name,
+        branch: position.branch,
+        status: position.status,
+        createTimestamp: position.createTimestamp,
+      };
+      res.status(HttpStatusCode.OK).json({ data: formattedData });
     } catch (err) {
       next(err);
     }

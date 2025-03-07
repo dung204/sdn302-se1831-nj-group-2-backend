@@ -4,11 +4,11 @@ import { ConflictException } from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
 import {
+  CreatePositionDto,
   DeletedPositionDto,
   PositionDto,
   PositionQueryDto,
   UpdatePositionDto,
-  createPositionDto,
   deletedPositionDto,
   positionDto,
 } from '@/modules/position/dtos';
@@ -86,7 +86,7 @@ class PositionService {
   }
 
   async createPosition(
-    createPositionDto: createPositionDto,
+    createPositionDto: CreatePositionDto,
   ): Promise<SuccessResponseBody<PositionDto>> {
     const isPositionExisted = await PositionModel.exists({
       name: createPositionDto.name,

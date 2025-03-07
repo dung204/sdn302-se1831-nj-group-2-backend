@@ -8,6 +8,7 @@ export const positionQueryDto = commonQueryDto
     sorting: SortingUtils.getSortingValueSchema([
       'id',
       'name',
+      'status',
       'createTimestamp',
       'deleteTimestamp',
     ]),

@@ -10,4 +10,4 @@ export const createPositionDto = z.object({
     .optional(),
 });
 
-export type createPositionDto = z.input<typeof createPositionDto>;
+export type CreatePositionDto = z.input<typeof createPositionDto>;

@@ -1,1 +1,1 @@
-export * from './positionStatus.enum';
+export * from './position-status.enum';

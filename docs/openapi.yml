@@ -303,7 +303,7 @@ paths:
   /api/v1/positions:
     get:
       summary: Get all positions
-      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `status` , `deleteTimestamp`
       tags:
         - positions
       parameters:
@@ -661,8 +661,7 @@ components:
           type: string
           example: Main Branch
         status:
-          type: string
-          example: AVAILABLE
+          $ref: '#/components/schemas/PositionStatus'
     UpdatePositionDto:
       type: object
       properties:
@@ -673,8 +672,7 @@ components:
           type: string
           example: Main Branch
         status:
-          type: string
-          example: AVAILABLE
+          $ref: '#/components/schemas/PositionStatus'
     PositionStatus:
       type: string
       enum:

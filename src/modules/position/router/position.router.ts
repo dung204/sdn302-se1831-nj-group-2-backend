@@ -13,7 +13,7 @@ positionRouter.get(
 );
 positionRouter.get(
   '/deleted',
-  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.ADMIN, Role.OWNER]),
   positionController.findAllDeleted,
 );
 positionRouter.get(
@@ -23,12 +23,12 @@ positionRouter.get(
 );
 positionRouter.post(
   '/',
-  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.ADMIN, Role.OWNER]),
   positionController.createPosition,
 );
 positionRouter.patch(
   '/:id',
-  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.ADMIN, Role.OWNER]),
   positionController.updatePosition,
 );
 positionRouter.delete(
@@ -38,6 +38,6 @@ positionRouter.delete(
 );
 positionRouter.patch(
   '/restore/:id',
-  AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.ADMIN, Role.OWNER]),
   positionController.restorePosition,
 );

@@ -7,7 +7,7 @@ export const basePositionSchema = z.object({
   _id: z.string(),
   name: z.string(),
   branch: z.string(),
-  status: z.enum(Object.values(PositionStatus) as [string, ...string[]]),
+  status: z.enum([PositionStatus.AVAILABLE, PositionStatus.IN_USE]),
   createTimestamp: z.date(),
 });
 

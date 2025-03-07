@@ -73,7 +73,7 @@ class ServiceTableController {
   ) {
     try {
       await serviceTableService.softDeleteServiceTable(req.params.id!);
-      res.status(HttpStatusCode.OK).json({ message: 'Delete successfully' });
+      res.status(HttpStatusCode.NO_CONTENT).end();
     } catch (err) {
       next(err);
     }
@@ -84,8 +84,9 @@ class ServiceTableController {
     next: NextFunction,
   ) {
     try {
-      await serviceTableService.restoreServiceTable(req.params.id!);
-      res.status(HttpStatusCode.OK).json({ message: 'Restore successfully' });
+      res
+        .status(HttpStatusCode.OK)
+        .json(await serviceTableService.restoreServiceTable(req.params.id!));
     } catch (err) {
       next(err);
     }

@@ -308,6 +308,10 @@ paths:
       summary: Get all service categories
       tags:
         - service-categories
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
       responses:
         '200':
           description: Get all service categories successfully
@@ -431,6 +435,10 @@ paths:
       summary: Get all deleted service categories
       tags:
         - service-categories
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
       responses:
         '200':
           description: Get all deleted service categories successfully
@@ -478,6 +486,10 @@ paths:
       summary: Get all services
       tags:
         - services
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
       responses:
         '200':
           description: Get all services successfully
@@ -489,7 +501,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ServicesDto'
+                      $ref: '#/components/schemas/ServiceDto'
       security:
         - JWT: []
     post:
@@ -501,7 +513,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CreateServicesDto'
+              $ref: '#/components/schemas/CreateServiceDto'
       responses:
         '201':
           description: Services created successfully
@@ -511,7 +523,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ServicesDto'
+                    $ref: '#/components/schemas/ServiceDto'
         '400':
           description: Bad request
       security:
@@ -538,7 +550,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ServicesDto'
+                    $ref: '#/components/schemas/ServiceDto'
         '404':
           description: Services not found
       security:
@@ -560,7 +572,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/UpdateServicesDto'
+              $ref: '#/components/schemas/UpdateServiceDto'
       responses:
         '200':
           description: Services updated successfully
@@ -570,7 +582,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ServicesDto'
+                    $ref: '#/components/schemas/ServiceDto'
         '400':
           description: Bad request
         '404':
@@ -601,6 +613,10 @@ paths:
       summary: Get all deleted services
       tags:
         - services
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
       responses:
         '200':
           description: Get all deleted services successfully
@@ -612,7 +628,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ServicesDto'
+                      $ref: '#/components/schemas/DeletedServiceDto'
       security:
         - JWT: []
   /api/v1/services/restore/{id}:
@@ -637,7 +653,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/ServicesDto'
+                    $ref: '#/components/schemas/ServiceDto'
         '404':
           description: Services not found
       security:
@@ -855,13 +871,17 @@ components:
         description:
           type: string
           example: Updated description of gaming ServiceCategoryDto
-    ServicesDto:
+    ServiceDto:
       type: object
       properties:
         id:
           type: string
           format: uuid
           example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        category:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceCategoryDto'
         name:
           type: string
           example: Gaming Services
@@ -871,11 +891,20 @@ components:
         price:
           type: number
           example: 20000
-        categoryId:
+        createTimestamp:
           type: string
-          format: uuid
-          example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
-    CreateServicesDto:
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedServiceDto:
+      allOf:
+        - $ref: '#/components/schemas/ServiceDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreateServiceDto:
       type: object
       required:
         - name
@@ -895,7 +924,7 @@ components:
           type: string
           format: uuid
           example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
-    UpdateServicesDto:
+    UpdateServiceDto:
       type: object
       properties:
         name:

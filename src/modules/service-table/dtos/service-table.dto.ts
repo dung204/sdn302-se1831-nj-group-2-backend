@@ -1,27 +1,30 @@
 import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
+import { serviceCategoryDto } from '@/modules/service-category/dtos';
 
 const baseServiceTableSchema = z.object({
   _id: z.string(),
   name: z.string(),
   price: z.coerce.number(),
-  categoryId: z.string(),
+  categoryId: serviceCategoryDto,
   description: z.string(),
   createTimestamp: z.date(),
 });
 
 export const serviceTableDto = baseServiceTableSchema.transform(
-  ({ _id, ...data }) => ({
+  ({ _id, categoryId, ...data }) => ({
     id: _id,
+    category: categoryId,
     ...data,
   }),
 );
 
 export const deletedServiceTableDto = baseServiceTableSchema
   .merge(deleteDto)
-  .transform(({ _id, ...data }) => ({
+  .transform(({ _id, categoryId, ...data }) => ({
     id: _id,
+    category: categoryId,
     ...data,
   }));
 

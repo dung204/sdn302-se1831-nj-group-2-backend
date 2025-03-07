@@ -38,15 +38,16 @@ class ServiceTableService {
           ({ field, direction }) =>
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
-      );
+      )
+      .populate('categoryId');
 
-    const serviceTable = await query.exec();
+    const serviceTables = await query.exec();
 
     const total = await ServiceTableModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
-      data: serviceTable.map((serviceTable) =>
+      data: serviceTables.map((serviceTable) =>
         deleted
           ? deletedServiceTableDto.parse(serviceTable)
           : serviceTableDto.parse(serviceTable),
@@ -71,7 +72,7 @@ class ServiceTableService {
     const serviceTable = await ServiceTableModel.findOne({
       _id: id,
       deleteTimestamp: null,
-    });
+    }).populate('categoryId');
 
     if (!serviceTable) {
       throw new NotFoundException('ServiceTable not found.');
@@ -90,7 +91,9 @@ class ServiceTableService {
     await serviceCategoryService.findOneById(newServiceTable.categoryId!);
 
     return {
-      data: serviceTableDto.parse(await newServiceTable.save()),
+      data: serviceTableDto.parse(
+        await (await newServiceTable.save()).populate('categoryId'),
+      ),
     };
   }
   async updateServiceTable(
@@ -111,7 +114,9 @@ class ServiceTableService {
     }
 
     return {
-      data: serviceTableDto.parse(updatedServiceTable),
+      data: serviceTableDto.parse(
+        await updatedServiceTable.populate('categoryId'),
+      ),
     };
   }
   async softDeleteServiceTable(id: string) {
@@ -141,7 +146,9 @@ class ServiceTableService {
     }
 
     return {
-      data: serviceTableDto.parse(updatedServiceTable),
+      data: serviceTableDto.parse(
+        await updatedServiceTable.populate('categoryId'),
+      ),
     };
   }
 }

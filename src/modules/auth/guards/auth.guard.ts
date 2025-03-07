@@ -19,8 +19,8 @@ import { userService } from '@/modules/user/services';
  * @example
  * ```typescript
  * app.use('/private', AuthGuard()); // Only logged in users can access this route
- * app.use('/admin', AuthGuard([Role.ADMIN])); // Only ADMIN can access this route
- * app.use('/route', AuthGuard([Role.ADMIN, Role.STAFF, Role.OWNER])) // Only ADMIN, STAFF, OWNER can access this route
+ * app.use('/admin', AuthGuard([Role.BRANCH_ADMIN])); // Only ADMIN can access this route
+ * app.use('/route', AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER])) // Only ADMIN, STAFF, OWNER can access this route
  * ```
  */
 export const AuthGuard =

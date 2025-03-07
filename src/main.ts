@@ -7,6 +7,7 @@ import { database } from '@/base/database';
 import { redis } from '@/base/redis';
 import { appRouter } from '@/base/router';
 import { configSwagger } from '@/base/swagger';
+import { userService } from '@/modules/user/services';
 
 async function bootstrap() {
   const logger = new Logger(bootstrap.name);
@@ -14,6 +15,8 @@ async function bootstrap() {
 
   // Try to connect to mongodb & redis simultaneously
   await Promise.all([database.connect(), redis.connect()]);
+
+  await userService.insertInitialOwner();
 
   app.use(cors());
   app.use(express.json());

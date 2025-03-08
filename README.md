@@ -32,16 +32,17 @@ You need to install all of these before continuing:
 - [Docker](https://www.docker.com/): To setup databases, and bundle the application as a container.
 - [MongoDB](https://www.mongodb.com/): The database system used in this project, set this up with Docker is recommended.
 - [MongoDB Compass](https://www.mongodb.com/products/compass): The GUI for MongoDB, to work with the database.
+- [Redis](https://redis.io/): The in-memory data structure store, used for storing blacklisted tokens, set this up with Docker is recommended.
 
 ## 4. Project setup
 
-1. Clone the repository:
+### 1. Clone the repository:
 
 ```bash
 git clone https://github.com/dung204/sdn302-se1831-nj-group-2-backend.git
 ```
 
-2. Install dependencies:
+### 2. Install dependencies:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -49,25 +50,49 @@ pnpm install --frozen-lockfile
 
 > ⚠️ **Note**: The `--frozen-lockfile` is required, since this helps to ensure the `pnpm-lock.yaml` file is not modified during the installation process.
 
-3. Setup the environment variables: Create the `.env` file in the root directory of the project, copy the content from `.env.example` to it, and fill in the values.
+### 3. Setup the environment variables: Create the `.env` file in the root directory of the project, copy the content from `.env.example` to it, and fill in the values.
 
 > You can also create a `.env.local` file to override the values in the `.env` file. The difference between the two files is that `.env` file will be used in the Docker container, while `.env.local` will be used in the local development environment.
 
-4. Start the development server:
+### 4. Setup MongoDB using Docker (dev environment only):
+
+```bash
+docker run --name sdn302-group-2-mongodb-dev -p {DB_PORT}:27017 --restart always -d mongo:7.0-jammy
+```
+
+> ⚠️ Note: replace `{DB_PORT}` with your own `DB_PORT` in `.env.local` file before running the command
+
+### 5. Setup Redis using Docker (dev environment only):
+
+```bash
+docker run --name sdn302-group-2-redis-dev -p {REDIS_PORT}:6379 --restart always -d redis:7.4-alpine redis-server --requirepass {REDIS_PASSWORD} --appendonly yes
+```
+
+> ⚠️ Note: replace `{REDIS_PORT}` with your own `REDIS_PORT`, `{REDIS_PASSWORD}` with your own `REDIS_PASSWORD` in `.env.local` file before running the command
+
+### 6. Start the development server:
 
 ```bash
 pnpm start:dev
 ```
 
-5. The server should be running at `http://localhost:<APP_PORT>`, where `APP_PORT` is the port defined in the `.env` (`.env.local`) file.
+### 7. The server should be running at `http://localhost:<APP_PORT>`, where `APP_PORT` is the port defined in the `.env` (`.env.local`) file.
 
-6. In order to run the server in production mode with Docker, you can use the following command:
+### 8. Run the server in production mode with Docker:
+
+- Useful when working with the frontend, without touching the backend code.
+- Before running the below command, make sure `.env` is present in the root directory, and these two fields in `.env` file must be:
 
 ```bash
-docker compose up -d
+DB_HOST=mongo
+REDIS_HOST=redis
 ```
 
-> ⚠️ **Note**: Make sure the `.env` file is present in the root directory of the project before running this command.
+- Use the following command to run:
+
+```bash
+docker compose up -d --build
+```
 
 ## 5. License
 

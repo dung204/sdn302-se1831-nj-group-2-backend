@@ -5,10 +5,11 @@ import { Role } from '@/modules/user/enums/role.enum';
 
 const baseUserSchema = z.object({
   _id: z.string(),
+  username: z.string(),
   firstName: z.string(),
   lastName: z.string(),
   address: z.string().nullable(),
-  role: z.enum([Role.ADMIN, Role.USER]),
+  role: z.enum([Role.BRANCH_ADMIN, Role.GUEST, Role.OWNER, Role.STAFF]),
   createTimestamp: z.date(),
 });
 

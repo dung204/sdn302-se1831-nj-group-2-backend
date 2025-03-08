@@ -24,6 +24,12 @@ tags:
     description: Authentication & Authorization
   - name: users
     description: User management
+  - name: branches
+    description: Branch management
+  - name: providers
+    description: Provider management
+  - name: positions
+    description: Position management
   - name: service-categories
     description: Service categories management
   - name: services
@@ -137,6 +143,8 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
       responses:
         '200':
           description: Get all users information successfully (with pagination metadata).
@@ -301,7 +309,602 @@ paths:
                   data:
                     $ref: '#/components/schemas/UserDto'
         '404':
-          description: User not found
+          description: User not found,
+  /api/v1/providers:
+    get:
+      summary: Get all providers
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      tags:
+        - providers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all providers information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ProviderDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`, `ADMIN` or `STAFF`
+      security:
+        - JWT: []
+
+    post:
+      summary: Create a new provider
+      tags:
+        - providers
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateProviderDto'
+      responses:
+        '201':
+          description: Provider created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '400':
+          description: Bad request
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '409':
+          description: Name already exists
+      security:
+        - JWT: []
+
+  /api/v1/providers/{id}:
+    get:
+      summary: Get a provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a provider information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
+    patch:
+      summary: Update a provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateProviderDto'
+      responses:
+        '200':
+          description: Provider updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '400':
+          description: Bad request
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
+    delete:
+      summary: Delete a provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Provider deleted successfully
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
+  /api/v1/providers/deleted:
+    get:
+      summary: Get all deleted providers
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`,
+        `description`, `deleteTimestamp`
+      tags:
+        - providers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+      responses:
+        '200':
+          description:
+            Get all deleted providers information successfully (with pagination
+            metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedProviderDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+      security:
+        - JWT: []
+
+  /api/v1/providers/restore/{id}:
+    patch:
+      summary: Restore a deleted provider by ID
+      tags:
+        - providers
+      parameters:
+        - name: id
+          in: path
+          description: The provider ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Provider restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProviderDto'
+        '401':
+          description: User has not logged in yet
+        '403':
+          description: Logged in user is not an `OWNER`
+        '404':
+          description: Provider not found
+      security:
+        - JWT: []
+
+  /api/v1/branches:
+    get:
+      summary: Get all non-deleted branches
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`
+      tags:
+        - branches
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all branches information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BranchDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new branch
+      tags:
+        - branches
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateBranchDto'
+      responses:
+        '201':
+          description: Branch created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+  /api/v1/branches/deleted:
+    get:
+      summary: Get all deleted branches
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      tags:
+        - branches
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all deleted branches information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedBranchDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+  /api/v1/branches/{id}:
+    get:
+      summary: Get a branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get branch information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateBranchDto'
+      responses:
+        '200':
+          description: Branch updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Branch deleted successfully
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
+  /api/v1/branches/restore/{id}:
+    patch:
+      summary: Restore a deleted branch by ID
+      tags:
+        - branches
+      parameters:
+        - name: id
+          in: path
+          description: The branch ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Branch restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BranchDto'
+        '404':
+          description: Branch not found
+      security:
+        - JWT: []
+  /api/v1/positions:
+    get:
+      summary: Get all positions
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `status` , `deleteTimestamp`
+      tags:
+        - positions
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all positions information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PositionDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new position
+      tags:
+        - positions
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePositionDto'
+      responses:
+        '201':
+          description: Position created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Position name already exists
+      security:
+        - JWT: []
+  /api/v1/positions/deleted:
+    get:
+      summary: Get all deleted positions
+      description: Allowed sorting fields are `createTimestamp`, `id`, `name`, `deleteTimestamp`
+      tags:
+        - positions
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all deleted positions information successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedPositionDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+  /api/v1/positions/{id}:
+    get:
+      summary: Get a position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a position information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '404':
+          description: Position not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdatePositionDto'
+      responses:
+        '200':
+          description: Position updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Position not found
+      security:
+        - JWT: []
+    delete:
+      summary: Delete a position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Position deleted successfully
+        '404':
+          description: Position not found
+      security:
+        - JWT: []
+  /api/v1/positions/restore/{id}:
+    patch:
+      summary: Restore a deleted position by ID
+      tags:
+        - positions
+      parameters:
+        - name: id
+          in: path
+          description: The position ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Position restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PositionDto'
+        '404':
+          description: Position not found
+      security:
+        - JWT: []
 
   /api/v1/service-categories:
     get:
@@ -837,7 +1440,159 @@ components:
         - BRANCH_ADMIN
         - STAFF
         - GUEST
-        - OWNER
+    ProviderDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        name:
+          type: string
+          example: PHONGVU
+        description:
+          type: string
+          example: MOUSE
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    CreateProviderDto:
+      required:
+        - name
+      allOf:
+        - type: object
+          properties:
+            name:
+              type: string
+              example: PhongVu
+            description:
+              type: string
+              example: Mouse
+
+    UpdateProviderDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: PhongVu
+        description:
+          type: string
+          example: keyboard
+    DeletedProviderDto:
+      allOf:
+        - $ref: '#/components/schemas/ProviderDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    ResponseMeta:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            pagination:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  example: 1
+                  description: The current page number
+                pageSize:
+                  type: integer
+                  example: 10
+                  description: The number of items per page
+                total:
+                  type: integer
+                  example: 100
+                  description: The total number of items (without pagination)
+                totalPage:
+                  type: integer
+                  example: 10
+                  description: The total number of pages
+                hasPreviousPage:
+                  type: boolean
+                  example: false
+                  description: Whether there is a previous page
+                hasNextPage:
+                  type: boolean
+                  example: true
+                  description: Whether there is a next page
+            sorting:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: createTimestamp
+                    description: The field to sort
+                  direction:
+                    type: string
+                    example: desc
+                    description: The order to sort
+    PositionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        name:
+          type: string
+          example: Manager
+        branch:
+          type: string
+          example: Main Branch
+        status:
+          type: string
+          example: AVAILABLE
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedPositionDto:
+      allOf:
+        - $ref: '#/components/schemas/PositionDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreatePositionDto:
+      required:
+        - name
+        - branch
+      type: object
+      properties:
+        name:
+          type: string
+          example: Manager
+        branch:
+          type: string
+          example: Main Branch
+        status:
+          $ref: '#/components/schemas/PositionStatus'
+    UpdatePositionDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Manager
+        branch:
+          type: string
+          example: Main Branch
+        status:
+          $ref: '#/components/schemas/PositionStatus'
+    PositionStatus:
+      type: string
+      enum:
+        - AVAILABLE
+        - IN_USE
     ServiceCategoryDto:
       type: object
       properties:
@@ -940,52 +1695,6 @@ components:
           type: string
           format: uuid
           example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
-    ResponseMeta:
-      type: object
-      properties:
-        meta:
-          type: object
-          properties:
-            pagination:
-              type: object
-              properties:
-                page:
-                  type: integer
-                  example: 1
-                  description: The current page number
-                pageSize:
-                  type: integer
-                  example: 10
-                  description: The number of items per page
-                total:
-                  type: integer
-                  example: 100
-                  description: The total number of items (without pagination)
-                totalPage:
-                  type: integer
-                  example: 10
-                  description: The total number of pages
-                hasPreviousPage:
-                  type: boolean
-                  example: false
-                  description: Whether there is a previous page
-                hasNextPage:
-                  type: boolean
-                  example: true
-                  description: Whether there is a next page
-            sorting:
-              type: array
-              items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                    example: createTimestamp
-                    description: The field to sort
-                  direction:
-                    type: string
-                    example: desc
-                    description: The order to sort
   parameters:
     page:
       name: page
@@ -1013,6 +1722,42 @@ components:
         items:
           type: string
           default: createTimestamp:desc
+    fromCreateTimestamp:
+      name: fromCreateTimestamp
+      in: query
+      description: Every items created after this timestamp will be returned
+      example: 2021-01-01T00:00:00Z
+      required: false
+      schema:
+        type: string
+        format: date-time
+    toCreateTimestamp:
+      name: toCreateTimestamp
+      in: query
+      description: Every items created before this timestamp will be returned
+      example: 2021-01-01T00:00:00Z
+      required: false
+      schema:
+        type: string
+        format: date-time
+    fromDeleteTimestamp:
+      name: fromDeleteTimestamp
+      in: query
+      description: Every items deleted after this timestamp will be returned
+      example: 2021-01-01T00:00:00Z
+      required: false
+      schema:
+        type: string
+        format: date-time
+    toDeleteTimestamp:
+      name: toDeleteTimestamp
+      in: query
+      description: Every items deleted before this timestamp will be returned
+      example: 2021-01-01T00:00:00Z
+      required: false
+      schema:
+        type: string
+        format: date-time
   securitySchemes:
     JWT:
       type: http

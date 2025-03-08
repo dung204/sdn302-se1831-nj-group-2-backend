@@ -1,4 +1,4 @@
-import { RootFilterQuery, SortOrder } from 'mongoose';
+import { SortOrder } from 'mongoose';
 
 import { NotFoundException } from '@/base/common/exceptions/http';
 import { SuccessResponseBody } from '@/base/common/types';
@@ -8,10 +8,9 @@ import {
   DeletedProviderDto,
   ProviderDto,
   UpdateProviderDto,
-  deletedProviderDto,
   providerDto,
 } from '@/modules/provider/dtos';
-import { Provider, ProviderModel } from '@/modules/provider/models';
+import { ProviderModel } from '@/modules/provider/models';
 
 class ProviderService {
   findAllAndCount(
@@ -25,15 +24,20 @@ class ProviderService {
     page,
     pageSize,
     sorting,
-    deleted,
-  }: ProviderQueryDto): Promise<
-    SuccessResponseBody<ProviderDto[] | DeletedProviderDto[]>
-  > {
-    const filter: RootFilterQuery<Provider> = deleted
-      ? { deleteTimestamp: { $ne: null } }
-      : { deleteTimestamp: null };
+    name,
+  }: ProviderQueryDto): Promise<SuccessResponseBody<ProviderDto[]>> {
+    interface QueryFilter {
+      name?: { $regex: string; $options: string };
+    }
 
-    const query = ProviderModel.find(filter)
+    const query: QueryFilter = {};
+
+    if (name) {
+      query.name = { $regex: name, $options: 'i' };
+    }
+
+    // Lọc theo các điều kiện khác
+    const providerQuery = ProviderModel.find(query)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -43,16 +47,13 @@ class ProviderService {
         ),
       );
 
-    const providers = await query.exec();
-    const total = await ProviderModel.countDocuments(filter).exec();
+    const total = await ProviderModel.countDocuments(query).exec();
     const totalPage = Math.ceil(total / pageSize);
 
+    const providers = await providerQuery.exec();
+
     return {
-      data: providers.map((provider) =>
-        deleted
-          ? deletedProviderDto.parse(provider)
-          : providerDto.parse(provider),
-      ),
+      data: providers.map((provider) => providerDto.parse(provider)),
       meta: {
         pagination: {
           total,

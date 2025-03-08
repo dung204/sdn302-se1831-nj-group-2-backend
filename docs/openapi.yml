@@ -310,6 +310,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/name'
       responses:
         '200':
           description: Get all providers information successfully (with pagination metadata).
@@ -746,6 +747,14 @@ components:
         items:
           type: string
           default: createTimestamp:desc
+    name:
+      name: name
+      in: query
+      description: partial search
+      required: false
+      schema:
+        type: string
+
   securitySchemes:
     JWT:
       type: http

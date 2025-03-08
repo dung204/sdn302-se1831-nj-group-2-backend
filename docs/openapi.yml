@@ -30,6 +30,10 @@ tags:
     description: Provider management
   - name: positions
     description: Position management
+  - name: service-categories
+    description: Service categories management
+  - name: services
+    description: Services management
 paths:
   /api/v1/auth/login:
     post:
@@ -901,6 +905,583 @@ paths:
           description: Position not found
       security:
         - JWT: []
+
+  /api/v1/service-categories:
+    get:
+      summary: Get all service categories
+      tags:
+        - service-categories
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all service categories successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceCategoryDto'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new servicess
+      tags:
+        - service-categories
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateServiceCategoryDto'
+      responses:
+        '201':
+          description: Service category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+  /api/v1/service-categories/{id}:
+    get:
+      summary: Get a service category by ID
+      tags:
+        - service-categories
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get service category successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a service category by ID
+      tags:
+        - service-categories
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateServiceCategoryDto'
+      responses:
+        '200':
+          description: Service category updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a service category by ID
+      tags:
+        - service-categories
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Service category deleted successfully
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+  /api/v1/service-categories/deleted:
+    get:
+      summary: Get all deleted service categories
+      tags:
+        - service-categories
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all deleted service categories successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceCategoryDto'
+      security:
+        - JWT: []
+  /api/v1/service-categories/restore/{id}:
+    patch:
+      summary: Restore a deleted service category by ID
+      tags:
+        - service-categories
+      parameters:
+        - name: id
+          in: path
+          description: The service category ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Service category restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceCategoryDto'
+        '404':
+          description: Service category not found
+      security:
+        - JWT: []
+
+  /api/v1/services:
+    get:
+      summary: Get all services
+      tags:
+        - services
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all services successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceDto'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new services
+      tags:
+        - services
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateServiceDto'
+      responses:
+        '201':
+          description: Services created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+  /api/v1/services/{id}:
+    get:
+      summary: Get a services  by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get services successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceDto'
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a services by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateServiceDto'
+      responses:
+        '200':
+          description: Services updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a services by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Services deleted successfully
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
+  /api/v1/services/deleted:
+    get:
+      summary: Get all deleted services
+      tags:
+        - services
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: Get all deleted services successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DeletedServiceDto'
+      security:
+        - JWT: []
+  /api/v1/services/restore/{id}:
+    patch:
+      summary: Restore a deleted services by ID
+      tags:
+        - services
+      parameters:
+        - name: id
+          in: path
+          description: The services ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Services restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ServiceDto'
+        '404':
+          description: Services not found
+      security:
+        - JWT: []
+  /api/v1/computers:
+    get:
+      summary: Get all computers
+      description: Retrieve a list of all computers with pagination.
+      tags:
+        - computers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: List of computers retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ComputerDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new computer
+      tags:
+        - computers
+      requestBody:
+        required: true
+        content:
+          application/json: # Đổi sang application/json nếu không phải form-urlencoded
+            schema:
+              $ref: '#/components/schemas/CreateComputerDto'
+            examples:
+              example1:
+                summary: Example computer creation data
+                value:
+                  name: 'Dell Inspiron'
+                  position: '09b19530-f298-4150-8683-96dd1004c1ca'
+                  status: 'NORMAL'
+                  pricePerHour: 20
+                  cpu: 'Intel Core i5-9400F'
+                  ram: '8GB DDR4'
+                  storage: '512GB SSD'
+                  providerId: 'fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77'
+                  peripherals:
+                    - id: 'keyboard789'
+                      status: 'NORMAL'
+                    - id: 'mouse321'
+                      status: 'IN_USE'
+      responses:
+        '201':
+          description: Computer created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Computer name already exists
+      security:
+        - JWT: []
+  /api/v1/computers/{id}:
+    get:
+      summary: Get a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a computer's information by ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+            schema:
+              $ref: '#/components/schemas/UpdateComputerDto'
+            examples:
+              example1:
+                summary: Example computer update data
+                value:
+                  name: 'Updated Dell Inspiron'
+                  position: 'Room 103 - Desk 1'
+                  status: 'NORMAL'
+                  pricePerHour: 25
+                  cpu: 'Intel Core i7-9700K'
+                  ram: '16GB DDR4'
+                  storage: '1TB SSD'
+                  peripherals:
+                    - id: 'keyboard789'
+                      status: 'IN_USE'
+                    - id: 'mouse321'
+                      status: 'NORMAL'
+      responses:
+        '200':
+          description: Computer updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+
+    delete:
+      summary: Soft delete a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Computer deleted successfully
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+
+  /api/v1/computers/deleted:
+    get:
+      summary: Get all deleted computers
+      description: Retrieve a list of all deleted computers with pagination.
+      tags:
+        - computers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+      responses:
+        '200':
+          description: List of deleted computers retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedComputerDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+
+  /api/v1/computers/restore/{id}:
+    patch:
+      summary: Restore a deleted computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Computer restored successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Computer'
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
 components:
   schemas:
     LoginRequestDto:
@@ -1233,6 +1814,220 @@ components:
       enum:
         - AVAILABLE
         - IN_USE
+    ServiceCategoryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Gaming ServiceCategoryDto
+        description:
+          type: string
+          example: ServiceCategoryDto related to gaming PCs and consoles
+    CreateServiceCategoryDto:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Gaming ServiceCategoryDto
+        description:
+          type: string
+          example: ServiceCategoryDto related to gaming PCs and consoles
+    UpdateServiceCategoryDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming ServiceCategoryDto
+        description:
+          type: string
+          example: Updated description of gaming ServiceCategoryDto
+    ServiceDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        category:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceCategoryDto'
+        name:
+          type: string
+          example: Gaming Services
+        description:
+          type: string
+          example: Services related to gaming PCs and consoles
+        price:
+          type: number
+          example: 20000
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedServiceDto:
+      allOf:
+        - $ref: '#/components/schemas/ServiceDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreateServiceDto:
+      type: object
+      required:
+        - name
+        - price
+        - categoryId
+      properties:
+        name:
+          type: string
+          example: Gaming Services
+        description:
+          type: string
+          example: Services related to gaming PCs and consoles
+        price:
+          type: number
+          example: 20000
+        categoryId:
+          type: string
+          format: uuid
+          example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+    UpdateServiceDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming Services
+        description:
+          type: string
+          example: Updated description of gaming services
+        price:
+          type: number
+          example: 25000
+        categoryId:
+          type: string
+          format: uuid
+          example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+    ComputerDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        position:
+          type: string
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        pricePerHour:
+          type: number
+        cpu:
+          type: string
+        ram:
+          type: string
+        storage:
+          type: string
+        providerId:
+          type: string
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                type: string
+
+    CreateComputerDto:
+      type: object
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        pricePerHour:
+          type: number
+        cpu:
+          type: string
+        ram:
+          type: string
+        storage:
+          type: string
+        providerId:
+          type: string
+          format: uuid
+          example: fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                type: string
+
+    UpdateComputerDto:
+      type: object
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        pricePerHour:
+          type: number
+        cpu:
+          type: string
+        ram:
+          type: string
+        storage:
+          type: string
+        providerId:
+          type: string
+          format: uuid
+          example: fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                type: string
+
+    DeletedComputerDto:
+      allOf:
+        - $ref: '#/components/schemas/Computer'
+      properties:
+        deleteTimestamp:
+          type: string
+          format: date-time
+    DeviceStatus:
+      type: string
+      enum:
+        - NORMAL
+        - MAINTENANCE
+        - ERROR
+      example: NORMAL
   parameters:
     page:
       name: page

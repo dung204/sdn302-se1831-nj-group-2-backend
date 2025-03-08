@@ -13,6 +13,8 @@ import {
 import { CreateComputerDto } from '@/modules/computer/dtos/create-computer.dto';
 import { UpdateComputerDto } from '@/modules/computer/dtos/update-computer.dto';
 import { Computer, ComputerModel } from '@/modules/computer/models';
+import { PositionModel } from '@/modules/position/models';
+import { ProviderModel } from '@/modules/provider/models';
 
 class ComputerService {
   findAllAndCount(
@@ -87,20 +89,34 @@ class ComputerService {
   async createComputer(
     createComputerDto: CreateComputerDto,
   ): Promise<SuccessResponseBody<ComputerDto>> {
-    const isComputerExisted = await ComputerModel.exists({
-      name: createComputerDto.name,
-    }).exec();
-    // Ktra trung Position
+    const { name, position, providerId } = createComputerDto;
 
-    // Kiem tra Provider
-
-    // Kiem tra PeripheralInfo
+    // Check if the computer already exists
+    const isComputerExisted = await ComputerModel.exists({ name }).exec();
 
     if (isComputerExisted) {
       throw new ConflictException(
-        `A computer with name '${createComputerDto.name}' has already existed.`,
+        `A computer with name '${name}' already exists.`,
       );
     }
+
+    // Check if the position exists
+    const isPositionExisted = await PositionModel.exists({
+      _id: position,
+    }).exec();
+    if (!isPositionExisted) {
+      throw new NotFoundException(`Position not found.`);
+    }
+
+    // Check if the provider exists
+    const isProviderExisted = await ProviderModel.exists({
+      _id: providerId,
+    }).exec();
+    if (!isProviderExisted) {
+      throw new NotFoundException(`Provider not found.`);
+    }
+
+    // Create the new computer
     const newComputer = new ComputerModel(createComputerDto);
 
     return {
@@ -110,19 +126,49 @@ class ComputerService {
 
   async updateComputer(
     id: string,
-    updateUserDto: UpdateComputerDto,
+    updateComputerDto: UpdateComputerDto,
   ): Promise<SuccessResponseBody<ComputerDto>> {
-    // Ktra trung Position
+    const { position, providerId } = updateComputerDto;
 
-    // Kiem tra Provider
+    // Check if the computer exists
+    const existingComputer = await ComputerModel.findOne({
+      _id: id,
+      deleteTimestamp: null,
+    });
 
-    // Kiem tra PeripheralInfo
+    if (!existingComputer) {
+      throw new NotFoundException('Computer not found.');
+    }
+
+    // Check if the position exists (if it's being updated)
+    if (position) {
+      const isPositionExisted = await PositionModel.exists({
+        _id: position,
+      }).exec();
+      if (!isPositionExisted) {
+        throw new NotFoundException(
+          `Position with id '${position}' not found.`,
+        );
+      }
+    }
+
+    // Check if the provider exists (if it's being updated)
+    if (providerId) {
+      const isProviderExisted = await ProviderModel.exists({
+        _id: providerId,
+      }).exec();
+      if (!isProviderExisted) {
+        throw new NotFoundException(
+          `Provider with id '${providerId}' not found.`,
+        );
+      }
+    }
+
+    // Update the computer
     const updatedComputer = await ComputerModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
-      updateUserDto,
-      {
-        new: true,
-      },
+      updateComputerDto,
+      { new: true },
     );
 
     if (!updatedComputer) {

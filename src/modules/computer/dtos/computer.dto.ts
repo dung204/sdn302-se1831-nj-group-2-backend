@@ -1,21 +1,24 @@
 import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
-
-import { DeviceStatus } from '../enums';
+import { DeviceStatus } from '@/modules/computer/enums';
+import { positionDto } from '@/modules/position/dtos';
+import { providerDto } from '@/modules/provider/dtos';
 
 const baseComputerSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  position: z.string(),
-  status: z
-    .enum([DeviceStatus.NORMAL, DeviceStatus.MAINTENANCE, DeviceStatus.ERROR])
-    .optional(),
+  positionId: positionDto,
+  status: z.enum([
+    DeviceStatus.NORMAL,
+    DeviceStatus.MAINTENANCE,
+    DeviceStatus.ERROR,
+  ]),
   pricePerHour: z.number(),
   cpu: z.string(),
   ram: z.string(),
   storage: z.string(),
-  providerId: z.string(),
+  providerId: providerDto,
   peripherals: z.array(
     z.object({
       id: z.string(),
@@ -24,15 +27,21 @@ const baseComputerSchema = z.object({
   ),
 });
 
-export const computerDto = baseComputerSchema.transform(({ _id, ...data }) => ({
-  id: _id,
-  ...data,
-}));
+export const computerDto = baseComputerSchema.transform(
+  ({ _id, positionId, providerId, ...data }) => ({
+    id: _id,
+    position: positionId,
+    provider: providerId,
+    ...data,
+  }),
+);
 
 export const deletedComputerDto = baseComputerSchema
   .merge(deleteDto)
-  .transform(({ _id, ...data }) => ({
+  .transform(({ _id, positionId, providerId, ...data }) => ({
     id: _id,
+    position: positionId,
+    provider: providerId,
     ...data,
   }));
 

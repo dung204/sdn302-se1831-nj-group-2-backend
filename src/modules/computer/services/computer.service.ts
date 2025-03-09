@@ -43,8 +43,9 @@ class ComputerService {
           ({ field, direction }) =>
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
-      );
-
+      )
+      .populate('positionId')
+      .populate('providerId');
     const computers = await query.exec();
     const total = await ComputerModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
@@ -89,7 +90,7 @@ class ComputerService {
   async createComputer(
     createComputerDto: CreateComputerDto,
   ): Promise<SuccessResponseBody<ComputerDto>> {
-    const { name, position, providerId } = createComputerDto;
+    const { name, positionId, providerId } = createComputerDto;
 
     // Check if the computer already exists
     const isComputerExisted = await ComputerModel.exists({ name }).exec();
@@ -102,7 +103,7 @@ class ComputerService {
 
     // Check if the position exists
     const isPositionExisted = await PositionModel.exists({
-      _id: position,
+      _id: positionId,
     }).exec();
     if (!isPositionExisted) {
       throw new NotFoundException(`Position not found.`);
@@ -118,9 +119,9 @@ class ComputerService {
 
     // Create the new computer
     const newComputer = new ComputerModel(createComputerDto);
-
+    const computerSave = await newComputer.save();
     return {
-      data: computerDto.parse(await newComputer.save()),
+      data: computerDto.parse(computerSave),
     };
   }
 
@@ -128,8 +129,7 @@ class ComputerService {
     id: string,
     updateComputerDto: UpdateComputerDto,
   ): Promise<SuccessResponseBody<ComputerDto>> {
-    const { position, providerId } = updateComputerDto;
-
+    const { positionId, providerId } = updateComputerDto;
     // Check if the computer exists
     const existingComputer = await ComputerModel.findOne({
       _id: id,
@@ -140,19 +140,18 @@ class ComputerService {
       throw new NotFoundException('Computer not found.');
     }
 
-    // Check if the position exists (if it's being updated)
-    if (position) {
+    // Check if the position exists (UUID check)
+    if (positionId) {
       const isPositionExisted = await PositionModel.exists({
-        _id: position,
+        _id: positionId,
       }).exec();
       if (!isPositionExisted) {
         throw new NotFoundException(
-          `Position with id '${position}' not found.`,
+          `Position with id '${positionId}' not found.`,
         );
       }
     }
 
-    // Check if the provider exists (if it's being updated)
     if (providerId) {
       const isProviderExisted = await ProviderModel.exists({
         _id: providerId,
@@ -164,7 +163,6 @@ class ComputerService {
       }
     }
 
-    // Update the computer
     const updatedComputer = await ComputerModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updateComputerDto,

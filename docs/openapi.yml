@@ -1304,7 +1304,7 @@ paths:
                 summary: Example computer creation data
                 value:
                   name: 'Dell Inspiron'
-                  position: '09b19530-f298-4150-8683-96dd1004c1ca'
+                  positionId: '09b19530-f298-4150-8683-96dd1004c1ca'
                   status: 'NORMAL'
                   pricePerHour: 20
                   cpu: 'Intel Core i5-9400F'
@@ -1382,12 +1382,13 @@ paths:
                 summary: Example computer update data
                 value:
                   name: 'Updated Dell Inspiron'
-                  position: 'Room 103 - Desk 1'
+                  positionId: '09b19530-f298-4150-8683-96dd1004c1ca'
                   status: 'NORMAL'
                   pricePerHour: 25
                   cpu: 'Intel Core i7-9700K'
                   ram: '16GB DDR4'
                   storage: '1TB SSD'
+                  providerId: 'fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77'
                   peripherals:
                     - id: 'keyboard789'
                       status: 'IN_USE'
@@ -1479,7 +1480,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/Computer'
+                    $ref: '#/components/schemas/ComputerDto'
         '404':
           description: Computer not found
       security:
@@ -1692,7 +1693,6 @@ components:
             description:
               type: string
               example: Mouse
-
     UpdateProviderDto:
       type: object
       properties:
@@ -1931,6 +1931,159 @@ components:
           type: string
           format: uuid
           example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+    ComputerDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Gaming PC
+        positionId:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: NORMAL
+        pricePerHour:
+          type: number
+          example: 15.5
+        cpu:
+          type: string
+          example: Intel Core i7-10700K
+        ram:
+          type: string
+          example: 16GB DDR4
+        storage:
+          type: string
+          example: 1TB SSD
+        providerId:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: WORKING
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedComputerDto:
+      allOf:
+        - $ref: '#/components/schemas/ComputerDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreateComputerDto:
+      type: object
+      required:
+        - name
+        - positionId
+        - status
+        - pricePerHour
+        - cpu
+        - ram
+        - storage
+        - providerId
+      properties:
+        name:
+          type: string
+          example: Gaming PC
+        positionId:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: NORMAL
+        pricePerHour:
+          type: number
+          example: 15.5
+        cpu:
+          type: string
+          example: Intel Core i7-10700K
+        ram:
+          type: string
+          example: 16GB DDR4
+        storage:
+          type: string
+          example: 1TB SSD
+        providerId:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: WORKING
+    UpdateComputerDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming PC
+        positionId:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: ERROR
+        pricePerHour:
+          type: number
+          example: 18.5
+        cpu:
+          type: string
+          example: Updated Intel Core i9-10900K
+        ram:
+          type: string
+          example: Updated 32GB DDR4
+        storage:
+          type: string
+          example: Updated 2TB SSD
+        providerId:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: BROKEN
+    DeviceStatus:
+      type: string
+      enum:
+        - NORMAL
+        - ERROR
+        - MAINTENANCE
+
   parameters:
     page:
       name: page

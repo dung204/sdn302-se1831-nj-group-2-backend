@@ -1,30 +1,24 @@
 import { Schema, model } from 'mongoose';
 
 import { BaseModel, baseModelSchemaDefinition } from '@/base/common/models';
-import { Position } from '@/modules/position/models/position.model';
-// Import Position model
-import { Provider } from '@/modules/provider/models/provider.model';
-
-import { DeviceStatus } from '../enums';
-
-// Import Provider model
+import { DeviceStatus } from '@/modules/computer/enums';
 
 export interface Computer extends BaseModel {
   name: string;
-  position: Position | string; // Tham chiếu tới Position
+  positionId: string;
   status: DeviceStatus;
   pricePerHour: number;
   cpu: string;
   ram: string;
   storage: string;
-  providerId: Provider | string; // Tham chiếu tới Provider
+  providerId: string;
   peripherals: { id: string; status: string }[];
 }
 
 const ComputerSchema = new Schema<Computer>({
   ...baseModelSchemaDefinition,
   name: { type: String, required: true },
-  position: { type: String, ref: 'Position', required: true }, // Tham chiếu Position
+  positionId: { type: String, ref: 'Position', required: true }, // Tham chiếu Position
   status: {
     type: String,
     enum: Object.values(DeviceStatus),

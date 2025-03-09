@@ -25,21 +25,20 @@ class BranchService {
     pageSize,
     sorting,
     deleted,
-    name,
-    ...rest
+    ...filter
   }: BranchQueryDto): Promise<
     SuccessResponseBody<BranchDto[] | DeletedBranchDto[]>
   > {
-    const filter: RootFilterQuery<Branch> = {
+    const { name } = filter;
+    const queryFilter: RootFilterQuery<Branch> = {
       deleteTimestamp: deleted ? { $ne: null } : null,
-      ...rest,
     };
 
     if (name) {
-      filter.name = { $regex: name, $options: 'i' };
+      queryFilter.name = { $regex: name, $options: 'i' };
     }
 
-    const query = BranchModel.find(filter)
+    const query = BranchModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -51,7 +50,7 @@ class BranchService {
 
     const branches = await query.exec();
 
-    const total = await BranchModel.countDocuments(filter).exec();
+    const total = await BranchModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -68,6 +67,7 @@ class BranchService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

@@ -29,14 +29,15 @@ class ServiceCategoryService {
     pageSize,
     sorting,
     deleted,
+    ...filter
   }: ServiceCategoryQueryDto): Promise<
     SuccessResponseBody<ServiceCategoryDto[] | DeletedServiceCategoryDto[]>
   > {
-    const filter: RootFilterQuery<ServiceCategory> = {
+    const queryFilter: RootFilterQuery<ServiceCategory> = {
       deleteTimestamp: deleted ? { $ne: null } : null,
     };
 
-    const query = ServiceCategoryModel.find(filter)
+    const query = ServiceCategoryModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -48,7 +49,7 @@ class ServiceCategoryService {
 
     const serviceCategories = await query.exec();
 
-    const total = await ServiceCategoryModel.countDocuments(filter).exec();
+    const total = await ServiceCategoryModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -67,6 +68,7 @@ class ServiceCategoryService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

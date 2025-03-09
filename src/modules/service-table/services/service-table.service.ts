@@ -23,14 +23,15 @@ class ServiceTableService {
     pageSize,
     sorting,
     deleted,
+    ...filter
   }: ServiceTableQueryDto): Promise<
     SuccessResponseBody<ServiceTableDto[] | DeletedServiceTableDto[]>
   > {
-    const filter: RootFilterQuery<ServiceTable> = {
+    const queryFilter: RootFilterQuery<ServiceTable> = {
       deleteTimestamp: deleted ? { $ne: null } : null,
     };
 
-    const query = ServiceTableModel.find(filter)
+    const query = ServiceTableModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -43,7 +44,7 @@ class ServiceTableService {
 
     const serviceTables = await query.exec();
 
-    const total = await ServiceTableModel.countDocuments(filter).exec();
+    const total = await ServiceTableModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -62,6 +63,7 @@ class ServiceTableService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

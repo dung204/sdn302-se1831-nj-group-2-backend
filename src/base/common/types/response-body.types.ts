@@ -10,7 +10,7 @@ export type SuccessResponseBody<T> = T extends unknown[]
         filter?: Record<string, unknown>;
       };
     }
-  : { data: T; meta?: { filter?: Record<string, unknown> } };
+  : { data: T };
 
 export type FailedResponseBody = {
   messages?: string[];

@@ -10,7 +10,6 @@ export const userRouter = Router();
 userRouter.get(
   '/',
   AuthGuard([Role.ADMIN, Role.OWNER, Role.STAFF]),
-
   userController.findAll,
 );
 

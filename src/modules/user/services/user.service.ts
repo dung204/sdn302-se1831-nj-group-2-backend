@@ -83,6 +83,7 @@ class UserService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        search,
       },
     };
   }

@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-export type SearchCondition = {
-  field: string;
-  value: string;
-};
+import { Search } from '@/base/common/types';
 
 type PayloadWithRawSearch = {
   search: string | string[];
@@ -14,6 +11,12 @@ export class SearchUtils {
   /**
    * Generates a Zod schema for validating search values
    * @param allowedFields - Allowed fields for searching
+   * @example const searchSchema = SearchUtils.getSearchValueSchema(['name', 'age']);
+   * @example searchSchema.parse('name:John'); // OK
+   * @example searchSchema.parse(['name:John', 'age:25']); // OK
+   * @example searchSchema.parse('invalid:John'); // Throws error
+   * @example searchSchema.parse(['name:John', 'invalid:25']); // Throws error
+   * @returns Zod schema for search values
    */
   public static getSearchValueSchema(allowedFields: [string, ...string[]]) {
     const fields = [...new Set(allowedFields)]; // Remove duplicates
@@ -44,7 +47,7 @@ export class SearchUtils {
   public static transformSearch<TPayload extends PayloadWithRawSearch>({
     search,
     ...payload
-  }: TPayload): Omit<TPayload, 'search'> & { search: SearchCondition[] } {
+  }: TPayload): Omit<TPayload, 'search'> & { search: Search[] } {
     // Convert search string to array of SearchCondition objects
     // ex: "name:John,age:25" -> ["name:John", "age:25"]
     const searchValues =
@@ -58,7 +61,7 @@ export class SearchUtils {
         return {
           field,
           value: values.join(':'), // Rejoin in case value contains ':'
-        } as SearchCondition;
+        } as Search;
       }),
     };
   }

@@ -7,7 +7,7 @@ export type SuccessResponseBody<T> = T extends unknown[]
       meta: {
         pagination: Pagination;
         sorting: Sorting[];
-        filter?: Record<string, unknown>;
+        filter: Record<string, unknown>;
       };
     }
   : { data: T };

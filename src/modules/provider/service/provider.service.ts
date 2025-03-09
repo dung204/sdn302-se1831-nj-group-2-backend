@@ -1,4 +1,4 @@
-import { SortOrder } from 'mongoose';
+import { RootFilterQuery, SortOrder } from 'mongoose';
 
 import { NotFoundException } from '@/base/common/exceptions/http';
 import { SuccessResponseBody } from '@/base/common/types';
@@ -10,7 +10,7 @@ import {
   UpdateProviderDto,
   providerDto,
 } from '@/modules/provider/dtos';
-import { ProviderModel } from '@/modules/provider/models';
+import { Provider, ProviderModel } from '@/modules/provider/models';
 
 class ProviderService {
   findAllAndCount(
@@ -25,19 +25,19 @@ class ProviderService {
     pageSize,
     sorting,
     name,
-  }: ProviderQueryDto): Promise<SuccessResponseBody<ProviderDto[]>> {
-    interface QueryFilter {
-      name?: { $regex: string; $options: string };
-    }
-
-    const query: QueryFilter = {};
+    deleted,
+  }: ProviderQueryDto & { deleted?: boolean }): Promise<
+    SuccessResponseBody<ProviderDto[]>
+  > {
+    const filter: RootFilterQuery<Provider> = deleted
+      ? { deleteTimestamp: { $ne: null } }
+      : { deleteTimestamp: null };
 
     if (name) {
-      query.name = { $regex: name, $options: 'i' };
+      filter.name = { $regex: name, $options: 'i' };
     }
 
-    // Lọc theo các điều kiện khác
-    const providerQuery = ProviderModel.find(query)
+    const providerQuery = await ProviderModel.find(filter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -47,13 +47,12 @@ class ProviderService {
         ),
       );
 
-    const total = await ProviderModel.countDocuments(query).exec();
+    const total = await ProviderModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
-
-    const providers = await providerQuery.exec();
+    const providers = await providerQuery;
 
     return {
-      data: providers.map((provider) => providerDto.parse(provider)),
+      data: providers.map((providers) => providerDto.parse(providers)),
       meta: {
         pagination: {
           total,

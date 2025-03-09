@@ -9,7 +9,6 @@ export const serviceTableQueryDto = commonQueryDto
       'id',
       'name',
       'price',
-      'category',
       'createTimestamp',
       'deleteTimestamp',
     ]),

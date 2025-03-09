@@ -930,7 +930,7 @@ paths:
       security:
         - JWT: []
     post:
-      summary: Create a new servicess
+      summary: Create a new service category
       tags:
         - service-categories
       requestBody:
@@ -1053,7 +1053,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ServiceCategoryDto'
+                      $ref: '#/components/schemas/DeletedServiceCategoryDto'
       security:
         - JWT: []
   /api/v1/service-categories/restore/{id}:
@@ -1606,6 +1606,19 @@ components:
         description:
           type: string
           example: ServiceCategoryDto related to gaming PCs and consoles
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedServiceCategoryDto:
+      allOf:
+        - $ref: '#/components/schemas/ServiceCategoryDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
     CreateServiceCategoryDto:
       type: object
       required:

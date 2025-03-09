@@ -14,7 +14,7 @@ import { LoginRequestDto } from '@/modules/auth/dtos/login-request.dto';
 import { CustomJwtPayload } from '@/modules/auth/types';
 import { JwtUtils, PasswordUtils } from '@/modules/auth/utils';
 import { Role } from '@/modules/user/enums';
-import { User } from '@/modules/user/models';
+import { User, UserModel } from '@/modules/user/models';
 import { userService } from '@/modules/user/services';
 
 class AuthService {
@@ -24,14 +24,19 @@ class AuthService {
     username,
     password,
   }: LoginRequestDto): Promise<SuccessResponseBody<LoginSuccessDto>> {
-    const user = await userService.findOneByUsername(username);
+    const user = await UserModel.findOne({ username, deleteTimestamp: null });
+
+    if (!user) {
+      throw new UnauthorizedException('Username or password is incorrect.');
+    }
+
     const isPasswordMatched = await PasswordUtils.isPasswordMatched(
       password,
       user.password,
     );
 
     if (!isPasswordMatched) {
-      throw new BadRequestException('Password is incorrect.');
+      throw new UnauthorizedException('Username or password is incorrect.');
     }
 
     return {

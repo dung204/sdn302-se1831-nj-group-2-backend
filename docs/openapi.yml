@@ -136,6 +136,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/search'
       responses:
         '200':
           description: Get all users information successfully (with pagination metadata).
@@ -1066,6 +1067,16 @@ components:
         items:
           type: string
           default: createTimestamp:desc
+    search:
+      name: search
+      in: query
+      description: The search for the query. The syntax is `{field}:{value}`,
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          default: createTimestamp:2021-01-01T00:00:00Z
   securitySchemes:
     JWT:
       type: http

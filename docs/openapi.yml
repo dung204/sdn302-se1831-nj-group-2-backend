@@ -468,7 +468,6 @@ paths:
           description: Provider not found
       security:
         - JWT: []
-
   /api/v1/providers/deleted:
     get:
       summary: Get all deleted providers
@@ -506,7 +505,6 @@ paths:
           description: Logged in user is not an `OWNER`
       security:
         - JWT: []
-
   /api/v1/providers/restore/{id}:
     patch:
       summary: Restore a deleted provider by ID
@@ -1263,6 +1261,7 @@ paths:
           description: Services not found
       security:
         - JWT: []
+
   /api/v1/computers:
     get:
       summary: Get all computers
@@ -1273,6 +1272,8 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
       responses:
         '200':
           description: List of computers retrieved successfully (with pagination metadata).
@@ -1304,13 +1305,13 @@ paths:
                 summary: Example computer creation data
                 value:
                   name: 'Dell Inspiron'
-                  positionId: '09b19530-f298-4150-8683-96dd1004c1ca'
+                  position: '09b19530-f298-4150-8683-96dd1004c1ca'
                   status: 'NORMAL'
                   pricePerHour: 20
                   cpu: 'Intel Core i5-9400F'
                   ram: '8GB DDR4'
                   storage: '512GB SSD'
-                  providerId: 'fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77'
+                  provider: 'fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77'
                   peripherals:
                     - id: 'keyboard789'
                       status: 'NORMAL'
@@ -2003,7 +2004,7 @@ components:
         name:
           type: string
           example: Gaming PC
-        positionId:
+        position:
           type: string
           format: uuid
           example: 09b19530-f298-4150-8683-96dd1004c1ca
@@ -2022,7 +2023,7 @@ components:
         storage:
           type: string
           example: 1TB SSD
-        providerId:
+        provider:
           type: string
           format: uuid
           example: 8d933f56-3a23-4a11-91f8-123456789abc

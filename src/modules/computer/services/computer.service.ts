@@ -28,12 +28,32 @@ class ComputerService {
     pageSize,
     sorting,
     deleted,
+    fromCreateTimestamp,
+    toCreateTimestamp,
+    fromDeleteTimestamp,
+    toDeleteTimestamp,
   }: ComputerQueryDto): Promise<
     SuccessResponseBody<ComputerDto[] | DeletedComputerDto[]>
   > {
+    // const filter: RootFilterQuery<Computer> = {
+    //   deleteTimestamp: deleted ? { $ne: null } : null,
+    // };
     const filter: RootFilterQuery<Computer> = {
-      deleteTimestamp: deleted ? { $ne: null } : null,
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
     };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      filter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
+    }
 
     const query = ComputerModel.find(filter)
       .limit(pageSize)
@@ -44,8 +64,8 @@ class ComputerService {
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
       )
-      .populate('positionId')
-      .populate('providerId');
+      .populate('position')
+      .populate('provider');
     const computers = await query.exec();
     const total = await ComputerModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
@@ -90,7 +110,7 @@ class ComputerService {
   async createComputer(
     createComputerDto: CreateComputerDto,
   ): Promise<SuccessResponseBody<ComputerDto>> {
-    const { name, positionId, providerId } = createComputerDto;
+    const { name, position, provider } = createComputerDto;
 
     // Check if the computer already exists
     const isComputerExisted = await ComputerModel.exists({ name }).exec();
@@ -103,7 +123,7 @@ class ComputerService {
 
     // Check if the position exists
     const isPositionExisted = await PositionModel.exists({
-      _id: positionId,
+      _id: position,
     }).exec();
     if (!isPositionExisted) {
       throw new NotFoundException(`Position not found.`);
@@ -111,7 +131,7 @@ class ComputerService {
 
     // Check if the provider exists
     const isProviderExisted = await ProviderModel.exists({
-      _id: providerId,
+      _id: provider,
     }).exec();
     if (!isProviderExisted) {
       throw new NotFoundException(`Provider not found.`);
@@ -119,9 +139,10 @@ class ComputerService {
 
     // Create the new computer
     const newComputer = new ComputerModel(createComputerDto);
-    const computerSave = await newComputer.save();
     return {
-      data: computerDto.parse(computerSave),
+      data: computerDto.parse(
+        await (await newComputer.save()).populate(['position', 'provider']),
+      ),
     };
   }
 
@@ -129,7 +150,7 @@ class ComputerService {
     id: string,
     updateComputerDto: UpdateComputerDto,
   ): Promise<SuccessResponseBody<ComputerDto>> {
-    const { positionId, providerId } = updateComputerDto;
+    const { position, provider } = updateComputerDto;
     // Check if the computer exists
     const existingComputer = await ComputerModel.findOne({
       _id: id,
@@ -141,24 +162,24 @@ class ComputerService {
     }
 
     // Check if the position exists (UUID check)
-    if (positionId) {
+    if (position) {
       const isPositionExisted = await PositionModel.exists({
-        _id: positionId,
+        _id: position,
       }).exec();
       if (!isPositionExisted) {
         throw new NotFoundException(
-          `Position with id '${positionId}' not found.`,
+          `Position with id '${position}' not found.`,
         );
       }
     }
 
-    if (providerId) {
+    if (provider) {
       const isProviderExisted = await ProviderModel.exists({
-        _id: providerId,
+        _id: provider,
       }).exec();
       if (!isProviderExisted) {
         throw new NotFoundException(
-          `Provider with id '${providerId}' not found.`,
+          `Provider with id '${provider}' not found.`,
         );
       }
     }

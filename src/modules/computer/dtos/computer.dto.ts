@@ -8,7 +8,7 @@ import { providerDto } from '@/modules/provider/dtos';
 const baseComputerSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  positionId: positionDto,
+  position: positionDto,
   status: z.enum([
     DeviceStatus.NORMAL,
     DeviceStatus.MAINTENANCE,
@@ -18,7 +18,7 @@ const baseComputerSchema = z.object({
   cpu: z.string(),
   ram: z.string(),
   storage: z.string(),
-  providerId: providerDto,
+  provider: providerDto,
   peripherals: z.array(
     z.object({
       id: z.string(),
@@ -27,21 +27,15 @@ const baseComputerSchema = z.object({
   ),
 });
 
-export const computerDto = baseComputerSchema.transform(
-  ({ _id, positionId, providerId, ...data }) => ({
-    id: _id,
-    position: positionId,
-    provider: providerId,
-    ...data,
-  }),
-);
+export const computerDto = baseComputerSchema.transform(({ _id, ...data }) => ({
+  id: _id,
+  ...data,
+}));
 
 export const deletedComputerDto = baseComputerSchema
   .merge(deleteDto)
-  .transform(({ _id, positionId, providerId, ...data }) => ({
+  .transform(({ _id, ...data }) => ({
     id: _id,
-    position: positionId,
-    provider: providerId,
     ...data,
   }));
 

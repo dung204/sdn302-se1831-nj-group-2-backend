@@ -4,7 +4,7 @@ import { DeviceStatus } from '../enums';
 
 export const createComputerDto = z.object({
   name: z.string(),
-  positionId: z.string(),
+  position: z.string(),
   status: z.enum([
     DeviceStatus.NORMAL,
     DeviceStatus.MAINTENANCE,
@@ -14,7 +14,7 @@ export const createComputerDto = z.object({
   cpu: z.string(),
   ram: z.string(),
   storage: z.string(),
-  providerId: z.string(),
+  provider: z.string(),
   peripherals: z.array(
     z.object({
       id: z.string(),

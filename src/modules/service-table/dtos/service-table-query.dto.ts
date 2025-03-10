@@ -12,6 +12,10 @@ export const serviceTableQueryDto = commonQueryDto
       'createTimestamp',
       'deleteTimestamp',
     ]),
+    name: z.string().optional(),
+    category: z.string().optional(),
+    fromPrice: z.number().optional(),
+    toPrice: z.number().optional(),
   })
   .transform((payload) => SortingUtils.transformSorting(payload));
 

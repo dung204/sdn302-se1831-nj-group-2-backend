@@ -2,29 +2,24 @@ import { Schema, model } from 'mongoose';
 
 import { BaseModel, baseModelSchemaDefinition } from '@/base/common/models';
 
-// import { Service } from '@/modules/service/models';
-
 export interface Branch extends BaseModel {
   name: string;
   address: string | null;
-  adminId: string;
-  //   services: Types.ObjectId[] | Service[];
+  admin: string;
+  services: string[];
 }
 
 const branchSchema = new Schema<Branch>({
   ...baseModelSchemaDefinition,
   name: { type: String, required: true },
   address: { type: String, default: null, required: false },
-  adminId: { type: String, ref: 'User', required: true },
-  //   services: [{ type: Schema.Types.ObjectId, ref: 'Service' }],
+  admin: { type: String, ref: 'User', required: true },
+  services: { type: [String], ref: 'Service', default: [], required: true },
 });
 
-// Add virtual property for populating admin
-branchSchema.virtual('admin', {
-  ref: 'User',
-  localField: 'adminId',
-  foreignField: '_id',
-  justOne: true,
+branchSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
+  this.populate(['admin', 'services']);
+  next();
 });
 
 export const BranchModel = model<Branch>('Branch', branchSchema);

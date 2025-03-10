@@ -3,6 +3,7 @@ import { HydratedDocument, RootFilterQuery, SortOrder } from 'mongoose';
 import { ConflictException } from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
+import { branchService } from '@/modules/branch/services';
 import {
   CreatePositionDto,
   DeletedPositionDto,
@@ -30,9 +31,34 @@ class PositionService {
   }: PositionQueryDto): Promise<
     SuccessResponseBody<PositionDto[] | DeletedPositionDto[]>
   > {
+    const {
+      name,
+      status,
+      fromCreateTimestamp,
+      toCreateTimestamp,
+      fromDeleteTimestamp,
+      toDeleteTimestamp,
+      ...otherFilters
+    } = filter;
     const queryFilter: RootFilterQuery<Position> = {
-      deleteTimestamp: deleted ? { $ne: null } : null,
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
+      ...(status && { status: { $in: status } }),
+      ...(name && { name: { $regex: name, $options: 'i' } }),
+      ...otherFilters,
     };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      queryFilter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
+    }
 
     const query = PositionModel.find(queryFilter)
       .limit(pageSize)
@@ -100,10 +126,17 @@ class PositionService {
       );
     }
 
-    const newPosition = new PositionModel(createPositionDto);
+    await branchService.findOneById(createPositionDto.branch);
+
+    const newPosition = await new PositionModel(createPositionDto).save();
 
     return {
-      data: positionDto.parse(await newPosition.save()),
+      data: positionDto.parse(
+        await newPosition.populate({
+          path: 'branch',
+          populate: ['admin', { path: 'services', populate: 'category' }],
+        }),
+      ),
     };
   }
 
@@ -111,6 +144,10 @@ class PositionService {
     id: string,
     updatePositionDto: UpdatePositionDto,
   ): Promise<SuccessResponseBody<PositionDto>> {
+    if (updatePositionDto.branch) {
+      await branchService.findOneById(updatePositionDto.branch);
+    }
+
     const position = await PositionModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updatePositionDto,

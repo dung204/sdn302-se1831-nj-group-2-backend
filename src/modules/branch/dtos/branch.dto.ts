@@ -1,15 +1,15 @@
 import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
-// import { serviceDto } from '@/modules/service/dtos/service.dto';
+import { serviceTableDto } from '@/modules/service-table/dtos';
 import { userDto } from '@/modules/user/dtos/user.dto';
 
 const baseBranchSchema = z.object({
   _id: z.string(),
   name: z.string(),
   address: z.string().nullable(),
-  admin: z.string().or(userDto),
-  // services: z.array(z.string().or(serviceDto)),
+  admin: userDto,
+  services: z.array(serviceTableDto),
   createTimestamp: z.date(),
 });
 

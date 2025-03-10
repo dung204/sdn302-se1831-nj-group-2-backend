@@ -1,12 +1,13 @@
 import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
+import { branchDto } from '@/modules/branch/dtos';
 import { PositionStatus } from '@/modules/position/enums';
 
 export const basePositionSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  branch: z.string(),
+  branch: branchDto,
   status: z.enum([PositionStatus.AVAILABLE, PositionStatus.IN_USE]),
   createTimestamp: z.date(),
 });

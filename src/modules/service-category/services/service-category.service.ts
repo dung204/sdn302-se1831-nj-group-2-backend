@@ -33,9 +33,31 @@ class ServiceCategoryService {
   }: ServiceCategoryQueryDto): Promise<
     SuccessResponseBody<ServiceCategoryDto[] | DeletedServiceCategoryDto[]>
   > {
+    const {
+      fromCreateTimestamp,
+      fromDeleteTimestamp,
+      toCreateTimestamp,
+      toDeleteTimestamp,
+      name,
+    } = filter;
+
     const queryFilter: RootFilterQuery<ServiceCategory> = {
-      deleteTimestamp: deleted ? { $ne: null } : null,
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
+      ...(name && { name: { $regex: name, $options: 'i' } }),
     };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      queryFilter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
+    }
 
     const query = ServiceCategoryModel.find(queryFilter)
       .limit(pageSize)
@@ -137,7 +159,7 @@ class ServiceCategoryService {
   }
   async softDeleteByServiceCategoryId(categoryId: string) {
     await ServiceTableModel.updateMany(
-      { categoryId: categoryId, deleteTimestamp: null },
+      { category: categoryId, deleteTimestamp: null },
       { deleteTimestamp: Date.now() },
     );
   }

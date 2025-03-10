@@ -11,6 +11,7 @@ export const serviceCategoryQueryDto = commonQueryDto
       'createTimestamp',
       'deleteTimestamp',
     ]),
+    name: z.string().optional(),
   })
   .transform((payload) => SortingUtils.transformSorting(payload));
 

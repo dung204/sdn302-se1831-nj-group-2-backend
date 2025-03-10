@@ -27,9 +27,41 @@ class ServiceTableService {
   }: ServiceTableQueryDto): Promise<
     SuccessResponseBody<ServiceTableDto[] | DeletedServiceTableDto[]>
   > {
+    const {
+      name,
+      fromCreateTimestamp,
+      toCreateTimestamp,
+      fromDeleteTimestamp,
+      toDeleteTimestamp,
+      fromPrice,
+      toPrice,
+      ...otherFilters
+    } = filter;
     const queryFilter: RootFilterQuery<ServiceTable> = {
-      deleteTimestamp: deleted ? { $ne: null } : null,
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
+      ...(name && { name: { $regex: name, $options: 'i' } }),
+      ...otherFilters,
     };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      queryFilter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
+    }
+
+    if (fromPrice || toPrice) {
+      queryFilter.price = {
+        ...(fromPrice && { $gte: fromPrice }),
+        ...(toPrice && { $lte: toPrice }),
+      };
+    }
 
     const query = ServiceTableModel.find(queryFilter)
       .limit(pageSize)
@@ -39,8 +71,7 @@ class ServiceTableService {
           ({ field, direction }) =>
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
-      )
-      .populate('categoryId');
+      );
 
     const serviceTables = await query.exec();
 
@@ -74,7 +105,7 @@ class ServiceTableService {
     const serviceTable = await ServiceTableModel.findOne({
       _id: id,
       deleteTimestamp: null,
-    }).populate('categoryId');
+    });
 
     if (!serviceTable) {
       throw new NotFoundException('ServiceTable not found.');
@@ -90,11 +121,11 @@ class ServiceTableService {
   ): Promise<SuccessResponseBody<ServiceTableDto>> {
     const newServiceTable = new ServiceTableModel(createServiceTableDto);
 
-    await serviceCategoryService.findOneById(newServiceTable.categoryId!);
+    await serviceCategoryService.findOneById(newServiceTable.category!);
 
     return {
       data: serviceTableDto.parse(
-        await (await newServiceTable.save()).populate('categoryId'),
+        await (await newServiceTable.save()).populate('category'),
       ),
     };
   }
@@ -102,7 +133,10 @@ class ServiceTableService {
     id: string,
     updateTableDto: UpdateServiceTableDto,
   ): Promise<SuccessResponseBody<ServiceTableDto>> {
-    await serviceCategoryService.findOneById(updateTableDto.categoryId!);
+    if (updateTableDto.category) {
+      await serviceCategoryService.findOneById(updateTableDto.category);
+    }
+
     const updatedServiceTable = await ServiceTableModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updateTableDto,
@@ -116,9 +150,7 @@ class ServiceTableService {
     }
 
     return {
-      data: serviceTableDto.parse(
-        await updatedServiceTable.populate('categoryId'),
-      ),
+      data: serviceTableDto.parse(updatedServiceTable),
     };
   }
   async softDeleteServiceTable(id: string) {
@@ -148,9 +180,7 @@ class ServiceTableService {
     }
 
     return {
-      data: serviceTableDto.parse(
-        await updatedServiceTable.populate('categoryId'),
-      ),
+      data: serviceTableDto.parse(updatedServiceTable),
     };
   }
 }

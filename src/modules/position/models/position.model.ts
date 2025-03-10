@@ -17,7 +17,7 @@ const positionSchema = new Schema<Position>({
   },
   branch: {
     type: String,
-    // ref: 'Branch',
+    ref: 'Branch',
     required: true,
   },
   status: {
@@ -26,6 +26,11 @@ const positionSchema = new Schema<Position>({
     default: PositionStatus.AVAILABLE,
     required: false,
   },
+});
+
+positionSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
+  this.populate('branch');
+  next();
 });
 
 export const PositionModel = model<Position>(

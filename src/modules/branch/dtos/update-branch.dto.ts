@@ -1,11 +1,8 @@
 import { z } from 'zod';
 
-export const updateBranchDtoSchema = z.object({
-  name: z.string().optional(),
-  address: z.string().nullable().optional(),
-  adminId: z.string().optional(),
-  services: z.array(z.string()).optional(),
-});
+import { createBranchDto } from '@/modules/branch/dtos/create-branch.dto';
+
+export const updateBranchDtoSchema = createBranchDto.partial();
 
 export const updateBranchDto = updateBranchDtoSchema;
 export type UpdateBranchDto = z.infer<typeof updateBranchDtoSchema>;

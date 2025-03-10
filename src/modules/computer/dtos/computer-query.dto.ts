@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { commonQueryDto } from '@/base/common/dtos';
 import { SortingUtils } from '@/base/common/utils';
+import { DeviceStatus } from '@/modules/computer/enums';
 
 export const computerQueryDto = commonQueryDto
   .extend({
@@ -12,6 +13,29 @@ export const computerQueryDto = commonQueryDto
       'createTimestamp',
       'deleteTimestamp',
     ]),
+    name: z.string().optional(),
+    position: z.string().optional(),
+    status: z
+      .union([
+        z
+          .enum([
+            DeviceStatus.NORMAL,
+            DeviceStatus.MAINTENANCE,
+            DeviceStatus.ERROR,
+          ])
+          .transform((value) => [value]),
+        z.array(
+          z.enum([
+            DeviceStatus.NORMAL,
+            DeviceStatus.MAINTENANCE,
+            DeviceStatus.ERROR,
+          ]),
+        ),
+      ])
+      .optional(),
+    provider: z.string().optional(),
+    fromPricePerHour: z.number().optional(),
+    toPricePerHour: z.number().optional(),
   })
   .transform((payload) => SortingUtils.transformSorting(payload));
 

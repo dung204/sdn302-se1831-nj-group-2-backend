@@ -31,12 +31,16 @@ class UserService {
     pageSize,
     sorting,
     deleted,
-    fromCreateTimestamp,
-    toCreateTimestamp,
-    fromDeleteTimestamp,
-    toDeleteTimestamp,
+    ...filter
   }: UserQueryDto): Promise<SuccessResponseBody<UserDto[] | DeletedUserDto[]>> {
-    const filter: RootFilterQuery<User> = {
+    const {
+      fromCreateTimestamp,
+      fromDeleteTimestamp,
+      toCreateTimestamp,
+      toDeleteTimestamp,
+    } = filter;
+
+    const queryFilter: RootFilterQuery<User> = {
       deleteTimestamp: !deleted
         ? null
         : {
@@ -47,13 +51,13 @@ class UserService {
     };
 
     if (fromCreateTimestamp || toCreateTimestamp) {
-      filter.createTimestamp = {
+      queryFilter.createTimestamp = {
         ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
         ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
       };
     }
 
-    const query = UserModel.find(filter)
+    const query = UserModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -64,7 +68,7 @@ class UserService {
       );
 
     const users = await query.exec();
-    const total = await UserModel.countDocuments(filter).exec();
+    const total = await UserModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -81,6 +85,7 @@ class UserService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

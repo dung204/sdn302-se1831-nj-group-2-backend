@@ -1274,6 +1274,47 @@ paths:
         - $ref: '#/components/parameters/sorting'
         - $ref: '#/components/parameters/fromCreateTimestamp'
         - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every computer whose name contains this name will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: query
+          description: Every computer whose position ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: provider
+          in: query
+          description: Every computer whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Every computer whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - NORMAL
+                - MAINTENANCE
+                - ERROR
+        - name: fromPricePerHour
+          in: query
+          description: Every computer whose price per hour is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPricePerHour
+          in: query
+          description: Every computer whose price per hour is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
       responses:
         '200':
           description: List of computers retrieved successfully (with pagination metadata).
@@ -1442,6 +1483,51 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every computer whose name contains this name will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: query
+          description: Every computer whose position ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: provider
+          in: query
+          description: Every computer whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Every computer whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - NORMAL
+                - MAINTENANCE
+                - ERROR
+        - name: fromPricePerHour
+          in: query
+          description: Every computer whose price per hour is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPricePerHour
+          in: query
+          description: Every computer whose price per hour is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
       responses:
         '200':
           description: List of deleted computers retrieved successfully (with pagination metadata).
@@ -1758,6 +1844,19 @@ components:
                     type: string
                     example: desc
                     description: The order to sort
+            filter:
+              type: object
+              properties:
+                fromCreateTimestamp:
+                  type: string
+                  format: date-time
+                  example: 2021-01-01T00:00:00Z
+                  description: The start createTimestamp to filter
+                toCreateTimestamp:
+                  type: string
+                  format: date-time
+                  example: 2021-01-01T00:00:00Z
+                  description: The end createTimestamp to filter
     PositionDto:
       type: object
       properties:

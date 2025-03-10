@@ -26,14 +26,15 @@ class PositionService {
     pageSize,
     sorting,
     deleted,
+    ...filter
   }: PositionQueryDto): Promise<
     SuccessResponseBody<PositionDto[] | DeletedPositionDto[]>
   > {
-    const filter: RootFilterQuery<Position> = {
+    const queryFilter: RootFilterQuery<Position> = {
       deleteTimestamp: deleted ? { $ne: null } : null,
     };
 
-    const query = PositionModel.find(filter)
+    const query = PositionModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -45,7 +46,7 @@ class PositionService {
 
     const positions = await query.exec();
 
-    const total = await PositionModel.countDocuments(filter).exec();
+    const total = await PositionModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -64,6 +65,7 @@ class PositionService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

@@ -28,17 +28,22 @@ class ComputerService {
     pageSize,
     sorting,
     deleted,
-    fromCreateTimestamp,
-    toCreateTimestamp,
-    fromDeleteTimestamp,
-    toDeleteTimestamp,
+    ...filter
   }: ComputerQueryDto): Promise<
     SuccessResponseBody<ComputerDto[] | DeletedComputerDto[]>
   > {
-    // const filter: RootFilterQuery<Computer> = {
-    //   deleteTimestamp: deleted ? { $ne: null } : null,
-    // };
-    const filter: RootFilterQuery<Computer> = {
+    const {
+      fromCreateTimestamp,
+      toCreateTimestamp,
+      fromDeleteTimestamp,
+      toDeleteTimestamp,
+      fromPricePerHour,
+      toPricePerHour,
+      name,
+      status,
+      ...otherFilters
+    } = filter;
+    const queryFilter: RootFilterQuery<Computer> = {
       deleteTimestamp: !deleted
         ? null
         : {
@@ -46,16 +51,26 @@ class ComputerService {
             ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
             ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
           },
+      ...(status && { status: { $in: status } }),
+      ...(name && { name: { $regex: name, $options: 'i' } }),
+      ...otherFilters,
     };
 
     if (fromCreateTimestamp || toCreateTimestamp) {
-      filter.createTimestamp = {
+      queryFilter.createTimestamp = {
         ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
         ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
       };
     }
 
-    const query = ComputerModel.find(filter)
+    if (fromPricePerHour || toPricePerHour) {
+      queryFilter.pricePerHour = {
+        ...(fromPricePerHour && { $gte: fromPricePerHour }),
+        ...(toPricePerHour && { $lte: toPricePerHour }),
+      };
+    }
+
+    const query = ComputerModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -67,7 +82,7 @@ class ComputerService {
       .populate('position')
       .populate('provider');
     const computers = await query.exec();
-    const total = await ComputerModel.countDocuments(filter).exec();
+    const total = await ComputerModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -86,6 +101,7 @@ class ComputerService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

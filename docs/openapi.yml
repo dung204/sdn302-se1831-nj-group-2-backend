@@ -34,6 +34,8 @@ tags:
     description: Service categories management
   - name: services
     description: Services management
+  - name: computers
+    description: Computer management
 paths:
   /api/v1/auth/login:
     post:
@@ -466,7 +468,6 @@ paths:
           description: Provider not found
       security:
         - JWT: []
-
   /api/v1/providers/deleted:
     get:
       summary: Get all deleted providers
@@ -504,7 +505,6 @@ paths:
           description: Logged in user is not an `OWNER`
       security:
         - JWT: []
-
   /api/v1/providers/restore/{id}:
     patch:
       summary: Restore a deleted provider by ID
@@ -1261,6 +1261,317 @@ paths:
           description: Services not found
       security:
         - JWT: []
+
+  /api/v1/computers:
+    get:
+      summary: Get all computers
+      description: Retrieve a list of all computers with pagination.
+      tags:
+        - computers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every computer whose name contains this name will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: query
+          description: Every computer whose position ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: provider
+          in: query
+          description: Every computer whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Every computer whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - NORMAL
+                - MAINTENANCE
+                - ERROR
+        - name: fromPricePerHour
+          in: query
+          description: Every computer whose price per hour is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPricePerHour
+          in: query
+          description: Every computer whose price per hour is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: List of computers retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ComputerDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new computer
+      tags:
+        - computers
+      requestBody:
+        required: true
+        content:
+          application/json: # Đổi sang application/json nếu không phải form-urlencoded
+            schema:
+              $ref: '#/components/schemas/CreateComputerDto'
+            examples:
+              example1:
+                summary: Example computer creation data
+                value:
+                  name: 'Dell Inspiron'
+                  position: '09b19530-f298-4150-8683-96dd1004c1ca'
+                  status: 'NORMAL'
+                  pricePerHour: 20
+                  cpu: 'Intel Core i5-9400F'
+                  ram: '8GB DDR4'
+                  storage: '512GB SSD'
+                  provider: 'fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77'
+                  peripherals:
+                    - id: 'keyboard789'
+                      status: 'NORMAL'
+                    - id: 'mouse321'
+                      status: 'IN_USE'
+      responses:
+        '201':
+          description: Computer created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Computer name already exists
+      security:
+        - JWT: []
+  /api/v1/computers/{id}:
+    get:
+      summary: Get a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a computer's information by ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+            schema:
+              $ref: '#/components/schemas/UpdateComputerDto'
+            examples:
+              example1:
+                summary: Example computer update data
+                value:
+                  name: 'Updated Dell Inspiron'
+                  positionId: '09b19530-f298-4150-8683-96dd1004c1ca'
+                  status: 'NORMAL'
+                  pricePerHour: 25
+                  cpu: 'Intel Core i7-9700K'
+                  ram: '16GB DDR4'
+                  storage: '1TB SSD'
+                  providerId: 'fd5ba75f-7386-4dbf-ace2-d3d0b9e49f77'
+                  peripherals:
+                    - id: 'keyboard789'
+                      status: 'IN_USE'
+                    - id: 'mouse321'
+                      status: 'NORMAL'
+      responses:
+        '200':
+          description: Computer updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+
+    delete:
+      summary: Soft delete a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Computer deleted successfully
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+
+  /api/v1/computers/deleted:
+    get:
+      summary: Get all deleted computers
+      description: Retrieve a list of all deleted computers with pagination.
+      tags:
+        - computers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every computer whose name contains this name will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: query
+          description: Every computer whose position ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: provider
+          in: query
+          description: Every computer whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Every computer whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - NORMAL
+                - MAINTENANCE
+                - ERROR
+        - name: fromPricePerHour
+          in: query
+          description: Every computer whose price per hour is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPricePerHour
+          in: query
+          description: Every computer whose price per hour is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: List of deleted computers retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedComputerDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+
+  /api/v1/computers/restore/{id}:
+    patch:
+      summary: Restore a deleted computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Computer restored successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
 components:
   schemas:
     LoginRequestDto:
@@ -1469,7 +1780,6 @@ components:
             description:
               type: string
               example: Mouse
-
     UpdateProviderDto:
       type: object
       properties:
@@ -1721,6 +2031,155 @@ components:
           type: string
           format: uuid
           example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+    ComputerDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Gaming PC
+        position:
+          $ref: '#/components/schemas/PositionDto'
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: NORMAL
+        pricePerHour:
+          type: number
+          example: 15.5
+        cpu:
+          type: string
+          example: Intel Core i7-10700K
+        ram:
+          type: string
+          example: 16GB DDR4
+        storage:
+          type: string
+          example: 1TB SSD
+        provider:
+          $ref: '#/components/schemas/ProviderDto'
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: WORKING
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedComputerDto:
+      allOf:
+        - $ref: '#/components/schemas/ComputerDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreateComputerDto:
+      type: object
+      required:
+        - name
+        - positionId
+        - status
+        - pricePerHour
+        - cpu
+        - ram
+        - storage
+        - providerId
+      properties:
+        name:
+          type: string
+          example: Gaming PC
+        position:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: NORMAL
+        pricePerHour:
+          type: number
+          example: 15.5
+        cpu:
+          type: string
+          example: Intel Core i7-10700K
+        ram:
+          type: string
+          example: 16GB DDR4
+        storage:
+          type: string
+          example: 1TB SSD
+        provider:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: WORKING
+    UpdateComputerDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming PC
+        positionId:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: ERROR
+        pricePerHour:
+          type: number
+          example: 18.5
+        cpu:
+          type: string
+          example: Updated Intel Core i9-10900K
+        ram:
+          type: string
+          example: Updated 32GB DDR4
+        storage:
+          type: string
+          example: Updated 2TB SSD
+        providerId:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: BROKEN
+    DeviceStatus:
+      type: string
+      enum:
+        - NORMAL
+        - ERROR
+        - MAINTENANCE
+
   parameters:
     page:
       name: page

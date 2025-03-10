@@ -98,7 +98,7 @@ class ComputerService {
     const computer = await ComputerModel.findOne({
       _id: id,
       deleteTimestamp: null,
-    });
+    }).populate(['position', 'provider']);
 
     if (!computer) {
       throw new NotFoundException('Computer not found.');

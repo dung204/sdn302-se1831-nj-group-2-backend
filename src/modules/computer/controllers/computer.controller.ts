@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
 import {
+  computerDto,
   computerQueryDto,
   createComputerDto,
   updateComputerDto,
@@ -36,9 +37,11 @@ class ComputerController {
 
   async findOneById(req: Request, res: Response, next: NextFunction) {
     try {
-      res
-        .status(HttpStatusCode.OK)
-        .json(await computerService.findOneById(req.params.id!));
+      res.status(HttpStatusCode.OK).json({
+        data: computerDto.parse(
+          await computerService.findOneById(req.params.id!),
+        ),
+      });
     } catch (err) {
       next(err);
     }

@@ -1942,10 +1942,8 @@ components:
         name:
           type: string
           example: Gaming PC
-        positionId:
-          type: string
-          format: uuid
-          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        position:
+          $ref: '#/components/schemas/PositionDto'
         status:
           $ref: '#/components/schemas/DeviceStatus'
           example: NORMAL
@@ -1961,10 +1959,8 @@ components:
         storage:
           type: string
           example: 1TB SSD
-        providerId:
-          type: string
-          format: uuid
-          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        provider:
+          $ref: '#/components/schemas/ProviderDto'
         peripherals:
           type: array
           items:

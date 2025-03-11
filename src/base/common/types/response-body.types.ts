@@ -1,10 +1,14 @@
 import { HttpStatusCode } from '@/base/common/enums';
-import { Pagination, Search, Sorting } from '@/base/common/types';
+import { Pagination, Sorting } from '@/base/common/types';
 
 export type SuccessResponseBody<T> = T extends unknown[]
   ? {
       data: T;
-      meta: { pagination: Pagination; sorting: Sorting[]; search?: Search[] };
+      meta: {
+        pagination: Pagination;
+        sorting: Sorting[];
+        filter: Record<string, unknown>;
+      };
     }
   : { data: T };
 

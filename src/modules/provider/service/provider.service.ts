@@ -26,14 +26,15 @@ class ProviderService {
     pageSize,
     sorting,
     deleted,
+    ...filter
   }: ProviderQueryDto): Promise<
     SuccessResponseBody<ProviderDto[] | DeletedProviderDto[]>
   > {
-    const filter: RootFilterQuery<Provider> = deleted
+    const queryFilter: RootFilterQuery<Provider> = deleted
       ? { deleteTimestamp: { $ne: null } }
       : { deleteTimestamp: null };
 
-    const query = ProviderModel.find(filter)
+    const query = ProviderModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -44,7 +45,7 @@ class ProviderService {
       );
 
     const providers = await query.exec();
-    const total = await ProviderModel.countDocuments(filter).exec();
+    const total = await ProviderModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -63,6 +64,7 @@ class ProviderService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

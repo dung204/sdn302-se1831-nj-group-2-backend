@@ -24,6 +24,8 @@ const envSchema = z.object({
   REDIS_HOST: z.string().nonempty(),
   REDIS_PORT: z.coerce.number().int().positive(),
   REDIS_PASSWORD: z.string().nonempty(),
+  INITIAL_OWNER_USERNAME: z.string().nonempty(),
+  INITIAL_OWNER_PASSWORD: z.string().nonempty(),
 });
 
 // eslint-disable-next-line no-process-env

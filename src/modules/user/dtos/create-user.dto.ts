@@ -10,7 +10,7 @@ export const createUserDto = z.object({
   lastName: z.string(),
   address: z.string().nullable().optional(),
   role: z
-    .enum([Role.ADMIN, Role.GUEST, Role.OWNER, Role.STAFF])
+    .enum([Role.BRANCH_ADMIN, Role.GUEST, Role.OWNER, Role.STAFF])
     .optional()
     .default(Role.GUEST),
   citizenNumber: z.string().nullable().optional(),
@@ -18,4 +18,4 @@ export const createUserDto = z.object({
   availableTime: z.number().nullable().optional(),
 });
 
-export type CreateUserDto = z.input<typeof createUserDto>;
+export type CreateUserDto = z.infer<typeof createUserDto>;

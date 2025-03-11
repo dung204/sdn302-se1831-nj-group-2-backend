@@ -4,4 +4,4 @@ import { createUserDto } from './create-user.dto';
 
 export const updateUserDto = createUserDto.partial();
 
-export type UpdateUserDto = z.input<typeof updateUserDto>;
+export type UpdateUserDto = z.infer<typeof updateUserDto>;

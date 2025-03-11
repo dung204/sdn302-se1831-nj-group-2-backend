@@ -322,6 +322,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/providerName'
         - $ref: '#/components/parameters/fromCreateTimestamp'
         - $ref: '#/components/parameters/toCreateTimestamp'
       responses:
@@ -485,6 +486,7 @@ paths:
         - $ref: '#/components/parameters/toCreateTimestamp'
         - $ref: '#/components/parameters/fromDeleteTimestamp'
         - $ref: '#/components/parameters/toDeleteTimestamp'
+        - $ref: '#/components/parameters/providerName'
       responses:
         '200':
           description:
@@ -2244,6 +2246,14 @@ components:
         items:
           type: string
           default: createTimestamp:desc
+    providerName:
+      name: name
+      in: query
+      description: Every provider whose name contains this name will be returned
+      required: false
+      schema:
+        type: string
+
     fromCreateTimestamp:
       name: fromCreateTimestamp
       in: query

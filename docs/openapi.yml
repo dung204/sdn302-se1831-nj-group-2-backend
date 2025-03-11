@@ -1310,6 +1310,12 @@ paths:
           schema:
             type: number
             format: float
+        - name: branch
+          in: query
+          description: Every service available in this branch will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Get all services successfully
@@ -1466,6 +1472,12 @@ paths:
           schema:
             type: number
             format: float
+        - name: branch
+          in: query
+          description: Every service available in this branch will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Get all deleted services successfully
@@ -1924,10 +1936,6 @@ components:
           type: string
           example: 123 Main St, Downtown
           nullable: true
-        services:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceDto'
         createTimestamp:
           type: string
           format: date-time
@@ -1957,17 +1965,6 @@ components:
           type: string
           example: 123 Main St, Downtown
           nullable: true
-        services:
-          type: array
-          description: List of service IDs
-          items:
-            type: string
-            format: uuid
-          example:
-            [
-              'aa2158c7-5bd1-477b-8606-7e96ea09e334',
-              'bb3158c7-5bd1-477b-8606-7e96ea09e456',
-            ]
     Role:
       type: string
       enum:
@@ -2242,6 +2239,12 @@ components:
           type: string
           format: uuid
           example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+        branches:
+          type: array
+          items:
+            type: string
+            format: uuid
+            example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
     ComputerDto:
       type: object
       properties:

@@ -35,6 +35,7 @@ class ServiceTableService {
       toDeleteTimestamp,
       fromPrice,
       toPrice,
+      branch,
       ...otherFilters
     } = filter;
     const queryFilter: RootFilterQuery<ServiceTable> = {
@@ -46,6 +47,7 @@ class ServiceTableService {
             ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
           },
       ...(name && { name: { $regex: name, $options: 'i' } }),
+      ...(branch && { branches: { $elemMatch: { $eq: branch } } }),
       ...otherFilters,
     };
 
@@ -125,7 +127,7 @@ class ServiceTableService {
 
     return {
       data: serviceTableDto.parse(
-        await (await newServiceTable.save()).populate('category'),
+        await (await newServiceTable.save()).populate(['category']),
       ),
     };
   }

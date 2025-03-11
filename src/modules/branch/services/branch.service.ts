@@ -12,7 +12,6 @@ import {
 import { CreateBranchDto } from '@/modules/branch/dtos/create-branch.dto';
 import { UpdateBranchDto } from '@/modules/branch/dtos/update-branch.dto';
 import { Branch, BranchModel } from '@/modules/branch/models';
-import { ServiceTableModel } from '@/modules/service-table/models';
 
 class BranchService {
   findAllAndCount(
@@ -111,24 +110,9 @@ class BranchService {
   async createBranch(
     createBranchDto: CreateBranchDto,
   ): Promise<SuccessResponseBody<BranchDto>> {
-    const { services } = createBranchDto;
-
-    for (const service of services) {
-      const isServiceExisted = await ServiceTableModel.exists({
-        _id: service,
-        deleteTimestamp: null,
-      }).exec();
-
-      if (!isServiceExisted) {
-        throw new NotFoundException(
-          `Service with ID: '${service}' is not found.`,
-        );
-      }
-    }
-
     const newBranch = await new BranchModel(createBranchDto).save();
     return {
-      data: branchDto.parse(await newBranch.populate(['services'])),
+      data: branchDto.parse(newBranch),
     };
   }
 
@@ -136,8 +120,6 @@ class BranchService {
     id: string,
     updateBranchDto: UpdateBranchDto,
   ): Promise<SuccessResponseBody<BranchDto>> {
-    const { services } = updateBranchDto;
-
     const updatedBranch = await BranchModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updateBranchDto,
@@ -145,19 +127,6 @@ class BranchService {
         new: true,
       },
     );
-
-    for (const service of services ?? []) {
-      const isServiceExisted = await ServiceTableModel.exists({
-        _id: service,
-        deleteTimestamp: null,
-      }).exec();
-
-      if (!isServiceExisted) {
-        throw new NotFoundException(
-          `Service with ID: '${service}' is not found.`,
-        );
-      }
-    }
 
     if (!updatedBranch) {
       throw new NotFoundException('Branch not found.');

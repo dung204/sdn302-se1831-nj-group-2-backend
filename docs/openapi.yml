@@ -1472,7 +1472,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json nếu không phải form-urlencoded
+          application/json: # Đổi sang application/json nếu không phải form-urlencoded
             schema:
               $ref: '#/components/schemas/CreateComputerDto'
       responses:
@@ -1533,7 +1533,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+          application/json: # Đổi sang application/json cho phù hợp với yêu cầu JSON
             schema:
               $ref: '#/components/schemas/UpdateComputerDto'
       responses:

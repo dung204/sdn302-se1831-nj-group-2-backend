@@ -79,8 +79,13 @@ class ComputerService {
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
       )
-      .populate('position')
-      .populate('provider');
+      .populate([
+        {
+          path: 'position',
+          populate: 'branch',
+        },
+        'provider',
+      ]);
     const computers = await query.exec();
     const total = await ComputerModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
@@ -114,7 +119,13 @@ class ComputerService {
     const computer = await ComputerModel.findOne({
       _id: id,
       deleteTimestamp: null,
-    }).populate(['position', 'provider']);
+    }).populate([
+      {
+        path: 'position',
+        populate: 'branch',
+      },
+      'provider',
+    ]);
 
     if (!computer) {
       throw new NotFoundException('Computer not found.');
@@ -157,7 +168,15 @@ class ComputerService {
     const newComputer = new ComputerModel(createComputerDto);
     return {
       data: computerDto.parse(
-        await (await newComputer.save()).populate(['position', 'provider']),
+        await (
+          await newComputer.save()
+        ).populate([
+          {
+            path: 'position',
+            populate: 'branch',
+          },
+          'provider',
+        ]),
       ),
     };
   }
@@ -204,7 +223,13 @@ class ComputerService {
       { _id: id, deleteTimestamp: null },
       updateComputerDto,
       { new: true },
-    );
+    ).populate([
+      {
+        path: 'position',
+        populate: 'branch',
+      },
+      'provider',
+    ]);
 
     if (!updatedComputer) {
       throw new NotFoundException('Computer not found.');

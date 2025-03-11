@@ -8,7 +8,6 @@ import {
   DeletedProviderDto,
   ProviderDto,
   UpdateProviderDto,
-  deletedProviderDto,
   providerDto,
 } from '@/modules/provider/dtos';
 import { Provider, ProviderModel } from '@/modules/provider/models';
@@ -30,9 +29,31 @@ class ProviderService {
   }: ProviderQueryDto): Promise<
     SuccessResponseBody<ProviderDto[] | DeletedProviderDto[]>
   > {
-    const queryFilter: RootFilterQuery<Provider> = deleted
-      ? { deleteTimestamp: { $ne: null } }
-      : { deleteTimestamp: null };
+    const {
+      fromCreateTimestamp,
+      fromDeleteTimestamp,
+      toCreateTimestamp,
+      toDeleteTimestamp,
+      name,
+    } = filter;
+
+    const queryFilter: RootFilterQuery<Provider> = {
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
+      ...(name && { name: { $regex: name, $options: 'i' } }),
+    };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      queryFilter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
+    }
 
     const query = ProviderModel.find(queryFilter)
       .limit(pageSize)
@@ -49,11 +70,7 @@ class ProviderService {
     const totalPage = Math.ceil(total / pageSize);
 
     return {
-      data: providers.map((provider) =>
-        deleted
-          ? deletedProviderDto.parse(provider)
-          : providerDto.parse(provider),
-      ),
+      data: providers.map((provider) => providerDto.parse(provider)),
       meta: {
         pagination: {
           total,

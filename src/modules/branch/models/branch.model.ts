@@ -13,12 +13,11 @@ const branchSchema = new Schema<Branch>({
   ...baseModelSchemaDefinition,
   name: { type: String, required: true },
   address: { type: String, default: null, required: false },
-  admin: { type: String, ref: 'User', required: true },
   services: { type: [String], ref: 'Service', default: [], required: true },
 });
 
 branchSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
-  this.populate(['admin', 'services']);
+  this.populate(['services']);
   next();
 });
 

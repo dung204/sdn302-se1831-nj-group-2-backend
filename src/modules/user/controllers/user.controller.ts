@@ -65,7 +65,7 @@ class UserController {
       const dto = await createUserDto.parseAsync(req.body);
       res
         .status(HttpStatusCode.CREATED)
-        .json(await userService.createUser(dto));
+        .json(await userService.createUser(dto, req.user!));
     } catch (err) {
       next(err);
     }
@@ -82,7 +82,7 @@ class UserController {
       const dto = updateUserDto.parse(req.body);
       res
         .status(HttpStatusCode.OK)
-        .json(await userService.updateUser(req.params.id!, dto));
+        .json(await userService.updateUser(req.params.id!, dto, req.user!));
     } catch (err) {
       next(err);
     }
@@ -96,7 +96,7 @@ class UserController {
    */
   async softDeleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-      await userService.softDeleteUser(req.params.id!);
+      await userService.softDeleteUser(req.params.id!, req.user!);
       res.status(HttpStatusCode.NO_CONTENT).json();
     } catch (err) {
       next(err);
@@ -113,7 +113,7 @@ class UserController {
     try {
       res
         .status(HttpStatusCode.OK)
-        .json(await userService.restoreUser(req.params.id!));
+        .json(await userService.restoreUser(req.params.id!, req.user!));
     } catch (err) {
       next(err);
     }

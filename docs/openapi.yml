@@ -548,6 +548,7 @@ paths:
           description: Provider not found
       security:
         - JWT: []
+  # USAGE TRACKING API
   /api/v1/usage-tracking:
     get:
       summary: Get all usage tracking records
@@ -584,7 +585,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/CreateUsageTrackingDto'
+              $ref: '#/components/schemas/CreateUsageDto'
       responses:
         '201':
           description: Usage tracking record created successfully
@@ -594,7 +595,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/UsageTrackingDto'
+                    $ref: '#/components/schemas/UsageDto'
         '400':
           description: Bad request
       security:
@@ -621,7 +622,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/UsageTrackingDto'
+                    $ref: '#/components/schemas/UsageDto'
         '404':
           description: Usage tracking record not found
       security:
@@ -643,7 +644,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/UpdateUsageTrackingDto'
+              $ref: '#/components/schemas/UpdateUsageDto'
       responses:
         '200':
           description: Usage tracking record updated successfully
@@ -653,7 +654,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/UsageTrackingDto'
+                    $ref: '#/components/schemas/UsageDto'
         '400':
           description: Bad request
         '404':
@@ -701,7 +702,7 @@ paths:
                       data:
                         type: array
                         items:
-                          $ref: '#/components/schemas/DeletedUsageTrackingDto'
+                          $ref: '#/components/schemas/DeletedUsageDto'
                   - $ref: '#/components/schemas/ResponseMeta'
       security:
         - JWT: []
@@ -727,12 +728,13 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/UsageTrackingDto'
+                    $ref: '#/components/schemas/UsageDto'
         '404':
           description: Usage tracking record not found
       security:
         - JWT: []
 
+  # BRANCHES API
   /api/v1/branches:
     get:
       summary: Get all non-deleted branches
@@ -1896,6 +1898,7 @@ components:
     RefreshSuccessDto:
       allOf:
         - $ref: '#/components/schemas/LoginSuccessDto'
+    # USER SCHEMA
     UserDto:
       type: object
       properties:
@@ -1982,6 +1985,81 @@ components:
               type: string
               example: password
         - $ref: '#/components/schemas/UpdateUserDto'
+    # USAGE-TRACKING SCHEMA
+    UsageDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        user:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        computer:
+          type: string
+          example: bb3158c7-5bd1-477b-8606-7e96ea09e456
+        startTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T00:00:00Z
+        endTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T01:00:00Z
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedUsageDto:
+      allOf:
+        - $ref: '#/components/schemas/UsageDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    UpdateUsageDto:
+      type: object
+      properties:
+        user:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        computer:
+          type: string
+          example: bb3158c7-5bd1-477b-8606-7e96ea09e456
+        startTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T00:00:00Z
+        endTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T01:00:00Z
+    CreateUsageDto:
+      required:
+        - user
+        - computer
+        - startTimeStamp
+        - endTimeStamp
+      allOf: #all of is used to combine the properties of two schemas
+        - type: object
+          properties:
+            user:
+              type: string
+              example: cadd525a-5938-429a-aef1-2fd366f02f64
+            computer:
+              type: string
+              example: 28d52911-c8e0-4755-9ffc-901d901adfae
+            startTimeStamp:
+              type: string
+              example: 2025-03-11T05:47:37.420+00:00
+            endTimeStamp:
+              type: string
+              example: 2025-03-11T05:47:37.420+00:00
+        - $ref: '#/components/schemas/UpdateUsageDto'
+    # BranchDto
     BranchDto:
       type: object
       properties:

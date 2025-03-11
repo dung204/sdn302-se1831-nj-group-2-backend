@@ -15,6 +15,7 @@ import {
   UsageTracking,
   UsageTrackingModel,
 } from '@/modules/usage-tracking/models';
+import { UserModel } from '@/modules/user/models';
 
 class UsageTrackingService {
   // các hàm này sẽ được implement sau -> method: overloading
@@ -30,15 +31,32 @@ class UsageTrackingService {
     pageSize,
     sorting,
     deleted,
+    ...filter
   }: UsageTrackingQueryDto): Promise<
     SuccessResponseBody<UsageTrackingDto[] | DeletedUsageTrackingDto[]>
   > {
+    // handling filter
+    const { user, computer, startTimeStamp, endTimeStamp } = filter;
     //
-    const filter: RootFilterQuery<UsageTracking> = {
+    const queryFilter: RootFilterQuery<UsageTracking> = {
+      // if deleted is false, then deleteTimestamp is null, otherwise deleteTimestamp is not null
       deleteTimestamp: deleted ? { $ne: null } : null,
+      ...(user && { user }), // search with accurate user ~ id
+      ...(computer && { computer }),
+      ...(startTimeStamp && { startTimeStamp }), // search with accurate startTimeStamp
+      ...(endTimeStamp && { endTimeStamp }),
     };
 
-    const query = UsageTrackingModel.find(filter)
+    // search between startTimeStamp and endTimeStamp
+    if (startTimeStamp && endTimeStamp) {
+      // search with startTimeStamp >= startTimeStamp && endTimeStamp <= endTimeStamp
+      queryFilter.startTimeStamp = {
+        $gte: startTimeStamp,
+        $lte: endTimeStamp,
+      };
+    }
+
+    const query = UsageTrackingModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -46,8 +64,9 @@ class UsageTrackingService {
           ({ field, direction }) =>
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
-      );
-
+      )
+      .populate('user')
+      .populate('computer');
     const usageTrackings = await query.exec();
 
     const total = await UsageTrackingModel.countDocuments(filter).exec();
@@ -69,6 +88,7 @@ class UsageTrackingService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }
@@ -113,10 +133,40 @@ class UsageTrackingService {
   async createUsageTracking(
     createUsageTrackingDto: CreateUsageTrackingDto,
   ): Promise<SuccessResponseBody<UsageTrackingDto>> {
-    const newUsageTracking = new UsageTrackingModel(createUsageTrackingDto);
+    // check user
+    if (!createUsageTrackingDto.user) {
+      throw new NotFoundException('User not found.');
+    }
 
+    const user = await UserModel.findById(createUsageTrackingDto.user);
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    // check computer
+    if (!createUsageTrackingDto.computer) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const computer = await UserModel.findById(createUsageTrackingDto.computer);
+    if (!computer) {
+      throw new NotFoundException('User not found.');
+    }
+
+    // create new object usageTracking
+    const newUsageTracking = new UsageTrackingModel(createUsageTrackingDto);
+    // save in db
+    await newUsageTracking.save();
+    const data = await newUsageTracking.populate([
+      'user',
+      {
+        path: 'computer',
+        populate: ['position', 'provider'],
+      },
+    ]);
+    //
     return {
-      data: usageTrackingDto.parse(await newUsageTracking.save()),
+      data: usageTrackingDto.parse(data),
     };
   }
 

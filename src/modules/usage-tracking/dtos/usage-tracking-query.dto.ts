@@ -14,6 +14,11 @@ export const usageTrackingQueryDto = commonQueryDto
       'createTimestamp',
       'deleteTimestamp',
     ]),
+    // filter => user, computer, startTimeStamp, endTimeStamp => optionals
+    user: z.string().optional(),
+    computer: z.string().optional(),
+    startTimeStamp: z.coerce.date().optional(),
+    endTimeStamp: z.coerce.date().optional(),
   })
   .transform((payload) => SortingUtils.transformSorting(payload));
 

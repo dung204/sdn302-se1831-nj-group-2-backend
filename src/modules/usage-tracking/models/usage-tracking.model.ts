@@ -11,8 +11,8 @@ export interface UsageTracking extends BaseModel {
 
 const usageTrackingSchema = new Schema<UsageTracking>({
   ...baseModelSchemaDefinition,
-  user: { type: String, required: true },
-  computer: { type: String, required: true },
+  user: { type: String, ref: 'User', required: true },
+  computer: { type: String, ref: 'Computer', required: true },
   startTimeStamp: { type: Date, required: true },
   endTimeStamp: { type: Date, required: true },
 });

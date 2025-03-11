@@ -157,12 +157,14 @@ class UserService {
     updateUserDto: UpdateUserDto,
     currentUser: User,
   ): Promise<SuccessResponseBody<UserDto>> {
-    const roleToMutate = !updateUserDto.role
-      ? (await this.findOneById(id)).role
-      : updateUserDto.role;
+    if (currentUser._id !== id) {
+      const roleToMutate = !updateUserDto.role
+        ? (await this.findOneById(id)).role
+        : updateUserDto.role;
 
-    if (!this.canMutateUserOfRole(currentUser, roleToMutate)) {
-      throw new ForbiddenException();
+      if (!this.canMutateUserOfRole(currentUser, roleToMutate)) {
+        throw new ForbiddenException();
+      }
     }
 
     const updatedUser = await UserModel.findOneAndUpdate(
@@ -183,6 +185,10 @@ class UserService {
   }
 
   async softDeleteUser(id: string, currentUser: User) {
+    if (currentUser._id === id) {
+      throw new ForbiddenException();
+    }
+
     const roleToMutate = (await this.findOneById(id)).role;
 
     if (!this.canMutateUserOfRole(currentUser, roleToMutate)) {

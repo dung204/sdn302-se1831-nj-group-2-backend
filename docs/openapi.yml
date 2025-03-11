@@ -261,10 +261,11 @@ paths:
     patch:
       summary: Update a user by ID
       description: |-
+        User can always update themselves and:
         - `OWNER` can update users of every roles
         - `BRANCH_ADMIN` can update users of role `STAFF` & `GUEST`
         - `STAFF` can update users of role `GUEST`
-        - `GUEST` cannot update any user
+        - `GUEST` cannot update other users
       tags:
         - users
       parameters:
@@ -300,10 +301,11 @@ paths:
     delete:
       summary: Delete a user by ID
       description: |-
+        User **CAN NOT** delete themselves. Allowed deletion rules:
         - `OWNER` can delete users of every roles
         - `BRANCH_ADMIN` can delete users of role `STAFF` & `GUEST`
         - `STAFF` can delete users of role `GUEST`
-        - `GUEST` cannot delete any user
+        - `GUEST` cannot delete other users
       tags:
         - users
       parameters:

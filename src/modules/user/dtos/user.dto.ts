@@ -6,7 +6,6 @@ import { Role } from '@/modules/user/enums/role.enum';
 const baseUserSchema = z.object({
   _id: z.string(),
   username: z.string(),
-  password: z.string(),
   firstName: z.string(),
   lastName: z.string(),
   address: z.string().nullable(),

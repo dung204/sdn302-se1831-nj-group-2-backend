@@ -34,6 +34,8 @@ tags:
     description: Service categories management
   - name: services
     description: Services management
+  - name: computers
+    description: Computer management
 paths:
   /api/v1/auth/login:
     post:
@@ -330,6 +332,8 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
       responses:
         '200':
           description: Get all providers information successfully (with pagination metadata).
@@ -476,7 +480,6 @@ paths:
           description: Provider not found
       security:
         - JWT: []
-
   /api/v1/providers/deleted:
     get:
       summary: Get all deleted providers
@@ -514,7 +517,6 @@ paths:
           description: Logged in user is not an `OWNER`
       security:
         - JWT: []
-
   /api/v1/providers/restore/{id}:
     patch:
       summary: Restore a deleted provider by ID
@@ -741,6 +743,13 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every branch whose name contains this name will be returned
+          schema:
+            type: string
       responses:
         '200':
           description: Get all branches information successfully (with pagination metadata).
@@ -778,7 +787,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/BranchDto'
         '400':
-          description: Bad request
+          description: Invalid fields in body or `admin` is not a `BRANCH_ADMIN`
       security:
         - JWT: []
   /api/v1/branches/deleted:
@@ -791,6 +800,15 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every branch whose name contains this name will be returned
+          schema:
+            type: string
       responses:
         '200':
           description: Get all deleted branches information successfully (with pagination metadata).
@@ -863,7 +881,7 @@ paths:
                   data:
                     $ref: '#/components/schemas/BranchDto'
         '400':
-          description: Bad request
+          description: Invalid fields in body or `admin` is not a `BRANCH_ADMIN`
         '404':
           description: Branch not found
       security:
@@ -924,6 +942,26 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every position whose name contains this name will be returned
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Every position whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PositionStatus'
+        - name: branch
+          in: query
+          description: Every position whose branch ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Get all positions information successfully (with pagination metadata).
@@ -976,6 +1014,28 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every position whose name contains this name will be returned
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Every position whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PositionStatus'
+        - name: branch
+          in: query
+          description: Every position whose branch ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Get all deleted positions information successfully (with pagination metadata).
@@ -1109,6 +1169,13 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every service category whose name contains this name will be returned
+          schema:
+            type: string
       responses:
         '200':
           description: Get all service categories successfully
@@ -1116,11 +1183,13 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ServiceCategoryDto'
+                allOf:
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ServiceCategoryDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
       security:
         - JWT: []
     post:
@@ -1236,6 +1305,15 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every service category whose name contains this name will be returned
+          schema:
+            type: string
       responses:
         '200':
           description: Get all deleted service categories successfully
@@ -1287,6 +1365,31 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every service whose name contains this name will be returned
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Every service whose category ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: fromPrice
+          in: query
+          description: Every service whose price is greater than or equal to this price will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPrice
+          in: query
+          description: Every service whose price is less than or equal to this price will be returned
+          schema:
+            type: number
+            format: float
       responses:
         '200':
           description: Get all services successfully
@@ -1294,11 +1397,13 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ServiceDto'
+                allOf:
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ServiceDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
       security:
         - JWT: []
     post:
@@ -1414,6 +1519,33 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every service whose name contains this name will be returned
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Every service whose category ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: fromPrice
+          in: query
+          description: Every service whose price is greater than or equal to this price will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPrice
+          in: query
+          description: Every service whose price is less than or equal to this price will be returned
+          schema:
+            type: number
+            format: float
       responses:
         '200':
           description: Get all deleted services successfully
@@ -1453,6 +1585,283 @@ paths:
                     $ref: '#/components/schemas/ServiceDto'
         '404':
           description: Services not found
+      security:
+        - JWT: []
+
+  /api/v1/computers:
+    get:
+      summary: Get all computers
+      description: Retrieve a list of all computers with pagination.
+      tags:
+        - computers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every computer whose name contains this name will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: query
+          description: Every computer whose position ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: provider
+          in: query
+          description: Every computer whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Every computer whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - NORMAL
+                - MAINTENANCE
+                - ERROR
+        - name: fromPricePerHour
+          in: query
+          description: Every computer whose price per hour is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPricePerHour
+          in: query
+          description: Every computer whose price per hour is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: List of computers retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ComputerDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new computer
+      tags:
+        - computers
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded: # Đổi sang application/json nếu không phải form-urlencoded
+            schema:
+              $ref: '#/components/schemas/CreateComputerDto'
+      responses:
+        '201':
+          description: Computer created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Computer name already exists
+      security:
+        - JWT: []
+  /api/v1/computers/{id}:
+    get:
+      summary: Get a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a computer's information by ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+            schema:
+              $ref: '#/components/schemas/UpdateComputerDto'
+      responses:
+        '200':
+          description: Computer updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+
+    delete:
+      summary: Soft delete a computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Computer deleted successfully
+        '404':
+          description: Computer not found
+      security:
+        - JWT: []
+
+  /api/v1/computers/deleted:
+    get:
+      summary: Get all deleted computers
+      description: Retrieve a list of all deleted computers with pagination.
+      tags:
+        - computers
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every computer whose name contains this name will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: position
+          in: query
+          description: Every computer whose position ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: provider
+          in: query
+          description: Every computer whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Every computer whose status is this status will be returned
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - NORMAL
+                - MAINTENANCE
+                - ERROR
+        - name: fromPricePerHour
+          in: query
+          description: Every computer whose price per hour is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: toPricePerHour
+          in: query
+          description: Every computer whose price per hour is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: List of deleted computers retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedComputerDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+
+  /api/v1/computers/restore/{id}:
+    patch:
+      summary: Restore a deleted computer by ID
+      tags:
+        - computers
+      parameters:
+        - name: id
+          in: path
+          description: The computer ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Computer restored successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ComputerDto'
+        '404':
+          description: Computer not found
       security:
         - JWT: []
 components:
@@ -1588,14 +1997,11 @@ components:
           example: 123 Main St, Downtown
           nullable: true
         admin:
-          type: string
-          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
-          description: ID of the admin user
-        # services:
-        #   type: array
-        #   items:
-        #     type: string
-        #   example: ['Gaming', 'Printing', 'Internet']
+          $ref: '#/components/schemas/UserDto'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceDto'
         createTimestamp:
           type: string
           format: date-time
@@ -1614,23 +2020,8 @@ components:
       required:
         - name
         - admin
-      properties:
-        name:
-          type: string
-          example: Downtown Branch
-        address:
-          type: string
-          example: 123 Main St, Downtown
-          nullable: true
-        admin:
-          type: string
-          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
-          description: ID of the admin user
-        services:
-          type: array
-          items:
-            type: string
-          example: ['Gaming', 'Printing', 'Internet']
+      allOf:
+        - $ref: '#/components/schemas/UpdateBranchDto'
     UpdateBranchDto:
       type: object
       properties:
@@ -1647,9 +2038,15 @@ components:
           description: ID of the admin user
         services:
           type: array
+          description: List of service IDs
           items:
             type: string
-          example: ['Gaming', 'Printing', 'Internet']
+            format: uuid
+          example:
+            [
+              'aa2158c7-5bd1-477b-8606-7e96ea09e334',
+              'bb3158c7-5bd1-477b-8606-7e96ea09e456',
+            ]
     Role:
       type: string
       enum:
@@ -1686,7 +2083,6 @@ components:
             description:
               type: string
               example: Mouse
-
     UpdateProviderDto:
       type: object
       properties:
@@ -1775,8 +2171,7 @@ components:
           type: string
           example: Manager
         branch:
-          type: string
-          example: Main Branch
+          $ref: '#/components/schemas/BranchDto'
         status:
           type: string
           example: AVAILABLE
@@ -1907,21 +2302,9 @@ components:
       required:
         - name
         - price
-        - categoryId
-      properties:
-        name:
-          type: string
-          example: Gaming Services
-        description:
-          type: string
-          example: Services related to gaming PCs and consoles
-        price:
-          type: number
-          example: 20000
-        categoryId:
-          type: string
-          format: uuid
-          example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+        - category
+      allOf:
+        - $ref: '#/components/schemas/UpdateServiceDto'
     UpdateServiceDto:
       type: object
       properties:
@@ -1934,10 +2317,123 @@ components:
         price:
           type: number
           example: 25000
-        categoryId:
+        category:
           type: string
           format: uuid
           example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+    ComputerDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Gaming PC
+        position:
+          $ref: '#/components/schemas/PositionDto'
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: NORMAL
+        pricePerHour:
+          type: number
+          example: 15.5
+        cpu:
+          type: string
+          example: Intel Core i7-10700K
+        ram:
+          type: string
+          example: 16GB DDR4
+        storage:
+          type: string
+          example: 1TB SSD
+        provider:
+          $ref: '#/components/schemas/ProviderDto'
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: WORKING
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedComputerDto:
+      allOf:
+        - $ref: '#/components/schemas/ComputerDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    CreateComputerDto:
+      type: object
+      required:
+        - name
+        - position
+        - status
+        - pricePerHour
+        - cpu
+        - ram
+        - storage
+        - provider
+      allOf:
+        - $ref: '#/components/schemas/UpdateComputerDto'
+    UpdateComputerDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming PC
+        position:
+          type: string
+          format: uuid
+          example: 09b19530-f298-4150-8683-96dd1004c1ca
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: ERROR
+        pricePerHour:
+          type: number
+          example: 18.5
+        cpu:
+          type: string
+          example: Updated Intel Core i9-10900K
+        ram:
+          type: string
+          example: Updated 32GB DDR4
+        storage:
+          type: string
+          example: Updated 2TB SSD
+        provider:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        peripherals:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
+              status:
+                type: string
+                example: BROKEN
+    DeviceStatus:
+      type: string
+      enum:
+        - NORMAL
+        - ERROR
+        - MAINTENANCE
+
   parameters:
     page:
       name: page
@@ -1979,7 +2475,7 @@ components:
       name: fromCreateTimestamp
       in: query
       description: Every items created after this timestamp will be returned
-      example: 2021-01-01T00:00:00Z
+      example: 2025-01-01T00:00:00Z
       required: false
       schema:
         type: string
@@ -1988,7 +2484,7 @@ components:
       name: toCreateTimestamp
       in: query
       description: Every items created before this timestamp will be returned
-      example: 2021-01-01T00:00:00Z
+      example: 2025-12-31T00:00:00Z
       required: false
       schema:
         type: string
@@ -1997,7 +2493,7 @@ components:
       name: fromDeleteTimestamp
       in: query
       description: Every items deleted after this timestamp will be returned
-      example: 2021-01-01T00:00:00Z
+      example: 2025-01-01T00:00:00Z
       required: false
       schema:
         type: string
@@ -2006,7 +2502,7 @@ components:
       name: toDeleteTimestamp
       in: query
       description: Every items deleted before this timestamp will be returned
-      example: 2021-01-01T00:00:00Z
+      example: 2025-12-31T00:00:00Z
       required: false
       schema:
         type: string

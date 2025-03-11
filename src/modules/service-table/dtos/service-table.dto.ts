@@ -7,24 +7,22 @@ const baseServiceTableSchema = z.object({
   _id: z.string(),
   name: z.string(),
   price: z.coerce.number(),
-  categoryId: serviceCategoryDto,
+  category: serviceCategoryDto,
   description: z.string(),
   createTimestamp: z.date(),
 });
 
 export const serviceTableDto = baseServiceTableSchema.transform(
-  ({ _id, categoryId, ...data }) => ({
+  ({ _id, ...data }) => ({
     id: _id,
-    category: categoryId,
     ...data,
   }),
 );
 
 export const deletedServiceTableDto = baseServiceTableSchema
   .merge(deleteDto)
-  .transform(({ _id, categoryId, ...data }) => ({
+  .transform(({ _id, ...data }) => ({
     id: _id,
-    category: categoryId,
     ...data,
   }));
 

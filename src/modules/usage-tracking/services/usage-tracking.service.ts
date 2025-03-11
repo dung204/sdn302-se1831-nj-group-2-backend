@@ -2,6 +2,7 @@ import { HydratedDocument, RootFilterQuery, SortOrder } from 'mongoose';
 
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
+import { ComputerModel } from '@/modules/computer/models';
 import {
   CreateUsageTrackingDto,
   DeletedUsageTrackingDto,
@@ -65,8 +66,13 @@ class UsageTrackingService {
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
       )
-      .populate('user')
-      .populate('computer');
+      .populate([
+        'user',
+        {
+          path: 'computer',
+          populate: ['position', 'provider'],
+        },
+      ]);
     const usageTrackings = await query.exec();
 
     const total = await UsageTrackingModel.countDocuments(filter).exec();
@@ -135,7 +141,7 @@ class UsageTrackingService {
   ): Promise<SuccessResponseBody<UsageTrackingDto>> {
     // check user
     if (!createUsageTrackingDto.user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('createUsageTrackingDto.user not found.');
     }
 
     const user = await UserModel.findById(createUsageTrackingDto.user);
@@ -145,16 +151,24 @@ class UsageTrackingService {
 
     // check computer
     if (!createUsageTrackingDto.computer) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException(
+        '!createUsageTrackingDto.computer not found.',
+      );
     }
 
-    const computer = await UserModel.findById(createUsageTrackingDto.computer);
+    const computer = await ComputerModel.findById(
+      createUsageTrackingDto.computer,
+    );
     if (!computer) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('computer not found.');
     }
 
     // create new object usageTracking
     const newUsageTracking = new UsageTrackingModel(createUsageTrackingDto);
+
+    // check createTimeStamp
+    // find in db: startTimeStamp (records in bd) <= newUsageTracking.createTimestamp (new) <= endTimeStamp (records in bd)
+
     // save in db
     await newUsageTracking.save();
     const data = await newUsageTracking.populate([
@@ -180,7 +194,13 @@ class UsageTrackingService {
       {
         new: true,
       },
-    );
+    ).populate([
+      'user',
+      {
+        path: 'computer',
+        populate: ['position', 'provider'],
+      },
+    ]);
 
     if (!updatedUsageTracking) {
       throw new NotFoundException('Usage tracking not found.');
@@ -211,7 +231,13 @@ class UsageTrackingService {
       { _id: id, deleteTimestamp: { $ne: null } },
       { deleteTimestamp: null },
       { new: true },
-    );
+    ).populate([
+      'user',
+      {
+        path: 'computer',
+        populate: ['position', 'provider'],
+      },
+    ]);
 
     if (!updatedUsageTracking) {
       throw new NotFoundException(

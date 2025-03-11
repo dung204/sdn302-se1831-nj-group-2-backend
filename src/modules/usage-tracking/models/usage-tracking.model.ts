@@ -18,6 +18,6 @@ const usageTrackingSchema = new Schema<UsageTracking>({
 });
 
 export const UsageTrackingModel = model<UsageTracking>(
-  'UsageTrackings',
+  'Usage_Trackings',
   usageTrackingSchema,
 );

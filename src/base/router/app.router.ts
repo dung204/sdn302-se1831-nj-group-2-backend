@@ -18,6 +18,6 @@ appRouter.use('/usage-tracking', usageTrackingRouter);
 appRouter.use('/service-categories', serviceCategoryRouter);
 appRouter.use('/services', serviceTableRouter);
 appRouter.use('/branches', branchRouter);
-appRouter.use('/provider', providerRouter);
+appRouter.use('/providers', providerRouter);
 appRouter.use('/positions', positionRouter);
 appRouter.use('/computers', computerRouter);

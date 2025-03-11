@@ -572,7 +572,7 @@ paths:
                       data:
                         type: array
                         items:
-                          $ref: '#/components/schemas/UsageTrackingDto'
+                          $ref: '#/components/schemas/UsageDto'
                   - $ref: '#/components/schemas/ResponseMeta'
       security:
         - JWT: []

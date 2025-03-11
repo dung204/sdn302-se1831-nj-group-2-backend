@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
+import { branchDto } from '@/modules/branch/dtos/branch.dto';
 import { Role } from '@/modules/user/enums/role.enum';
 
 const baseUserSchema = z.object({
@@ -9,6 +10,7 @@ const baseUserSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   address: z.string().nullable(),
+  branch: branchDto.optional(),
   role: z.enum([Role.BRANCH_ADMIN, Role.GUEST, Role.OWNER, Role.STAFF]),
   citizenNumber: z.string().nullable(),
   phoneNumber: z.string().nullable(),

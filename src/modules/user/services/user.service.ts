@@ -41,6 +41,11 @@ class UserService {
       fromDeleteTimestamp,
       toCreateTimestamp,
       toDeleteTimestamp,
+      firstName,
+      lastName,
+      address,
+      role: roles,
+      ...otherFilters
     } = filter;
 
     const queryFilter: RootFilterQuery<User> = {
@@ -51,6 +56,11 @@ class UserService {
             ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
             ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
           },
+      ...(firstName && { firstName: { $regex: firstName, $options: 'i' } }),
+      ...(lastName && { lastName: { $regex: lastName, $options: 'i' } }),
+      ...(address && { address: { $regex: address, $options: 'i' } }),
+      ...(roles && { role: { $in: roles } }),
+      ...otherFilters,
     };
 
     if (fromCreateTimestamp || toCreateTimestamp) {
@@ -135,10 +145,10 @@ class UserService {
       );
     }
 
-    const newUser = new UserModel(createUserDto);
+    const newUser = await new UserModel(createUserDto).save();
 
     return {
-      data: userDto.parse(await newUser.save()),
+      data: userDto.parse(await newUser.populate('branch')),
     };
   }
 

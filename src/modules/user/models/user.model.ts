@@ -10,6 +10,7 @@ export interface User extends BaseModel {
   lastName: string;
   address: string | null;
   role: Role;
+  branch?: string;
   citizenNumber: string | null;
   phoneNumber: string | null;
   availableTime: number | null; // in seconds
@@ -28,6 +29,11 @@ const userSchema = new Schema<User>({
     default: Role.GUEST,
     required: false,
   },
+  branch: {
+    type: String,
+    ref: 'Branch',
+    required: false,
+  },
   citizenNumber: {
     type: String,
     default: null,
@@ -43,6 +49,11 @@ const userSchema = new Schema<User>({
     default: null,
     required: false,
   },
+});
+
+userSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
+  this.populate(['branch']);
+  next();
 });
 
 export const UserModel = model<User>('Users', userSchema);

@@ -24,20 +24,38 @@ class ProviderService {
     page,
     pageSize,
     sorting,
-    name,
     deleted,
-  }: ProviderQueryDto & { deleted?: boolean }): Promise<
-    SuccessResponseBody<ProviderDto[]>
+    ...filter
+  }: ProviderQueryDto): Promise<
+    SuccessResponseBody<ProviderDto[] | DeletedProviderDto[]>
   > {
-    const filter: RootFilterQuery<Provider> = deleted
-      ? { deleteTimestamp: { $ne: null } }
-      : { deleteTimestamp: null };
+    const {
+      fromCreateTimestamp,
+      fromDeleteTimestamp,
+      toCreateTimestamp,
+      toDeleteTimestamp,
+      name,
+    } = filter;
 
-    if (name) {
-      filter.name = { $regex: name, $options: 'i' };
+    const queryFilter: RootFilterQuery<Provider> = {
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
+      ...(name && { name: { $regex: name, $options: 'i' } }),
+    };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      queryFilter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
     }
 
-    const providerQuery = await ProviderModel.find(filter)
+    const query = ProviderModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -47,12 +65,12 @@ class ProviderService {
         ),
       );
 
-    const total = await ProviderModel.countDocuments(filter).exec();
+    const providers = await query.exec();
+    const total = await ProviderModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
-    const providers = await providerQuery;
 
     return {
-      data: providers.map((providers) => providerDto.parse(providers)),
+      data: providers.map((provider) => providerDto.parse(provider)),
       meta: {
         pagination: {
           total,
@@ -63,6 +81,7 @@ class ProviderService {
           hasNextPage: page < totalPage,
         },
         sorting,
+        filter,
       },
     };
   }

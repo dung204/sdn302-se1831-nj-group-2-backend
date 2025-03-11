@@ -1,0 +1,22 @@
+import { z } from 'zod';
+
+import { commonQueryDto } from '@/base/common/dtos';
+import { SortingUtils } from '@/base/common/utils';
+
+export const serviceTableQueryDto = commonQueryDto
+  .extend({
+    sorting: SortingUtils.getSortingValueSchema([
+      'id',
+      'name',
+      'price',
+      'createTimestamp',
+      'deleteTimestamp',
+    ]),
+    name: z.string().optional(),
+    category: z.string().optional(),
+    fromPrice: z.number().optional(),
+    toPrice: z.number().optional(),
+  })
+  .transform((payload) => SortingUtils.transformSorting(payload));
+
+export type ServiceTableQueryDto = z.infer<typeof serviceTableQueryDto>;

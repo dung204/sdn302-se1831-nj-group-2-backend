@@ -134,7 +134,6 @@ class PositionService {
       data: positionDto.parse(
         await newPosition.populate({
           path: 'branch',
-          populate: ['admin', { path: 'services', populate: 'category' }],
         }),
       ),
     };

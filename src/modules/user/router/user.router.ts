@@ -21,30 +21,30 @@ userRouter.get(
 
 userRouter.get(
   '/:id',
-  AuthGuard([Role.BRANCH_ADMIN, Role.OWNER, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   userController.findOneById,
 );
 
 userRouter.post(
   '/',
-  AuthGuard([Role.BRANCH_ADMIN, Role.OWNER]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   userController.createUser,
 );
 
 userRouter.patch(
   '/:id',
-  AuthGuard([Role.BRANCH_ADMIN, Role.OWNER]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   userController.updateUser,
 );
 
 userRouter.delete(
   '/:id',
-  AuthGuard([Role.BRANCH_ADMIN, Role.OWNER]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   userController.softDeleteUser,
 );
 
 userRouter.patch(
   '/restore/:id',
-  AuthGuard([Role.BRANCH_ADMIN, Role.OWNER]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
   userController.restoreUser,
 );

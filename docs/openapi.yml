@@ -145,6 +145,45 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: firstName
+          in: query
+          description: Every user whose first name contains this name will be returned
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          description: Every user whose last name contains this name will be returned
+          schema:
+            type: string
+        - name: address
+          in: query
+          description: Every user whose address contains this address will be returned
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Role'
+        - name: citizenNumber
+          in: query
+          description: Every user whose citizen number is this number will be returned
+          schema:
+            type: string
+        - name: phoneNumber
+          in: query
+          description: Every user whose phone number is this number will be returned
+          schema:
+            type: string
+        - name: branch
+          in: query
+          description: Every user whose branch ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Get all users information successfully (with pagination metadata).
@@ -163,6 +202,11 @@ paths:
         - JWT: []
     post:
       summary: Create a new user
+      description: |-
+        - `OWNER` can create users of every roles
+        - `BRANCH_ADMIN` can create users of role `STAFF` & `GUEST`
+        - `STAFF` can create users of role `GUEST`
+        - `GUEST` cannot create any user
       tags:
         - users
       requestBody:
@@ -216,6 +260,12 @@ paths:
         - JWT: []
     patch:
       summary: Update a user by ID
+      description: |-
+        User can always update themselves and:
+        - `OWNER` can update users of every roles
+        - `BRANCH_ADMIN` can update users of role `STAFF` & `GUEST`
+        - `STAFF` can update users of role `GUEST`
+        - `GUEST` cannot update other users
       tags:
         - users
       parameters:
@@ -250,6 +300,12 @@ paths:
         - JWT: []
     delete:
       summary: Delete a user by ID
+      description: |-
+        User **CAN NOT** delete themselves. Allowed deletion rules:
+        - `OWNER` can delete users of every roles
+        - `BRANCH_ADMIN` can delete users of role `STAFF` & `GUEST`
+        - `STAFF` can delete users of role `GUEST`
+        - `GUEST` cannot delete other users
       tags:
         - users
       parameters:
@@ -279,6 +335,47 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: firstName
+          in: query
+          description: Every user whose first name contains this name will be returned
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          description: Every user whose last name contains this name will be returned
+          schema:
+            type: string
+        - name: address
+          in: query
+          description: Every user whose address contains this address will be returned
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Role'
+        - name: citizenNumber
+          in: query
+          description: Every user whose citizen number is this number will be returned
+          schema:
+            type: string
+        - name: phoneNumber
+          in: query
+          description: Every user whose phone number is this number will be returned
+          schema:
+            type: string
+        - name: branch
+          in: query
+          description: Every user whose branch ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description:
@@ -300,6 +397,11 @@ paths:
   /api/v1/users/restore/{id}:
     patch:
       summary: Restore a deleted user by ID
+      description: |-
+        - `OWNER` can create users of every roles
+        - `BRANCH_ADMIN` can create users of role `STAFF` & `GUEST`
+        - `STAFF` can create users of role `GUEST`
+        - `GUEST` cannot create any user
       tags:
         - users
       parameters:
@@ -322,6 +424,8 @@ paths:
                     $ref: '#/components/schemas/UserDto'
         '404':
           description: User not found,
+      security:
+        - JWT: []
   /api/v1/providers:
     get:
       summary: Get all providers
@@ -1394,6 +1498,12 @@ paths:
           schema:
             type: number
             format: float
+        - name: branch
+          in: query
+          description: Every service available in this branch will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Get all services successfully
@@ -1550,6 +1660,12 @@ paths:
           schema:
             type: number
             format: float
+        - name: branch
+          in: query
+          description: Every service available in this branch will be returned
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Get all deleted services successfully
@@ -1923,6 +2039,8 @@ components:
           nullable: true
         role:
           $ref: '#/components/schemas/Role'
+        branch:
+          $ref: '#/components/schemas/BranchDto'
         citizenNumber:
           type: string
           nullable: true
@@ -1962,6 +2080,12 @@ components:
           example: 123 Main St
         role:
           $ref: '#/components/schemas/Role'
+        branch:
+          type: string
+          format: uuid
+          description: |-
+            - Branch is required for role `BRANCH_ADMIN` & `STAFF`
+            - Branch is not allowed for role `OWNER` & `GUEST`
         citizenNumber:
           type: string
           example: '123456789'
@@ -2076,12 +2200,6 @@ components:
           type: string
           example: 123 Main St, Downtown
           nullable: true
-        admin:
-          $ref: '#/components/schemas/UserDto'
-        services:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceDto'
         createTimestamp:
           type: string
           format: date-time
@@ -2099,7 +2217,6 @@ components:
       type: object
       required:
         - name
-        - admin
       allOf:
         - $ref: '#/components/schemas/UpdateBranchDto'
     UpdateBranchDto:
@@ -2112,21 +2229,6 @@ components:
           type: string
           example: 123 Main St, Downtown
           nullable: true
-        admin:
-          type: string
-          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
-          description: ID of the admin user
-        services:
-          type: array
-          description: List of service IDs
-          items:
-            type: string
-            format: uuid
-          example:
-            [
-              'aa2158c7-5bd1-477b-8606-7e96ea09e334',
-              'bb3158c7-5bd1-477b-8606-7e96ea09e456',
-            ]
     Role:
       type: string
       enum:
@@ -2401,6 +2503,12 @@ components:
           type: string
           format: uuid
           example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
+        branches:
+          type: array
+          items:
+            type: string
+            format: uuid
+            example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
     ComputerDto:
       type: object
       properties:

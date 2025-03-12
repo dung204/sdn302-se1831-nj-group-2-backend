@@ -1,6 +1,5 @@
 import { RootFilterQuery, SortOrder } from 'mongoose';
 
-import { BadRequestException } from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
 import { BranchQueryDto } from '@/modules/branch/dtos';
@@ -13,9 +12,6 @@ import {
 import { CreateBranchDto } from '@/modules/branch/dtos/create-branch.dto';
 import { UpdateBranchDto } from '@/modules/branch/dtos/update-branch.dto';
 import { Branch, BranchModel } from '@/modules/branch/models';
-import { ServiceTableModel } from '@/modules/service-table/models';
-import { Role } from '@/modules/user/enums';
-import { UserModel } from '@/modules/user/models';
 
 class BranchService {
   findAllAndCount(
@@ -114,37 +110,9 @@ class BranchService {
   async createBranch(
     createBranchDto: CreateBranchDto,
   ): Promise<SuccessResponseBody<BranchDto>> {
-    const { admin, services } = createBranchDto;
-
-    const branchAdmin = await UserModel.findOne({
-      _id: admin,
-      deleteTimestamp: null,
-    }).exec();
-
-    if (!branchAdmin) {
-      throw new NotFoundException('Branch Admin not found.');
-    }
-
-    if (branchAdmin.role !== Role.BRANCH_ADMIN) {
-      throw new BadRequestException(`The admin is not a ${Role.BRANCH_ADMIN}.`);
-    }
-
-    for (const service of services) {
-      const isServiceExisted = await ServiceTableModel.exists({
-        _id: service,
-        deleteTimestamp: null,
-      }).exec();
-
-      if (!isServiceExisted) {
-        throw new NotFoundException(
-          `Service with ID: '${service}' is not found.`,
-        );
-      }
-    }
-
     const newBranch = await new BranchModel(createBranchDto).save();
     return {
-      data: branchDto.parse(await newBranch.populate(['admin', 'services'])),
+      data: branchDto.parse(newBranch),
     };
   }
 
@@ -152,21 +120,6 @@ class BranchService {
     id: string,
     updateBranchDto: UpdateBranchDto,
   ): Promise<SuccessResponseBody<BranchDto>> {
-    const { admin, services } = updateBranchDto;
-
-    const branchAdmin = await UserModel.findOne({
-      _id: admin,
-      deleteTimestamp: null,
-    }).exec();
-
-    if (!branchAdmin) {
-      throw new NotFoundException('Branch Admin not found.');
-    }
-
-    if (branchAdmin.role !== Role.BRANCH_ADMIN) {
-      throw new BadRequestException(`The admin is not a ${Role.BRANCH_ADMIN}.`);
-    }
-
     const updatedBranch = await BranchModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updateBranchDto,
@@ -174,19 +127,6 @@ class BranchService {
         new: true,
       },
     );
-
-    for (const service of services ?? []) {
-      const isServiceExisted = await ServiceTableModel.exists({
-        _id: service,
-        deleteTimestamp: null,
-      }).exec();
-
-      if (!isServiceExisted) {
-        throw new NotFoundException(
-          `Service with ID: '${service}' is not found.`,
-        );
-      }
-    }
 
     if (!updatedBranch) {
       throw new NotFoundException('Branch not found.');

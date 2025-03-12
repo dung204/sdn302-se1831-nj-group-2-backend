@@ -34,15 +34,6 @@ export const userQueryDto = commonQueryDto
       .optional(),
     branch: z.string().optional(),
   })
-  .transform((payload) => {
-    const searchTransformed = SearchUtils.transformSearch(payload);
-    const sortingTransformed = SortingUtils.transformSorting(payload);
-
-    return {
-      ...payload,
-      search: searchTransformed.search,
-      sorting: sortingTransformed.sorting,
-    };
-  });
+  .transform((payload) => SortingUtils.transformSorting(payload));
 
 export type UserQueryDto = z.infer<typeof userQueryDto>;

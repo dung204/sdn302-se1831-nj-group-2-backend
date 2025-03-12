@@ -56,9 +56,4 @@ userSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
   next();
 });
 
-userSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
-  this.populate(['branch']);
-  next();
-});
-
 export const UserModel = model<User>('User', userSchema);

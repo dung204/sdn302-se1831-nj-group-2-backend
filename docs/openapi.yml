@@ -436,7 +436,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
-        - $ref: '#/components/parameters/providerName'
+        # - $ref: '#/components/parameters/providerName'
         - $ref: '#/components/parameters/fromCreateTimestamp'
         - $ref: '#/components/parameters/toCreateTimestamp'
       responses:
@@ -600,7 +600,7 @@ paths:
         - $ref: '#/components/parameters/toCreateTimestamp'
         - $ref: '#/components/parameters/fromDeleteTimestamp'
         - $ref: '#/components/parameters/toDeleteTimestamp'
-        - $ref: '#/components/parameters/providerName'
+        # - $ref: '#/components/parameters/providerName'
       responses:
         '200':
           description:

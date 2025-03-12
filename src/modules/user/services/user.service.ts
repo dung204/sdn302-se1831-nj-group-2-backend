@@ -211,25 +211,26 @@ class UserService {
     id: string,
     currentUser: User,
   ): Promise<SuccessResponseBody<UserDto>> {
-    const roleToMutate = (await this.findOneById(id)).role;
+    const userToMutate = await UserModel.findOne({
+      _id: id,
+      deleteTimestamp: { $ne: null },
+    }).exec();
 
-    if (!this.canMutateUserOfRole(currentUser, roleToMutate)) {
-      throw new ForbiddenException();
-    }
-
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { _id: id, deleteTimestamp: { $ne: null } },
-      { deleteTimestamp: null },
-    );
-
-    if (!updatedUser) {
+    if (!userToMutate) {
       throw new NotFoundException(
         'User not found or has been already restored.',
       );
     }
 
+    if (!this.canMutateUserOfRole(currentUser, userToMutate.role)) {
+      throw new ForbiddenException();
+    }
+
+    userToMutate.deleteTimestamp = null;
+    const savedUser = await userToMutate.save();
+
     return {
-      data: userDto.parse(updatedUser),
+      data: userDto.parse(await savedUser.populate('branch')),
     };
   }
 

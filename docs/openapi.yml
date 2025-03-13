@@ -36,6 +36,10 @@ tags:
     description: Services management
   - name: computers
     description: Computer management
+  - name: peripherals
+    description: Peripheral management
+  - name: peripheral-info
+    description: Peripheral info management
 paths:
   /api/v1/auth/login:
     post:
@@ -1672,6 +1676,419 @@ paths:
           description: Computer not found
       security:
         - JWT: []
+  /api/v1/peripherals:
+    get:
+      summary: Get all peripherals
+      description: Retrieve a list of all peripherals with pagination.
+      tags:
+        - peripherals
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every peripheral whose name contains this name will be returned
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Every peripheral whose type matches will be returned
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PeripheralType'
+        - name: status
+          in: query
+          description: Every peripheral whose status matches will be returned
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/DeviceStatus'
+        - name: provider
+          in: query
+          description: Every peripheral whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: computer
+          in: query
+          description: Every peripheral assigned to this computer ID will be returned
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of peripherals retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PeripheralDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new peripheral
+      tags:
+        - peripherals
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePeripheralDto'
+      responses:
+        '201':
+          description: Peripheral created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PeripheralDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Peripheral name already exists
+      security:
+        - JWT: []
+
+  /api/v1/peripherals/{id}:
+    get:
+      summary: Get a peripheral by ID
+      tags:
+        - peripherals
+      parameters:
+        - name: id
+          in: path
+          description: The peripheral ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a peripheral's information by ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PeripheralDto'
+        '404':
+          description: Peripheral not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a peripheral by ID
+      tags:
+        - peripherals
+      parameters:
+        - name: id
+          in: path
+          description: The peripheral ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdatePeripheralDto'
+      responses:
+        '200':
+          description: Peripheral updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PeripheralDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Peripheral not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a peripheral by ID
+      tags:
+        - peripherals
+      parameters:
+        - name: id
+          in: path
+          description: The peripheral ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Peripheral deleted successfully
+        '404':
+          description: Peripheral not found
+      security:
+        - JWT: []
+
+  /api/v1/peripherals/deleted:
+    get:
+      summary: Get all deleted peripherals
+      description: Retrieve a list of all deleted peripherals with pagination.
+      tags:
+        - peripherals
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: name
+          in: query
+          description: Every peripheral whose name contains this name will be returned
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Every peripheral whose type matches will be returned
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PeripheralType'
+        - name: status
+          in: query
+          description: Every peripheral whose status matches will be returned
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/DeviceStatus'
+        - name: provider
+          in: query
+          description: Every peripheral whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of deleted peripherals retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedPeripheralDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+
+  /api/v1/peripherals/restore/{id}:
+    patch:
+      summary: Restore a deleted peripheral by ID
+      tags:
+        - peripherals
+      parameters:
+        - name: id
+          in: path
+          description: The peripheral ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Peripheral restored successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PeripheralDto'
+        '404':
+          description: Peripheral not found
+      security:
+        - JWT: []
+  /api/v1/peripheral-info:
+    get:
+      summary: Get all peripheral info
+      description: Retrieve a list of all peripheral info with pagination.
+      tags:
+        - peripheral-info
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: name
+          in: query
+          description: Every peripheral info whose name contains this name will be returned
+          schema:
+            type: string
+        - name: brand
+          in: query
+          description: Every peripheral info whose brand contains this brand will be returned
+          schema:
+            type: string
+        - name: provider
+          in: query
+          description: Every peripheral info whose provider ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: fromImportPrice
+          in: query
+          description: Every peripheral info whose import price is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: toImportPrice
+          in: query
+          description: Every peripheral info whose import price is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: List of peripheral info retrieved successfully (with pagination metadata).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PeripheralInfoDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new peripheral info
+      tags:
+        - peripheral-info
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreatePeripheralInfoDto'
+      responses:
+        '201':
+          description: Peripheral info created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PeripheralInfoDto'
+        '400':
+          description: Bad request
+        '409':
+          description: Peripheral info name already exists
+      security:
+        - JWT: []
+
+  /api/v1/peripheral-info/{id}:
+    get:
+      summary: Get a peripheral info by ID
+      tags:
+        - peripheral-info
+      parameters:
+        - name: id
+          in: path
+          description: The peripheral info ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get a peripheral info by ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PeripheralInfoDto'
+        '404':
+          description: Peripheral info not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a peripheral info by ID
+      tags:
+        - peripheral-info
+      parameters:
+        - name: id
+          in: path
+          description: The peripheral info ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdatePeripheralInfoDto'
+      responses:
+        '200':
+          description: Peripheral info updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PeripheralInfoDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Peripheral info not found
+      security:
+        - JWT: []
+    delete:
+      summary: Delete a peripheral info by ID
+      tags:
+        - peripheral-info
+      parameters:
+        - name: id
+          in: path
+          description: The peripheral info ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Peripheral info deleted successfully
+        '404':
+          description: Peripheral info not found
+      security:
+        - JWT: []
 components:
   schemas:
     LoginRequestDto:
@@ -2218,6 +2635,188 @@ components:
         - NORMAL
         - ERROR
         - MAINTENANCE
+    PeripheralDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Gaming Mouse
+        type:
+          $ref: '#/components/schemas/PeripheralType'
+          example: MOUSE
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: NORMAL
+        provider:
+          $ref: '#/components/schemas/ProviderDto'
+        computer:
+          $ref: '#/components/schemas/ComputerDto'
+          nullable: true
+        description:
+          type: string
+          example: Logitech G502 gaming mouse
+          nullable: true
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+
+    DeletedPeripheralDto:
+      allOf:
+        - $ref: '#/components/schemas/PeripheralDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+
+    CreatePeripheralDto:
+      type: object
+      required:
+        - name
+        - type
+        - status
+        - provider
+        - brand
+        - importPrice
+      properties:
+        name:
+          type: string
+          example: Gaming Mouse
+        type:
+          $ref: '#/components/schemas/PeripheralType'
+          example: MOUSE
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: NORMAL
+        provider:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        computer:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+          nullable: true
+        description:
+          type: string
+          example: Logitech G502 gaming mouse
+          nullable: true
+        brand:
+          type: string
+          example: Logitech
+        importPrice:
+          type: number
+          example: 120.50
+
+    UpdatePeripheralDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Gaming Mouse
+        type:
+          $ref: '#/components/schemas/PeripheralType'
+          example: KEYBOARD
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: MAINTENANCE
+        provider:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+        computer:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+          nullable: true
+        description:
+          type: string
+          example: Updated Logitech G502 gaming mouse
+          nullable: true
+        brand:
+          type: string
+          example: Logitech
+        importPrice:
+          type: number
+          example: 130.75
+
+    PeripheralType:
+      type: string
+      enum:
+        - KEYBOARD
+        - MOUSE
+        - MONITOR
+        - HEADPHONE
+        - SPEAKER
+        - WEBCAM
+        - OTHER
+    PeripheralInfoDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
+        name:
+          type: string
+          example: Logitech G502
+        brand:
+          type: string
+          example: Logitech
+        importPrice:
+          type: number
+          example: 120.50
+        provider:
+          $ref: '#/components/schemas/ProviderDto'
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+
+    CreatePeripheralInfoDto:
+      type: object
+      required:
+        - name
+        - brand
+        - importPrice
+        - provider
+      properties:
+        name:
+          type: string
+          example: Logitech G502
+        brand:
+          type: string
+          example: Logitech
+        importPrice:
+          type: number
+          example: 120.50
+        provider:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
+
+    UpdatePeripheralInfoDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Logitech G502
+        brand:
+          type: string
+          example: Logitech
+        importPrice:
+          type: number
+          example: 130.75
+        provider:
+          type: string
+          format: uuid
+          example: 8d933f56-3a23-4a11-91f8-123456789abc
 
   parameters:
     page:

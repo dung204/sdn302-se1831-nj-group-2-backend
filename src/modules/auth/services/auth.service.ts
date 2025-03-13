@@ -117,7 +117,7 @@ class AuthService {
     };
   }
 
-  private async blacklistToken(token: string) {
+  async blacklistToken(token: string) {
     const { exp } = JwtUtils.decodeToken(token);
     await redis.getInstance().set(token, this.BLACKLISTED, 'EXAT', exp!);
   }

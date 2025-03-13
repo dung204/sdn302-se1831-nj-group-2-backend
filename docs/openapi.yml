@@ -436,7 +436,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
-        - $ref: '#/components/parameters/providerName'
+        # - $ref: '#/components/parameters/providerName'
         - $ref: '#/components/parameters/fromCreateTimestamp'
         - $ref: '#/components/parameters/toCreateTimestamp'
       responses:
@@ -600,7 +600,7 @@ paths:
         - $ref: '#/components/parameters/toCreateTimestamp'
         - $ref: '#/components/parameters/fromDeleteTimestamp'
         - $ref: '#/components/parameters/toDeleteTimestamp'
-        - $ref: '#/components/parameters/providerName'
+        # - $ref: '#/components/parameters/providerName'
       responses:
         '200':
           description:
@@ -654,7 +654,245 @@ paths:
           description: Provider not found
       security:
         - JWT: []
+  # USAGE TRACKING API
+  /api/v1/usage-tracking:
+    get:
+      summary: Get all usage tracking records
+      tags:
+        - usage-tracking
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: user
+          in: query
+          description: Every usage tracking record whose user ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: computer
+          in: query
+          description: Every usage tracking record whose computer ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: startTimestamp
+          in: query
+          description: Every usage tracking record whose start timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: endTimestamp
+          in: query
+          description: Every usage tracking record whose end timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description:
+            Get all usage tracking records successfully (with pagination
+            metadata)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UsageDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new usage tracking record
+      tags:
+        - usage-tracking
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateUsageDto'
+      responses:
+        '201':
+          description: Usage tracking record created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+  /api/v1/usage-tracking/{id}:
+    get:
+      summary: Get a usage tracking record by ID
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Get usage tracking record successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageDto'
+        '404':
+          description: Usage tracking record not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a usage tracking record by ID
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateUsageDto'
+      responses:
+        '200':
+          description: Usage tracking record updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Usage tracking record not found
+      security:
+        - JWT: []
+    delete:
+      summary: Delete a usage tracking record by ID
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Usage tracking record deleted successfully
+        '404':
+          description: Usage tracking record not found
+      security:
+        - JWT: []
+  /api/v1/usage-tracking/deleted:
+    get:
+      summary: Get all deleted usage tracking records
+      tags:
+        - usage-tracking
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: user
+          in: query
+          description: Every usage tracking record whose user ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: computer
+          in: query
+          description: Every usage tracking record whose computer ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: startTimestamp
+          in: query
+          description: Every usage tracking record whose start timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: endTimestamp
+          in: query
+          description: Every usage tracking record whose end timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Get all deleted usage tracking records successfully (with
+            pagination metadata)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedUsageDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+  /api/v1/usage-tracking/restore/{id}:
+    patch:
+      summary: Restore a deleted usage tracking record
+      tags:
+        - usage-tracking
+      parameters:
+        - name: id
+          in: path
+          description: The usage tracking record ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Usage tracking record restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UsageDto'
+        '404':
+          description: Usage tracking record not found
+      security:
+        - JWT: []
 
+  # BRANCHES API
   /api/v1/branches:
     get:
       summary: Get all non-deleted branches
@@ -1598,7 +1836,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json nếu không phải form-urlencoded
+          application/json: # Đổi sang application/json nếu không phải form-urlencoded
             schema:
               $ref: '#/components/schemas/CreateComputerDto'
       responses:
@@ -1659,7 +1897,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+          application/json: # Đổi sang application/json cho phù hợp với yêu cầu JSON
             schema:
               $ref: '#/components/schemas/UpdateComputerDto'
       responses:
@@ -1830,6 +2068,7 @@ components:
     RefreshSuccessDto:
       allOf:
         - $ref: '#/components/schemas/LoginSuccessDto'
+    # USER SCHEMA
     UserDto:
       type: object
       properties:
@@ -1924,6 +2163,79 @@ components:
               type: string
               example: password
         - $ref: '#/components/schemas/UpdateUserDto'
+    # USAGE-TRACKING SCHEMA
+    UsageDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        user:
+          $ref: '#/components/schemas/UserDto'
+        computer:
+          $ref: '#/components/schemas/ComputerDto'
+        startTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T00:00:00Z
+        endTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T01:00:00Z
+        createTimestamp:
+          type: string
+          format: date-time
+          example: 2021-01-01T00:00:00Z
+    DeletedUsageDto:
+      allOf:
+        - $ref: '#/components/schemas/UsageDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+              example: 2021-01-01T00:00:00Z
+    UpdateUsageDto:
+      type: object
+      properties:
+        user:
+          type: string
+          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+        computer:
+          type: string
+          example: bb3158c7-5bd1-477b-8606-7e96ea09e456
+        startTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T00:00:00Z
+        endTimeStamp:
+          type: string
+          format: date-time
+          example: 2025-01-01T01:00:00Z
+    CreateUsageDto:
+      required:
+        - user
+        - computer
+        - startTimeStamp
+        - endTimeStamp
+      allOf: #all of is used to combine the properties of two schemas
+        - type: object
+          properties:
+            user:
+              type: string
+              example: cadd525a-5938-429a-aef1-2fd366f02f64
+            computer:
+              type: string
+              example: 28d52911-c8e0-4755-9ffc-901d901adfae
+            startTimeStamp:
+              type: string
+              example: 2025-03-11T05:47:37.420+00:00
+            endTimeStamp:
+              type: string
+              example: 2025-03-11T05:47:37.420+00:00
+        - $ref: '#/components/schemas/UpdateUsageDto'
+    # BranchDto
     BranchDto:
       type: object
       properties:
@@ -2119,7 +2431,8 @@ components:
           example: Manager
         branch:
           type: string
-          example: Main Branch
+          format: uuid
+          example: 906bd1f3-da40-471d-be18-682a143c7663
         status:
           $ref: '#/components/schemas/PositionStatus'
     UpdatePositionDto:
@@ -2351,8 +2664,7 @@ components:
                 type: string
                 example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
               status:
-                type: string
-                example: BROKEN
+                $ref: '#/components/schemas/DeviceStatus'
     DeviceStatus:
       type: string
       enum:
@@ -2387,14 +2699,6 @@ components:
         items:
           type: string
           default: createTimestamp:desc
-    providerName:
-      name: name
-      in: query
-      description: Every provider whose name contains this name will be returned
-      required: false
-      schema:
-        type: string
-
     fromCreateTimestamp:
       name: fromCreateTimestamp
       in: query

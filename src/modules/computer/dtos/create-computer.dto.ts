@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { DeviceStatus } from '../enums';
+import { DeviceStatus } from '@/modules/computer/enums';
 
 export const createComputerDto = z.object({
   name: z.string(),
@@ -18,7 +18,11 @@ export const createComputerDto = z.object({
   peripherals: z.array(
     z.object({
       id: z.string(),
-      status: z.string(),
+      status: z.enum([
+        DeviceStatus.ERROR,
+        DeviceStatus.MAINTENANCE,
+        DeviceStatus.NORMAL,
+      ]),
     }),
   ),
 });

@@ -9,13 +9,13 @@ export const userRouter = Router();
 
 userRouter.get(
   '/',
-  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
+  AuthGuard([Role.BRANCH_ADMIN, Role.OWNER, Role.STAFF]),
   userController.findAll,
 );
 
 userRouter.get(
   '/deleted',
-  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
+  AuthGuard([Role.BRANCH_ADMIN, Role.OWNER, Role.STAFF]),
   userController.findAllDeleted,
 );
 

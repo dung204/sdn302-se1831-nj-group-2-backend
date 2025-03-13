@@ -23,7 +23,7 @@ export const computerQueryDto = commonQueryDto
             DeviceStatus.MAINTENANCE,
             DeviceStatus.ERROR,
           ])
-          .transform((value) => [value]),
+          .transform((value) => value.split(',')),
         z.array(
           z.enum([
             DeviceStatus.NORMAL,

@@ -15,7 +15,7 @@ export interface Computer extends BaseModel {
   peripherals: { id: string; status: string }[];
 }
 
-const ComputerSchema = new Schema<Computer>({
+const computerSchema = new Schema<Computer>({
   ...baseModelSchemaDefinition,
   name: { type: String, required: true },
   position: { type: String, ref: 'Position', required: true }, // Tham chiếu Position
@@ -33,4 +33,9 @@ const ComputerSchema = new Schema<Computer>({
   peripherals: [{ id: String, status: String }],
 });
 
-export const ComputerModel = model<Computer>('Computer', ComputerSchema);
+computerSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
+  this.populate(['position', 'provider']);
+  next();
+});
+
+export const ComputerModel = model<Computer>('Computer', computerSchema);

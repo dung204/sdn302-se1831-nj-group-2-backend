@@ -7,6 +7,7 @@ export interface ServiceTable extends BaseModel {
   description: string;
   price: number;
   category: string;
+  branches: string[];
 }
 
 const serviceTableSchema = new Schema<ServiceTable>({
@@ -15,12 +16,13 @@ const serviceTableSchema = new Schema<ServiceTable>({
   description: { type: String, required: true },
   price: { type: Number, required: true },
   category: { type: String, ref: 'ServiceCategory', required: true },
+  branches: { type: [String], ref: 'Branch', default: [], required: true },
 });
 
 serviceTableSchema.pre(
   ['find', 'findOne', 'findOneAndUpdate'],
   function (next) {
-    this.populate('category');
+    this.populate(['category']);
     next();
   },
 );

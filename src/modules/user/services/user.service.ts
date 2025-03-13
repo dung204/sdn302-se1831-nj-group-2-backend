@@ -1,9 +1,14 @@
 import { HydratedDocument, RootFilterQuery, SortOrder } from 'mongoose';
 
-import { ConflictException } from '@/base/common/exceptions';
+import {
+  ConflictException,
+  ForbiddenException,
+} from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
 import { Logger, envVariables } from '@/base/common/utils';
+import { redis } from '@/base/redis';
+import { authService } from '@/modules/auth/services';
 import { PasswordUtils } from '@/modules/auth/utils';
 import { UserQueryDto } from '@/modules/user/dtos';
 import { CreateUserDto } from '@/modules/user/dtos/create-user.dto';
@@ -38,6 +43,11 @@ class UserService {
       fromDeleteTimestamp,
       toCreateTimestamp,
       toDeleteTimestamp,
+      firstName,
+      lastName,
+      address,
+      role: roles,
+      ...otherFilters
     } = filter;
 
     const queryFilter: RootFilterQuery<User> = {
@@ -48,6 +58,11 @@ class UserService {
             ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
             ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
           },
+      ...(firstName && { firstName: { $regex: firstName, $options: 'i' } }),
+      ...(lastName && { lastName: { $regex: lastName, $options: 'i' } }),
+      ...(address && { address: { $regex: address, $options: 'i' } }),
+      ...(roles && { role: { $in: roles } }),
+      ...otherFilters,
     };
 
     if (fromCreateTimestamp || toCreateTimestamp) {
@@ -116,7 +131,12 @@ class UserService {
 
   async createUser(
     createUserDto: CreateUserDto,
+    currentUser: User,
   ): Promise<SuccessResponseBody<UserDto>> {
+    if (!this.canMutateUserOfRole(currentUser, createUserDto.role)) {
+      throw new ForbiddenException();
+    }
+
     const isUserExisted = await UserModel.exists({
       username: createUserDto.username,
     }).exec();
@@ -127,17 +147,28 @@ class UserService {
       );
     }
 
-    const newUser = new UserModel(createUserDto);
+    const newUser = await new UserModel(createUserDto).save();
 
     return {
-      data: userDto.parse(await newUser.save()),
+      data: userDto.parse(await newUser.populate('branch')),
     };
   }
 
   async updateUser(
     id: string,
     updateUserDto: UpdateUserDto,
+    currentUser: User,
   ): Promise<SuccessResponseBody<UserDto>> {
+    if (currentUser._id !== id) {
+      const roleToMutate = !updateUserDto.role
+        ? (await this.findOneById(id)).role
+        : updateUserDto.role;
+
+      if (!this.canMutateUserOfRole(currentUser, roleToMutate)) {
+        throw new ForbiddenException();
+      }
+    }
+
     const updatedUser = await UserModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updateUserDto,
@@ -155,33 +186,60 @@ class UserService {
     };
   }
 
-  async softDeleteUser(id: string) {
+  async softDeleteUser(id: string, currentUser: User) {
+    if (currentUser._id === id) {
+      throw new ForbiddenException();
+    }
+
+    const roleToMutate = (await this.findOneById(id)).role;
+
+    if (!this.canMutateUserOfRole(currentUser, roleToMutate)) {
+      throw new ForbiddenException();
+    }
+
     const updateResult = await UserModel.updateOne(
       { _id: id, deleteTimestamp: null },
       { deleteTimestamp: Date.now() },
     );
 
-    if (updateResult.modifiedCount !== 1) {
+    if (updateResult.modifiedCount === 0) {
       throw new NotFoundException(
         'User not found or has been already deleted.',
       );
     }
+
+    // Check if refresh token exists in Redis -> delete and get it
+    const refreshTokenExists = await redis.getInstance().getdel(id);
+    // If refresh token exists, relocate it from blacklist
+    if (refreshTokenExists) {
+      await authService.blacklistToken(refreshTokenExists);
+    }
   }
 
-  async restoreUser(id: string): Promise<SuccessResponseBody<UserDto>> {
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { _id: id, deleteTimestamp: { $ne: null } },
-      { deleteTimestamp: null },
-    );
+  async restoreUser(
+    id: string,
+    currentUser: User,
+  ): Promise<SuccessResponseBody<UserDto>> {
+    const userToMutate = await UserModel.findOne({
+      _id: id,
+      deleteTimestamp: { $ne: null },
+    }).exec();
 
-    if (!updatedUser) {
+    if (!userToMutate) {
       throw new NotFoundException(
         'User not found or has been already restored.',
       );
     }
 
+    if (!this.canMutateUserOfRole(currentUser, userToMutate.role)) {
+      throw new ForbiddenException();
+    }
+
+    userToMutate.deleteTimestamp = null;
+    const savedUser = await userToMutate.save();
+
     return {
-      data: userDto.parse(updatedUser),
+      data: userDto.parse(await savedUser.populate('branch')),
     };
   }
 
@@ -189,11 +247,11 @@ class UserService {
     try {
       this.logger.info('Inserting initial OWNER...');
 
-      const intialOwnerInfo = {
+      const initialOwnerInfo = {
         username: envVariables.INITIAL_OWNER_USERNAME,
         role: Role.OWNER,
       };
-      const initialOwnerIsExisted = await UserModel.exists(intialOwnerInfo);
+      const initialOwnerIsExisted = await UserModel.exists(initialOwnerInfo);
 
       if (initialOwnerIsExisted) {
         this.logger.info(
@@ -203,7 +261,7 @@ class UserService {
       }
 
       await new UserModel({
-        ...intialOwnerInfo,
+        ...initialOwnerInfo,
         password: await PasswordUtils.hashPassword(
           envVariables.INITIAL_OWNER_PASSWORD,
         ),
@@ -214,6 +272,20 @@ class UserService {
       this.logger.info('Insert initial OWNER to database successfully!');
     } catch (err) {
       this.logger.fatal(err);
+    }
+  }
+
+  // Mutation includes: add, update, delete
+  private canMutateUserOfRole(currentUser: User, roleToMutate: Role) {
+    switch (currentUser.role) {
+      case Role.OWNER:
+        return true;
+      case Role.BRANCH_ADMIN:
+        return [Role.STAFF, Role.GUEST].includes(roleToMutate);
+      case Role.STAFF:
+        return roleToMutate === Role.GUEST;
+      case Role.GUEST:
+        return false;
     }
   }
 }

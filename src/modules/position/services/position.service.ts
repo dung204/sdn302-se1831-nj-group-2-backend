@@ -131,12 +131,7 @@ class PositionService {
     const newPosition = await new PositionModel(createPositionDto).save();
 
     return {
-      data: positionDto.parse(
-        await newPosition.populate({
-          path: 'branch',
-          populate: ['admin', { path: 'services', populate: 'category' }],
-        }),
-      ),
+      data: positionDto.parse(await newPosition.populate('branch')),
     };
   }
 

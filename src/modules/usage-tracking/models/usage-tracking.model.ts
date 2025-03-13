@@ -17,7 +17,16 @@ const usageTrackingSchema = new Schema<UsageTracking>({
   endTimeStamp: { type: Date, required: true },
 });
 
+usageTrackingSchema.pre(
+  ['find', 'findOne', 'findOneAndUpdate'],
+  function (next) {
+    this.populate(['user', 'computer']);
+    next();
+  },
+);
+
 export const UsageTrackingModel = model<UsageTracking>(
-  'Usage_Trackings',
+  'UsageTracking',
   usageTrackingSchema,
+  'usage_tracking',
 );

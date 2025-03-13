@@ -54,7 +54,7 @@ class UsageTrackingController {
     try {
       res
         .status(HttpStatusCode.OK)
-        .json({ data: await usageTrackingService.findOneById(req.params.id!) });
+        .json(await usageTrackingService.findOneById(req.params.id!));
     } catch (err) {
       next(err);
     }

@@ -664,6 +664,32 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: user
+          in: query
+          description: Every usage tracking record whose user ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: computer
+          in: query
+          description: Every usage tracking record whose computer ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: startTimestamp
+          in: query
+          description: Every usage tracking record whose start timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: endTimestamp
+          in: query
+          description: Every usage tracking record whose end timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description:
@@ -795,6 +821,32 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: user
+          in: query
+          description: Every usage tracking record whose user ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: computer
+          in: query
+          description: Every usage tracking record whose computer ID is this ID will be returned
+          schema:
+            type: string
+            format: uuid
+        - name: startTimestamp
+          in: query
+          description: Every usage tracking record whose start timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: endTimestamp
+          in: query
+          description: Every usage tracking record whose end timestamp is equal to this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description: Get all deleted usage tracking records successfully (with
@@ -1784,7 +1836,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json nếu không phải form-urlencoded
+          application/json: # Đổi sang application/json nếu không phải form-urlencoded
             schema:
               $ref: '#/components/schemas/CreateComputerDto'
       responses:
@@ -1845,7 +1897,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+          application/json: # Đổi sang application/json cho phù hợp với yêu cầu JSON
             schema:
               $ref: '#/components/schemas/UpdateComputerDto'
       responses:
@@ -2120,11 +2172,9 @@ components:
           format: uuid
           example: aa2158c7-5bd1-477b-8606-7e96ea09e334
         user:
-          type: string
-          example: aa2158c7-5bd1-477b-8606-7e96ea09e334
+          $ref: '#/components/schemas/UserDto'
         computer:
-          type: string
-          example: bb3158c7-5bd1-477b-8606-7e96ea09e456
+          $ref: '#/components/schemas/ComputerDto'
         startTimeStamp:
           type: string
           format: date-time
@@ -2381,7 +2431,8 @@ components:
           example: Manager
         branch:
           type: string
-          example: Main Branch
+          format: uuid
+          example: 906bd1f3-da40-471d-be18-682a143c7663
         status:
           $ref: '#/components/schemas/PositionStatus'
     UpdatePositionDto:
@@ -2613,8 +2664,7 @@ components:
                 type: string
                 example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
               status:
-                type: string
-                example: BROKEN
+                $ref: '#/components/schemas/DeviceStatus'
     DeviceStatus:
       type: string
       enum:

@@ -1,4 +1,4 @@
-import { HydratedDocument, RootFilterQuery, SortOrder } from 'mongoose';
+import { RootFilterQuery, SortOrder } from 'mongoose';
 
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
@@ -37,16 +37,38 @@ class UsageTrackingService {
     SuccessResponseBody<UsageTrackingDto[] | DeletedUsageTrackingDto[]>
   > {
     // handling filter
-    const { user, computer, startTimeStamp, endTimeStamp } = filter;
+    const {
+      user,
+      computer,
+      startTimeStamp,
+      endTimeStamp,
+      fromCreateTimestamp,
+      toCreateTimestamp,
+      fromDeleteTimestamp,
+      toDeleteTimestamp,
+    } = filter;
     //
     const queryFilter: RootFilterQuery<UsageTracking> = {
       // if deleted is false, then deleteTimestamp is null, otherwise deleteTimestamp is not null
-      deleteTimestamp: deleted ? { $ne: null } : null,
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
       ...(user && { user }), // search with accurate user ~ id
       ...(computer && { computer }),
       ...(startTimeStamp && { startTimeStamp }), // search with accurate startTimeStamp
       ...(endTimeStamp && { endTimeStamp }),
     };
+
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      queryFilter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
+    }
 
     // search between startTimeStamp and endTimeStamp
     if (startTimeStamp && endTimeStamp) {
@@ -65,14 +87,8 @@ class UsageTrackingService {
           ({ field, direction }) =>
             [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
         ),
-      )
-      .populate([
-        'user',
-        {
-          path: 'computer',
-          populate: ['position', 'provider'],
-        },
-      ]);
+      );
+
     const usageTrackings = await query.exec();
 
     const total = await UsageTrackingModel.countDocuments(filter).exec();
@@ -105,62 +121,36 @@ class UsageTrackingService {
 
   async findOneById(
     id: string,
-  ): Promise<SuccessResponseBody<HydratedDocument<UsageTracking>>> {
+  ): Promise<SuccessResponseBody<UsageTrackingDto>> {
     const usageTracking = await UsageTrackingModel.findOne({
       _id: id,
       deleteTimestamp: null,
     });
 
     if (!usageTracking) {
-      throw new NotFoundException('usageTracking not found.');
+      throw new NotFoundException('Usage tracking not found.');
     }
 
     return {
-      data: usageTracking,
+      data: usageTrackingDto.parse(usageTracking),
     };
-  }
-
-  async findOneByUserName() {
-    // TODO: Implement this function
-  }
-
-  async findOneByComputerName() {
-    // TODO: Implement this function
-  }
-
-  async findOneByUserId() {
-    // TODO: Implement this function
-  }
-  async findOneByComputerId() {
-    // TODO: Implement this function
   }
 
   //  CUD: create, update, delete
   async createUsageTracking(
     createUsageTrackingDto: CreateUsageTrackingDto,
   ): Promise<SuccessResponseBody<UsageTrackingDto>> {
-    // check user
-    if (!createUsageTrackingDto.user) {
-      throw new NotFoundException('createUsageTrackingDto.user not found.');
-    }
-
     const user = await UserModel.findById(createUsageTrackingDto.user);
     if (!user) {
       throw new NotFoundException('User not found.');
     }
 
     // check computer
-    if (!createUsageTrackingDto.computer) {
-      throw new NotFoundException(
-        '!createUsageTrackingDto.computer not found.',
-      );
-    }
-
     const computer = await ComputerModel.findById(
       createUsageTrackingDto.computer,
     );
     if (!computer) {
-      throw new NotFoundException('computer not found.');
+      throw new NotFoundException('Computer not found.');
     }
 
     // create new object usageTracking
@@ -171,13 +161,7 @@ class UsageTrackingService {
 
     // save in db
     await newUsageTracking.save();
-    const data = await newUsageTracking.populate([
-      'user',
-      {
-        path: 'computer',
-        populate: ['position', 'provider'],
-      },
-    ]);
+    const data = await newUsageTracking.populate(['user', 'computer']);
     //
     return {
       data: usageTrackingDto.parse(data),
@@ -188,19 +172,29 @@ class UsageTrackingService {
     id: string,
     updateUsageTrackingDto: UpdateUsageTrackingDto,
   ): Promise<SuccessResponseBody<UsageTrackingDto>> {
+    const { user, computer } = updateUsageTrackingDto;
+
+    if (
+      user &&
+      !(await UserModel.exists({ _id: user, deleteTimestamp: null }))
+    ) {
+      throw new NotFoundException('User not found.');
+    }
+
+    if (
+      computer &&
+      !(await ComputerModel.exists({ _id: computer, deleteTimestamp: null }))
+    ) {
+      throw new NotFoundException('Computer not found.');
+    }
+
     const updatedUsageTracking = await UsageTrackingModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updateUsageTrackingDto,
       {
         new: true,
       },
-    ).populate([
-      'user',
-      {
-        path: 'computer',
-        populate: ['position', 'provider'],
-      },
-    ]);
+    );
 
     if (!updatedUsageTracking) {
       throw new NotFoundException('Usage tracking not found.');
@@ -231,13 +225,7 @@ class UsageTrackingService {
       { _id: id, deleteTimestamp: { $ne: null } },
       { deleteTimestamp: null },
       { new: true },
-    ).populate([
-      'user',
-      {
-        path: 'computer',
-        populate: ['position', 'provider'],
-      },
-    ]);
+    );
 
     if (!updatedUsageTracking) {
       throw new NotFoundException(

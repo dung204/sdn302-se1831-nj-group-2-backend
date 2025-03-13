@@ -2,27 +2,24 @@ import { RootFilterQuery, SortOrder } from 'mongoose';
 
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
-import { PeripheralInfoQueryDto } from '@/modules/peripheral-info/dtos';
-import { CreatePeripheralInfoDto } from '@/modules/peripheral-info/dtos/create-peripheral-info.dto';
+import { PeripheralInfoQueryDto } from '@/modules/peripheral/dtos';
+import { CreatePeripheralDto } from '@/modules/peripheral/dtos/create-peripheral.dto';
 import {
-  DeletedPeripheralInfoDto,
-  PeripheralInfoDto,
-  deletedPeripheralInfoDto,
-  peripheralInfoDto,
-} from '@/modules/peripheral-info/dtos/peripheral-info.dto';
-import { UpdatePeripheralInfoDto } from '@/modules/peripheral-info/dtos/update-peripheral-info.dto';
-import {
-  PeripheralInfo,
-  PeripheralInfoModel,
-} from '@/modules/peripheral-info/models';
+  DeletedPeripheralDto,
+  PeripheralDto,
+  deletedPeripheralDto,
+  peripheralDto,
+} from '@/modules/peripheral/dtos/peripheral.dto';
+import { UpdatePeripheralDto } from '@/modules/peripheral/dtos/update-peripheral.dto';
+import { Peripheral, PeripheralModel } from '@/modules/peripheral/models';
 
-class PeripheralInfoService {
+class PeripheralService {
   findAllAndCount(
     commonQueryDto: PeripheralInfoQueryDto & { deleted?: false },
-  ): Promise<SuccessResponseBody<PeripheralInfoDto[]>>;
+  ): Promise<SuccessResponseBody<PeripheralDto[]>>;
   findAllAndCount(
     commonQueryDto: PeripheralInfoQueryDto & { deleted: true },
-  ): Promise<SuccessResponseBody<DeletedPeripheralInfoDto[]>>;
+  ): Promise<SuccessResponseBody<DeletedPeripheralDto[]>>;
   async findAllAndCount({
     page,
     pageSize,
@@ -31,9 +28,9 @@ class PeripheralInfoService {
     name,
     ...rest
   }: PeripheralInfoQueryDto): Promise<
-    SuccessResponseBody<PeripheralInfoDto[] | DeletedPeripheralInfoDto[]>
+    SuccessResponseBody<PeripheralDto[] | DeletedPeripheralDto[]>
   > {
-    const filter: RootFilterQuery<PeripheralInfo> = {
+    const filter: RootFilterQuery<Peripheral> = {
       deleteTimestamp: deleted ? { $ne: null } : null,
       ...rest,
     };
@@ -42,7 +39,7 @@ class PeripheralInfoService {
       filter.name = { $regex: name, $options: 'i' };
     }
 
-    const query = PeripheralInfoModel.find(filter)
+    const query = PeripheralModel.find(filter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -54,14 +51,14 @@ class PeripheralInfoService {
 
     const peripheralInfos = await query.exec();
 
-    const total = await PeripheralInfoModel.countDocuments(filter).exec();
+    const total = await PeripheralModel.countDocuments(filter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
       data: peripheralInfos.map((peripheralInfo) =>
         deleted
-          ? deletedPeripheralInfoDto.parse(peripheralInfo)
-          : peripheralInfoDto.parse(peripheralInfo),
+          ? deletedPeripheralDto.parse(peripheralInfo)
+          : peripheralDto.parse(peripheralInfo),
       ),
       meta: {
         pagination: {
@@ -82,10 +79,8 @@ class PeripheralInfoService {
     return this.findAllAndCount({ ...peripheralInfoQueryDto, deleted: true });
   }
 
-  async findOneById(
-    id: string,
-  ): Promise<SuccessResponseBody<PeripheralInfoDto>> {
-    const peripheralInfo = await PeripheralInfoModel.findOne({
+  async findOneById(id: string): Promise<SuccessResponseBody<PeripheralDto>> {
+    const peripheralInfo = await PeripheralModel.findOne({
       _id: id,
       deleteTimestamp: null,
     });
@@ -95,24 +90,24 @@ class PeripheralInfoService {
     }
 
     return {
-      data: peripheralInfoDto.parse(peripheralInfo),
+      data: peripheralDto.parse(peripheralInfo),
     };
   }
 
   async createPeripheralInfo(
-    createPeripheralInfoDto: CreatePeripheralInfoDto,
-  ): Promise<SuccessResponseBody<PeripheralInfoDto>> {
-    const newPeripheralInfo = new PeripheralInfoModel(createPeripheralInfoDto);
+    createPeripheralInfoDto: CreatePeripheralDto,
+  ): Promise<SuccessResponseBody<PeripheralDto>> {
+    const newPeripheralInfo = new PeripheralModel(createPeripheralInfoDto);
     return {
-      data: peripheralInfoDto.parse(await newPeripheralInfo.save()),
+      data: peripheralDto.parse(await newPeripheralInfo.save()),
     };
   }
 
   async updatePeripheralInfo(
     id: string,
-    updatePeripheralInfoDto: UpdatePeripheralInfoDto,
-  ): Promise<SuccessResponseBody<PeripheralInfoDto>> {
-    const updatedPeripheralInfo = await PeripheralInfoModel.findOneAndUpdate(
+    updatePeripheralInfoDto: UpdatePeripheralDto,
+  ): Promise<SuccessResponseBody<PeripheralDto>> {
+    const updatedPeripheralInfo = await PeripheralModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
       updatePeripheralInfoDto,
       {
@@ -125,12 +120,12 @@ class PeripheralInfoService {
     }
 
     return {
-      data: peripheralInfoDto.parse(updatedPeripheralInfo),
+      data: peripheralDto.parse(updatedPeripheralInfo),
     };
   }
 
   async softDeletePeripheralInfo(id: string) {
-    const updateResult = await PeripheralInfoModel.updateOne(
+    const updateResult = await PeripheralModel.updateOne(
       { _id: id, deleteTimestamp: null },
       { deleteTimestamp: Date.now() },
     );
@@ -144,8 +139,8 @@ class PeripheralInfoService {
 
   async restorePeripheralInfo(
     id: string,
-  ): Promise<SuccessResponseBody<PeripheralInfoDto>> {
-    const updatedPeripheralInfo = await PeripheralInfoModel.findOneAndUpdate(
+  ): Promise<SuccessResponseBody<PeripheralDto>> {
+    const updatedPeripheralInfo = await PeripheralModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: { $ne: null } },
       { deleteTimestamp: null },
     );
@@ -157,9 +152,9 @@ class PeripheralInfoService {
     }
 
     return {
-      data: peripheralInfoDto.parse(updatedPeripheralInfo),
+      data: peripheralDto.parse(updatedPeripheralInfo),
     };
   }
 }
 
-export const peripheralInfoService = new PeripheralInfoService();
+export const peripheralService = new PeripheralService();

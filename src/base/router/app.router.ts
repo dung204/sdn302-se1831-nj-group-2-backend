@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { authRouter } from '@/modules/auth/routers';
 import { branchRouter } from '@/modules/branch/router';
 import { computerRouter } from '@/modules/computer/router';
-import { peripheralInfoRouter } from '@/modules/peripheral-info/router';
+import { peripheralRouter } from '@/modules/peripheral/router';
 import { positionRouter } from '@/modules/position/router';
 import { providerRouter } from '@/modules/provider/router';
 import { serviceCategoryRouter } from '@/modules/service-category/router';
@@ -20,4 +20,4 @@ appRouter.use('/branches', branchRouter);
 appRouter.use('/providers', providerRouter);
 appRouter.use('/positions', positionRouter);
 appRouter.use('/computers', computerRouter);
-appRouter.use('/peripherals', peripheralInfoRouter); // Changed from '/peripheral-info' to '/peripherals'
+appRouter.use('/peripherals', peripheralRouter);

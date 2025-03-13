@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { commonQueryDto } from '@/base/common/dtos';
 import { SortingUtils } from '@/base/common/utils';
 
-export const peripheralInfoQueryDto = commonQueryDto
+export const peripheralQueryDto = commonQueryDto
   .extend({
     name: z.string().optional(),
     brand: z.string().optional(),
@@ -20,4 +20,4 @@ export const peripheralInfoQueryDto = commonQueryDto
   })
   .transform((payload) => SortingUtils.transformSorting(payload));
 
-export type PeripheralInfoQueryDto = z.infer<typeof peripheralInfoQueryDto>;
+export type PeripheralInfoQueryDto = z.infer<typeof peripheralQueryDto>;

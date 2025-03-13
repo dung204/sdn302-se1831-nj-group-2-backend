@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { deleteDto } from '@/base/common/dtos';
 import { providerDto } from '@/modules/provider/dtos/provider.dto';
 
-const basePeripheralInfoSchema = z.object({
+const basePeripheralSchema = z.object({
   _id: z.string(),
   name: z.string(),
   brand: z.string(),
@@ -12,20 +12,20 @@ const basePeripheralInfoSchema = z.object({
   createTimestamp: z.date(),
 });
 
-export const peripheralInfoDto = basePeripheralInfoSchema.transform(
+export const peripheralDto = basePeripheralSchema.transform(
   ({ _id, ...data }) => ({
     id: _id,
     ...data,
   }),
 );
 
-export const deletedPeripheralInfoDto = basePeripheralInfoSchema
+export const deletedPeripheralDto = basePeripheralSchema
   .merge(deleteDto)
   .transform(({ _id, ...data }) => ({
     id: _id,
     ...data,
   }));
 
-export type PeripheralInfoDto = z.infer<typeof peripheralInfoDto>;
+export type PeripheralDto = z.infer<typeof peripheralDto>;
 
-export type DeletedPeripheralInfoDto = z.infer<typeof deletedPeripheralInfoDto>;
+export type DeletedPeripheralDto = z.infer<typeof deletedPeripheralDto>;

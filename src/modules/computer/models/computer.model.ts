@@ -12,7 +12,7 @@ export interface Computer extends BaseModel {
   ram: string;
   storage: string;
   provider: string;
-  peripherals: { id: string; status: string }[];
+  peripherals: { _id: string; status: string }[];
 }
 
 const computerSchema = new Schema<Computer>({
@@ -30,11 +30,21 @@ const computerSchema = new Schema<Computer>({
   ram: { type: String, required: true },
   storage: { type: String, required: true },
   provider: { type: String, ref: 'Provider', required: true }, // Tham chiếu Provider
-  peripherals: [{ id: String, status: String }],
+  peripherals: [
+    {
+      _id: { type: String, ref: 'Peripheral', required: true },
+      status: {
+        type: String,
+        enum: DeviceStatus,
+        default: DeviceStatus.NORMAL,
+        required: true,
+      },
+    },
+  ],
 });
 
 computerSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
-  this.populate(['position', 'provider']);
+  this.populate(['position', 'provider', 'peripherals._id']);
   next();
 });
 

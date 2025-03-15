@@ -8,6 +8,12 @@ export const peripheralQueryDto = commonQueryDto
     name: z.string().optional(),
     brand: z.string().optional(),
     provider: z.string().optional(),
+    type: z
+      .union([
+        z.string().transform((value) => value.split(',')),
+        z.array(z.string()),
+      ])
+      .optional(),
     sorting: SortingUtils.getSortingValueSchema([
       'id',
       'name',
@@ -20,4 +26,4 @@ export const peripheralQueryDto = commonQueryDto
   })
   .transform((payload) => SortingUtils.transformSorting(payload));
 
-export type PeripheralInfoQueryDto = z.infer<typeof peripheralQueryDto>;
+export type PeripheralQueryDto = z.infer<typeof peripheralQueryDto>;

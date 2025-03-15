@@ -1,14 +1,16 @@
 import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
-import { providerDto } from '@/modules/provider/dtos/provider.dto';
+import { PeripheralType } from '@/modules/peripheral/enums';
+import { providerDto } from '@/modules/provider/dtos';
 
-const basePeripheralSchema = z.object({
+export const basePeripheralSchema = z.object({
   _id: z.string(),
   name: z.string(),
   brand: z.string(),
+  type: z.nativeEnum(PeripheralType),
   importPrice: z.number(),
-  provider: z.string().or(providerDto),
+  provider: providerDto,
   createTimestamp: z.date(),
 });
 

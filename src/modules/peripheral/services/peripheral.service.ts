@@ -2,7 +2,7 @@ import { RootFilterQuery, SortOrder } from 'mongoose';
 
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
-import { PeripheralInfoQueryDto } from '@/modules/peripheral/dtos';
+import { PeripheralQueryDto } from '@/modules/peripheral/dtos';
 import { CreatePeripheralDto } from '@/modules/peripheral/dtos/create-peripheral.dto';
 import {
   DeletedPeripheralDto,
@@ -12,34 +12,57 @@ import {
 } from '@/modules/peripheral/dtos/peripheral.dto';
 import { UpdatePeripheralDto } from '@/modules/peripheral/dtos/update-peripheral.dto';
 import { Peripheral, PeripheralModel } from '@/modules/peripheral/models';
+import { ProviderModel } from '@/modules/provider/models';
 
 class PeripheralService {
   findAllAndCount(
-    commonQueryDto: PeripheralInfoQueryDto & { deleted?: false },
+    commonQueryDto: PeripheralQueryDto & { deleted?: false },
   ): Promise<SuccessResponseBody<PeripheralDto[]>>;
   findAllAndCount(
-    commonQueryDto: PeripheralInfoQueryDto & { deleted: true },
+    commonQueryDto: PeripheralQueryDto & { deleted: true },
   ): Promise<SuccessResponseBody<DeletedPeripheralDto[]>>;
   async findAllAndCount({
     page,
     pageSize,
     sorting,
     deleted,
-    name,
-    ...rest
-  }: PeripheralInfoQueryDto): Promise<
+    ...filter
+  }: PeripheralQueryDto): Promise<
     SuccessResponseBody<PeripheralDto[] | DeletedPeripheralDto[]>
   > {
-    const filter: RootFilterQuery<Peripheral> = {
-      deleteTimestamp: deleted ? { $ne: null } : null,
-      ...rest,
+    const {
+      name,
+      brand,
+      type,
+      fromCreateTimestamp,
+      toCreateTimestamp,
+      fromDeleteTimestamp,
+      toDeleteTimestamp,
+      ...otherFilters
+    } = filter;
+
+    const queryFilter: RootFilterQuery<Peripheral> = {
+      deleteTimestamp: !deleted
+        ? null
+        : {
+            $ne: null,
+            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+          },
+      ...(name && { name: { $regex: name, $options: 'i' } }),
+      ...(brand && { brand: { $regex: brand, $options: 'i' } }),
+      ...(type && { type: { $in: type } }),
+      ...otherFilters,
     };
 
-    if (name) {
-      filter.name = { $regex: name, $options: 'i' };
+    if (fromCreateTimestamp || toCreateTimestamp) {
+      queryFilter.createTimestamp = {
+        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+      };
     }
 
-    const query = PeripheralModel.find(filter)
+    const query = PeripheralModel.find(queryFilter)
       .limit(pageSize)
       .skip((page - 1) * pageSize)
       .sort(
@@ -51,7 +74,7 @@ class PeripheralService {
 
     const peripheralInfos = await query.exec();
 
-    const total = await PeripheralModel.countDocuments(filter).exec();
+    const total = await PeripheralModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
     return {
@@ -75,7 +98,7 @@ class PeripheralService {
     };
   }
 
-  async findAllDeletedAndCount(peripheralInfoQueryDto: PeripheralInfoQueryDto) {
+  async findAllDeletedAndCount(peripheralInfoQueryDto: PeripheralQueryDto) {
     return this.findAllAndCount({ ...peripheralInfoQueryDto, deleted: true });
   }
 
@@ -94,37 +117,61 @@ class PeripheralService {
     };
   }
 
-  async createPeripheralInfo(
-    createPeripheralInfoDto: CreatePeripheralDto,
+  async createPeripheral(
+    createPeripheralDto: CreatePeripheralDto,
   ): Promise<SuccessResponseBody<PeripheralDto>> {
-    const newPeripheralInfo = new PeripheralModel(createPeripheralInfoDto);
+    const { provider } = createPeripheralDto;
+
+    const isProviderExisted = await ProviderModel.exists({
+      _id: provider,
+      deleteTimestamp: null,
+    });
+    if (!isProviderExisted) {
+      throw new NotFoundException('Provider not found.');
+    }
+
+    const newPeripheralInfo = await new PeripheralModel(
+      createPeripheralDto,
+    ).save();
     return {
-      data: peripheralDto.parse(await newPeripheralInfo.save()),
+      data: peripheralDto.parse(await newPeripheralInfo.populate('provider')),
     };
   }
 
-  async updatePeripheralInfo(
+  async updatePeripheral(
     id: string,
-    updatePeripheralInfoDto: UpdatePeripheralDto,
+    updatePeripheralDto: UpdatePeripheralDto,
   ): Promise<SuccessResponseBody<PeripheralDto>> {
-    const updatedPeripheralInfo = await PeripheralModel.findOneAndUpdate(
+    const { provider } = updatePeripheralDto;
+
+    if (provider) {
+      const isProviderExisted = await ProviderModel.exists({
+        _id: provider,
+        deleteTimestamp: null,
+      });
+      if (!isProviderExisted) {
+        throw new NotFoundException('Provider not found.');
+      }
+    }
+
+    const updatedPeripheral = await PeripheralModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: null },
-      updatePeripheralInfoDto,
+      updatePeripheralDto,
       {
         new: true,
       },
     );
 
-    if (!updatedPeripheralInfo) {
+    if (!updatedPeripheral) {
       throw new NotFoundException('Peripheral Info not found.');
     }
 
     return {
-      data: peripheralDto.parse(updatedPeripheralInfo),
+      data: peripheralDto.parse(updatedPeripheral),
     };
   }
 
-  async softDeletePeripheralInfo(id: string) {
+  async softDeletePeripheral(id: string) {
     const updateResult = await PeripheralModel.updateOne(
       { _id: id, deleteTimestamp: null },
       { deleteTimestamp: Date.now() },
@@ -137,22 +184,22 @@ class PeripheralService {
     }
   }
 
-  async restorePeripheralInfo(
+  async restorePeripheral(
     id: string,
   ): Promise<SuccessResponseBody<PeripheralDto>> {
-    const updatedPeripheralInfo = await PeripheralModel.findOneAndUpdate(
+    const updatedPeripheral = await PeripheralModel.findOneAndUpdate(
       { _id: id, deleteTimestamp: { $ne: null } },
       { deleteTimestamp: null },
     );
 
-    if (!updatedPeripheralInfo) {
+    if (!updatedPeripheral) {
       throw new NotFoundException(
         'Peripheral Info not found or has been already restored.',
       );
     }
 
     return {
-      data: peripheralDto.parse(updatedPeripheralInfo),
+      data: peripheralDto.parse(updatedPeripheral),
     };
   }
 }

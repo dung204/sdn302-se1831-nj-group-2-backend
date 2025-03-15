@@ -5,26 +5,19 @@ import { DeviceStatus } from '@/modules/computer/enums';
 export const createComputerDto = z.object({
   name: z.string(),
   position: z.string(),
-  status: z.enum([
-    DeviceStatus.NORMAL,
-    DeviceStatus.MAINTENANCE,
-    DeviceStatus.ERROR,
-  ]),
+  status: z.nativeEnum(DeviceStatus),
   pricePerHour: z.coerce.number(),
   cpu: z.string(),
   ram: z.string(),
   storage: z.string(),
   provider: z.string(),
-  peripherals: z.array(
-    z.object({
-      id: z.string(),
-      status: z.enum([
-        DeviceStatus.ERROR,
-        DeviceStatus.MAINTENANCE,
-        DeviceStatus.NORMAL,
-      ]),
-    }),
-  ),
+  peripherals: z
+    .union([
+      z.string().transform((value) => value.split(',')),
+      z.array(z.string()),
+    ])
+    .optional()
+    .default([]),
 });
 
-export type CreateComputerDto = z.input<typeof createComputerDto>;
+export type CreateComputerDto = z.infer<typeof createComputerDto>;

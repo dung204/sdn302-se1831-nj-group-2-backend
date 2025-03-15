@@ -68,7 +68,7 @@ class PeripheralController {
       const dto = createPeripheralDto.parse(req.body);
       res
         .status(HttpStatusCode.CREATED)
-        .json(await peripheralService.createPeripheralInfo(dto));
+        .json(await peripheralService.createPeripheral(dto));
     } catch (err) {
       next(err);
     }
@@ -85,9 +85,7 @@ class PeripheralController {
       const dto = updatePeripheralDto.parse(req.body);
       res
         .status(HttpStatusCode.OK)
-        .json(
-          await peripheralService.updatePeripheralInfo(req.params.id!, dto),
-        );
+        .json(await peripheralService.updatePeripheral(req.params.id!, dto));
     } catch (err) {
       next(err);
     }
@@ -105,7 +103,7 @@ class PeripheralController {
     next: NextFunction,
   ) {
     try {
-      await peripheralService.softDeletePeripheralInfo(req.params.id!);
+      await peripheralService.softDeletePeripheral(req.params.id!);
       res.status(HttpStatusCode.NO_CONTENT).json();
     } catch (err) {
       next(err);
@@ -122,7 +120,7 @@ class PeripheralController {
     try {
       res
         .status(HttpStatusCode.OK)
-        .json(await peripheralService.restorePeripheralInfo(req.params.id!));
+        .json(await peripheralService.restorePeripheral(req.params.id!));
     } catch (err) {
       next(err);
     }

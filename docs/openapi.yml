@@ -1838,7 +1838,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: # Đổi sang application/json nếu không phải form-urlencoded
+          application/x-www-form-urlencoded: # Đổi sang application/json nếu không phải form-urlencoded
             schema:
               $ref: '#/components/schemas/CreateComputerDto'
       responses:
@@ -1899,7 +1899,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+          application/x-www-form-urlencoded: # Đổi sang application/json cho phù hợp với yêu cầu JSON
             schema:
               $ref: '#/components/schemas/UpdateComputerDto'
       responses:
@@ -2055,6 +2055,11 @@ paths:
           description: Every peripheral whose name contains this name will be returned
           schema:
             type: string
+        - name: brand
+          in: query
+          description: Every peripheral whose brand contains this brand will be returned
+          schema:
+            type: string
         - name: type
           in: query
           description: Every peripheral whose type matches will be returned
@@ -2062,22 +2067,9 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/PeripheralType'
-        - name: status
-          in: query
-          description: Every peripheral whose status matches will be returned
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/DeviceStatus'
         - name: provider
           in: query
           description: Every peripheral whose provider ID is this ID will be returned
-          schema:
-            type: string
-            format: uuid
-        - name: computer
-          in: query
-          description: Every peripheral assigned to this computer ID will be returned
           schema:
             type: string
             format: uuid
@@ -2224,6 +2216,11 @@ paths:
           description: Every peripheral whose name contains this name will be returned
           schema:
             type: string
+        - name: brand
+          in: query
+          description: Every peripheral whose brand contains this brand will be returned
+          schema:
+            type: string
         - name: type
           in: query
           description: Every peripheral whose type matches will be returned
@@ -2231,13 +2228,6 @@ paths:
             type: array
             items:
               $ref: '#/components/schemas/PeripheralType'
-        - name: status
-          in: query
-          description: Every peripheral whose status matches will be returned
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/DeviceStatus'
         - name: provider
           in: query
           description: Every peripheral whose provider ID is this ID will be returned
@@ -2844,14 +2834,12 @@ components:
         peripherals:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: string
-                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
-              status:
-                type: string
-                example: WORKING
+            allOf:
+              - $ref: '#/components/schemas/PeripheralDto'
+              - type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/DeviceStatus'
         createTimestamp:
           type: string
           format: date-time
@@ -2910,13 +2898,9 @@ components:
         peripherals:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: string
-                example: 5fa0e9f0-05c7-4c8d-8c4e-123456789abc
-              status:
-                $ref: '#/components/schemas/DeviceStatus'
+            type: string
+            format: uuid
+            example: 5f7e1d3b-9d21-4c3a-8f8b-123456789abc
     DeviceStatus:
       type: string
       enum:
@@ -2936,18 +2920,8 @@ components:
         type:
           $ref: '#/components/schemas/PeripheralType'
           example: MOUSE
-        status:
-          $ref: '#/components/schemas/DeviceStatus'
-          example: NORMAL
         provider:
           $ref: '#/components/schemas/ProviderDto'
-        computer:
-          $ref: '#/components/schemas/ComputerDto'
-          nullable: true
-        description:
-          type: string
-          example: Logitech G502 gaming mouse
-          nullable: true
         createTimestamp:
           type: string
           format: date-time
@@ -2968,39 +2942,11 @@ components:
       required:
         - name
         - type
-        - status
         - provider
         - brand
         - importPrice
-      properties:
-        name:
-          type: string
-          example: Gaming Mouse
-        type:
-          $ref: '#/components/schemas/PeripheralType'
-          example: MOUSE
-        status:
-          $ref: '#/components/schemas/DeviceStatus'
-          example: NORMAL
-        provider:
-          type: string
-          format: uuid
-          example: 8d933f56-3a23-4a11-91f8-123456789abc
-        computer:
-          type: string
-          format: uuid
-          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
-          nullable: true
-        description:
-          type: string
-          example: Logitech G502 gaming mouse
-          nullable: true
-        brand:
-          type: string
-          example: Logitech
-        importPrice:
-          type: number
-          example: 120.50
+      allOf:
+        - $ref: '#/components/schemas/UpdatePeripheralDto'
 
     UpdatePeripheralDto:
       type: object
@@ -3011,22 +2957,10 @@ components:
         type:
           $ref: '#/components/schemas/PeripheralType'
           example: KEYBOARD
-        status:
-          $ref: '#/components/schemas/DeviceStatus'
-          example: MAINTENANCE
         provider:
           type: string
           format: uuid
           example: 8d933f56-3a23-4a11-91f8-123456789abc
-        computer:
-          type: string
-          format: uuid
-          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
-          nullable: true
-        description:
-          type: string
-          example: Updated Logitech G502 gaming mouse
-          nullable: true
         brand:
           type: string
           example: Logitech
@@ -3044,68 +2978,6 @@ components:
         - SPEAKER
         - WEBCAM
         - OTHER
-    PeripheralInfoDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: d68b5c72-3d41-4d4a-8d1d-123456789abc
-        name:
-          type: string
-          example: Logitech G502
-        brand:
-          type: string
-          example: Logitech
-        importPrice:
-          type: number
-          example: 120.50
-        provider:
-          $ref: '#/components/schemas/ProviderDto'
-        createTimestamp:
-          type: string
-          format: date-time
-          example: 2021-01-01T00:00:00Z
-
-    CreatePeripheralInfoDto:
-      type: object
-      required:
-        - name
-        - brand
-        - importPrice
-        - provider
-      properties:
-        name:
-          type: string
-          example: Logitech G502
-        brand:
-          type: string
-          example: Logitech
-        importPrice:
-          type: number
-          example: 120.50
-        provider:
-          type: string
-          format: uuid
-          example: 8d933f56-3a23-4a11-91f8-123456789abc
-
-    UpdatePeripheralInfoDto:
-      type: object
-      properties:
-        name:
-          type: string
-          example: Updated Logitech G502
-        brand:
-          type: string
-          example: Logitech
-        importPrice:
-          type: number
-          example: 130.75
-        provider:
-          type: string
-          format: uuid
-          example: 8d933f56-3a23-4a11-91f8-123456789abc
-
   parameters:
     page:
       name: page

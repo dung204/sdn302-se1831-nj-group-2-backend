@@ -25,6 +25,7 @@ const baseComputerSchema = z.object({
       status: z.string(),
     }),
   ),
+  createTimestamp: z.date(),
 });
 
 export const computerDto = baseComputerSchema.transform(({ _id, ...data }) => ({

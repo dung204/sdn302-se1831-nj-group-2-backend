@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { authRouter } from '@/modules/auth/routers';
 import { branchRouter } from '@/modules/branch/router';
 import { computerRouter } from '@/modules/computer/router';
+import { meRouter } from '@/modules/me/router';
 import { peripheralRouter } from '@/modules/peripheral/router';
 import { positionRouter } from '@/modules/position/router';
 import { providerRouter } from '@/modules/provider/router';
@@ -15,6 +16,7 @@ export const appRouter = Router();
 
 appRouter.use('/auth', authRouter);
 appRouter.use('/users', userRouter);
+appRouter.use('/me', meRouter);
 appRouter.use('/usage-tracking', usageTrackingRouter);
 appRouter.use('/service-categories', serviceCategoryRouter);
 appRouter.use('/services', serviceTableRouter);

@@ -7,6 +7,8 @@ import {
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
 import { SuccessResponseBody } from '@/base/common/types';
 import { Logger, envVariables } from '@/base/common/utils';
+import { redis } from '@/base/redis';
+import { authService } from '@/modules/auth/services';
 import { PasswordUtils } from '@/modules/auth/utils';
 import { UserQueryDto } from '@/modules/user/dtos';
 import { CreateUserDto } from '@/modules/user/dtos/create-user.dto';
@@ -200,10 +202,17 @@ class UserService {
       { deleteTimestamp: Date.now() },
     );
 
-    if (updateResult.modifiedCount !== 1) {
+    if (updateResult.modifiedCount === 0) {
       throw new NotFoundException(
         'User not found or has been already deleted.',
       );
+    }
+
+    // Check if refresh token exists in Redis -> delete and get it
+    const refreshTokenExists = await redis.getInstance().getdel(id);
+    // If refresh token exists, relocate it from blacklist
+    if (refreshTokenExists) {
+      await authService.blacklistToken(refreshTokenExists);
     }
   }
 
@@ -211,25 +220,26 @@ class UserService {
     id: string,
     currentUser: User,
   ): Promise<SuccessResponseBody<UserDto>> {
-    const roleToMutate = (await this.findOneById(id)).role;
+    const userToMutate = await UserModel.findOne({
+      _id: id,
+      deleteTimestamp: { $ne: null },
+    }).exec();
 
-    if (!this.canMutateUserOfRole(currentUser, roleToMutate)) {
-      throw new ForbiddenException();
-    }
-
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { _id: id, deleteTimestamp: { $ne: null } },
-      { deleteTimestamp: null },
-    );
-
-    if (!updatedUser) {
+    if (!userToMutate) {
       throw new NotFoundException(
         'User not found or has been already restored.',
       );
     }
 
+    if (!this.canMutateUserOfRole(currentUser, userToMutate.role)) {
+      throw new ForbiddenException();
+    }
+
+    userToMutate.deleteTimestamp = null;
+    const savedUser = await userToMutate.save();
+
     return {
-      data: userDto.parse(updatedUser),
+      data: userDto.parse(await savedUser.populate('branch')),
     };
   }
 

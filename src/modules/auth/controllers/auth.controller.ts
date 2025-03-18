@@ -1,11 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpStatusCode } from '@/base/common/enums';
-import {
-  changePasswordDto,
-  loginRequestDto,
-  refreshRequestDto,
-} from '@/modules/auth/dtos';
+import { loginRequestDto, refreshRequestDto } from '@/modules/auth/dtos';
 import { authService } from '@/modules/auth/services';
 
 class AuthController {
@@ -41,19 +37,6 @@ class AuthController {
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
       await authService.logout(req.user!, req.accessToken!);
-      res.status(HttpStatusCode.NO_CONTENT).end();
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  /**
-   * `[POST] /api/v1/auth/change-password`
-   */
-  async changePassword(req: Request, res: Response, next: NextFunction) {
-    try {
-      const dto = changePasswordDto.parse(req.body);
-      await authService.changePassword(req.user!, dto);
       res.status(HttpStatusCode.NO_CONTENT).end();
     } catch (err) {
       next(err);

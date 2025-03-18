@@ -4,7 +4,7 @@ import { SchemaDefinition, SchemaDefinitionType } from 'mongoose';
 export interface BaseModel {
   _id: string;
   createTimestamp: Date;
-  deleteTimestamp: Date;
+  deleteTimestamp: Date | null;
 }
 
 export const baseModelSchemaDefinition = {

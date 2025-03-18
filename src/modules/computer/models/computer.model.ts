@@ -12,10 +12,10 @@ export interface Computer extends BaseModel {
   ram: string;
   storage: string;
   provider: string;
-  peripherals: { id: string; status: string }[];
+  peripherals: { _id: string; status: string }[];
 }
 
-const ComputerSchema = new Schema<Computer>({
+const computerSchema = new Schema<Computer>({
   ...baseModelSchemaDefinition,
   name: { type: String, required: true },
   position: { type: String, ref: 'Position', required: true }, // Tham chiếu Position
@@ -30,7 +30,22 @@ const ComputerSchema = new Schema<Computer>({
   ram: { type: String, required: true },
   storage: { type: String, required: true },
   provider: { type: String, ref: 'Provider', required: true }, // Tham chiếu Provider
-  peripherals: [{ id: String, status: String }],
+  peripherals: [
+    {
+      _id: { type: String, ref: 'Peripheral', required: true },
+      status: {
+        type: String,
+        enum: DeviceStatus,
+        default: DeviceStatus.NORMAL,
+        required: true,
+      },
+    },
+  ],
 });
 
-export const ComputerModel = model<Computer>('Computer', ComputerSchema);
+computerSchema.pre(['find', 'findOne', 'findOneAndUpdate'], function (next) {
+  this.populate(['position', 'provider', 'peripherals._id']);
+  next();
+});
+
+export const ComputerModel = model<Computer>('Computer', computerSchema);

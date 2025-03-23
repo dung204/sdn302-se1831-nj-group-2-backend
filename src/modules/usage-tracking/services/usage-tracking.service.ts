@@ -160,11 +160,12 @@ class UsageTrackingService {
     // find in db: startTimeStamp (records in bd) <= newUsageTracking.createTimestamp (new) <= endTimeStamp (records in bd)
 
     // save in db
-    await newUsageTracking.save();
-    const data = await newUsageTracking.populate(['user', 'computer']);
-    //
+    const savedUsageTracking = await newUsageTracking.save();
+
     return {
-      data: usageTrackingDto.parse(data),
+      data: usageTrackingDto.parse(
+        await savedUsageTracking.populate(['user', 'computer']),
+      ),
     };
   }
 

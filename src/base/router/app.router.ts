@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { authRouter } from '@/modules/auth/routers';
+import { billRouter } from '@/modules/bill/router';
 import { branchRouter } from '@/modules/branch/router';
 import { computerRouter } from '@/modules/computer/router';
 import { meRouter } from '@/modules/me/router';
@@ -25,3 +26,4 @@ appRouter.use('/providers', providerRouter);
 appRouter.use('/positions', positionRouter);
 appRouter.use('/computers', computerRouter);
 appRouter.use('/peripherals', peripheralRouter);
+appRouter.use('/bills', billRouter);

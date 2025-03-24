@@ -13,7 +13,7 @@ import {
 import { CreateComputerDto } from '@/modules/computer/dtos/create-computer.dto';
 import { UpdateComputerDto } from '@/modules/computer/dtos/update-computer.dto';
 import { Computer, ComputerModel } from '@/modules/computer/models';
-import { Peripheral, PeripheralModel } from '@/modules/peripheral/models';
+import { PeripheralModel } from '@/modules/peripheral/models';
 import { PositionModel } from '@/modules/position/models';
 import { ProviderModel } from '@/modules/provider/models';
 
@@ -83,16 +83,7 @@ class ComputerService {
       .populate('position')
       .populate('provider');
 
-    const computers = (await query.exec()).map((computer) => {
-      const computerObj = computer.toObject();
-      return {
-        ...computerObj,
-        peripherals: computerObj.peripherals.map((peripheral) => ({
-          ...(peripheral._id as unknown as Peripheral),
-          status: peripheral.status,
-        })),
-      };
-    });
+    const computers = await query.exec();
     const total = await ComputerModel.countDocuments(queryFilter).exec();
     const totalPage = Math.ceil(total / pageSize);
 
@@ -131,16 +122,8 @@ class ComputerService {
       throw new NotFoundException('Computer not found.');
     }
 
-    const computerObj = computer.toObject();
-
     return {
-      data: computerDto.parse({
-        ...computerObj,
-        peripherals: computerObj.peripherals.map((peripheral) => ({
-          ...(peripheral._id as unknown as Peripheral),
-          status: peripheral.status,
-        })),
-      }),
+      data: computerDto.parse(computer),
     };
   }
 
@@ -196,16 +179,8 @@ class ComputerService {
       }).save()
     ).populate(['position', 'provider', 'peripherals._id']);
 
-    const computerObj = newComputer.toObject();
-
     return {
-      data: computerDto.parse({
-        ...computerObj,
-        peripherals: computerObj.peripherals.map((peripheral) => ({
-          ...(peripheral._id as unknown as Peripheral),
-          status: peripheral.status,
-        })),
-      }),
+      data: computerDto.parse(newComputer),
     };
   }
 
@@ -269,16 +244,8 @@ class ComputerService {
       throw new NotFoundException('Computer not found.');
     }
 
-    const computerObj = updatedComputer.toObject();
-
     return {
-      data: computerDto.parse({
-        ...computerObj,
-        peripherals: computerObj.peripherals.map((peripheral) => ({
-          ...(peripheral._id as unknown as Peripheral),
-          status: peripheral.status,
-        })),
-      }),
+      data: computerDto.parse(updatedComputer),
     };
   }
 
@@ -307,16 +274,8 @@ class ComputerService {
       );
     }
 
-    const computerObj = updatedComputer.toObject();
-
     return {
-      data: computerDto.parse({
-        ...computerObj,
-        peripherals: computerObj.peripherals.map((peripheral) => ({
-          ...(peripheral._id as unknown as Peripheral),
-          status: peripheral.status,
-        })),
-      }),
+      data: computerDto.parse(updatedComputer),
     };
   }
 }

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { deleteDto } from '@/base/common/dtos';
 import { DeviceStatus } from '@/modules/computer/enums';
-import { basePeripheralSchema } from '@/modules/peripheral/dtos';
+import { peripheralDto } from '@/modules/peripheral/dtos';
 import { positionDto } from '@/modules/position/dtos';
 import { providerDto } from '@/modules/provider/dtos';
 
@@ -17,27 +17,33 @@ const baseComputerSchema = z.object({
   storage: z.string(),
   provider: providerDto,
   peripherals: z.array(
-    basePeripheralSchema
-      .extend({
-        status: z.nativeEnum(DeviceStatus),
-      })
-      .transform(({ _id, ...data }) => ({
-        id: _id,
-        ...data,
-      })),
+    z.object({
+      _id: peripheralDto,
+      status: z.nativeEnum(DeviceStatus),
+    }),
   ),
   createTimestamp: z.date(),
 });
 
-export const computerDto = baseComputerSchema.transform(({ _id, ...data }) => ({
-  id: _id,
-  ...data,
-}));
+export const computerDto = baseComputerSchema.transform(
+  ({ _id, peripherals, ...data }) => ({
+    id: _id,
+    peripherals: peripherals.map(({ _id, status }) => ({
+      ..._id,
+      status,
+    })),
+    ...data,
+  }),
+);
 
 export const deletedComputerDto = baseComputerSchema
   .merge(deleteDto)
-  .transform(({ _id, ...data }) => ({
+  .transform(({ _id, peripherals, ...data }) => ({
     id: _id,
+    peripherals: peripherals.map(({ _id, status }) => ({
+      ..._id,
+      status,
+    })),
     ...data,
   }));
 

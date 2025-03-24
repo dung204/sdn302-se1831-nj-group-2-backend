@@ -40,6 +40,8 @@ tags:
     description: Computer management
   - name: peripherals
     description: Peripheral management
+  - name: bills
+    description: Bill management for services and computer usage
 paths:
   /api/v1/auth/login:
     post:
@@ -1889,7 +1891,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json nếu không phải form-urlencoded
+          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/CreateComputerDto'
       responses:
@@ -1950,7 +1952,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded: # Đổi sang application/json cho phù hợp với yêu cầu JSON
+          application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/UpdateComputerDto'
       responses:
@@ -2329,6 +2331,318 @@ paths:
           description: Peripheral not found
       security:
         - JWT: []
+  # BILLS API
+  /api/v1/bills:
+    get:
+      summary: Get all non-deleted bills
+      description: Allowed sorting fields are `createTimestamp`, `id`, `totalPrice`, `startTimestamp`, `endTimestamp`
+      tags:
+        - bills
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - name: user
+          in: query
+          description: Every bill whose user ID is this ID will be returned
+          schema:
+            type: string
+        - name: computer
+          in: query
+          description: Every bill whose computer ID is this ID will be returned
+          schema:
+            type: string
+        - name: minTotalPrice
+          in: query
+          description: Every bill whose total price is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: maxTotalPrice
+          in: query
+          description: Every bill whose total price is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: fromStartTimestamp
+          in: query
+          description: Every bill whose start timestamp is after this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: toStartTimestamp
+          in: query
+          description: Every bill whose start timestamp is before this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: fromEndTimestamp
+          in: query
+          description: Every bill whose end timestamp is after this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: toEndTimestamp
+          in: query
+          description: Every bill whose end timestamp is before this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: fromMaxEndTimestamp
+          in: query
+          description: Every bill whose max end timestamp is after this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: toMaxEndTimestamp
+          in: query
+          description: Every bill whose max end timestamp is before this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: fromMaxHoldingTimestamp
+          in: query
+          description: Every bill whose max holding timestamp is after this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: toMaxHoldingTimestamp
+          in: query
+          description: Every bill whose max holding timestamp is before this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: serviceStatus
+          in: query
+          description: Every bill that has a service with this status will be returned
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ServiceStatus'
+      responses:
+        '200':
+          description: Get all bills successfully (with pagination metadata)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BillDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+    post:
+      summary: Create a new bill
+      tags:
+        - bills
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateBillDto'
+      responses:
+        '201':
+          description: Bill created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillDto'
+        '400':
+          description: Bad request
+      security:
+        - JWT: []
+
+  /api/v1/bills/{id}:
+    get:
+      summary: Get a bill by ID
+      tags:
+        - bills
+      parameters:
+        - name: id
+          in: path
+          description: The bill ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get bill information successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillDto'
+        '404':
+          description: Bill not found
+      security:
+        - JWT: []
+    patch:
+      summary: Update a bill by ID
+      tags:
+        - bills
+      parameters:
+        - name: id
+          in: path
+          description: The bill ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateBillDto'
+      responses:
+        '200':
+          description: Bill updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillDto'
+        '400':
+          description: Bad request
+        '404':
+          description: Bill not found
+      security:
+        - JWT: []
+    delete:
+      summary: Soft delete a bill by ID
+      tags:
+        - bills
+      parameters:
+        - name: id
+          in: path
+          description: The bill ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Bill deleted successfully
+        '404':
+          description: Bill not found
+      security:
+        - JWT: []
+
+  /api/v1/bills/deleted:
+    get:
+      summary: Get all deleted bills
+      description: Allowed sorting fields are `createTimestamp`, `id`, `totalPrice`, `startTimestamp`, `endTimestamp`, `deleteTimestamp`
+      tags:
+        - bills
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sorting'
+        - $ref: '#/components/parameters/fromCreateTimestamp'
+        - $ref: '#/components/parameters/toCreateTimestamp'
+        - $ref: '#/components/parameters/fromDeleteTimestamp'
+        - $ref: '#/components/parameters/toDeleteTimestamp'
+        - name: user
+          in: query
+          description: Every bill whose user ID is this ID will be returned
+          schema:
+            type: string
+        - name: computer
+          in: query
+          description: Every bill whose computer ID is this ID will be returned
+          schema:
+            type: string
+        - name: minTotalPrice
+          in: query
+          description: Every bill whose total price is greater than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: maxTotalPrice
+          in: query
+          description: Every bill whose total price is less than or equal to this value will be returned
+          schema:
+            type: number
+            format: float
+        - name: fromStartTimestamp
+          in: query
+          description: Every bill whose start timestamp is after this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: toStartTimestamp
+          in: query
+          description: Every bill whose start timestamp is before this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: fromEndTimestamp
+          in: query
+          description: Every bill whose end timestamp is after this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+        - name: toEndTimestamp
+          in: query
+          description: Every bill whose end timestamp is before this timestamp will be returned
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Get all deleted bills successfully (with pagination metadata)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeletedBillDto'
+                  - $ref: '#/components/schemas/ResponseMeta'
+      security:
+        - JWT: []
+
+  /api/v1/bills/restore/{id}:
+    patch:
+      summary: Restore a deleted bill by ID
+      tags:
+        - bills
+      parameters:
+        - name: id
+          in: path
+          description: The bill ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bill restored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BillDto'
+        '404':
+          description: Bill not found
+      security:
+        - JWT: []
 components:
   schemas:
     LoginRequestDto:
@@ -2512,7 +2826,7 @@ components:
         - computer
         - startTimeStamp
         - endTimeStamp
-      allOf: #all of is used to combine the properties of two schemas
+      allOf:
         - type: object
           properties:
             user:
@@ -3029,6 +3343,150 @@ components:
         - SPEAKER
         - WEBCAM
         - OTHER
+    # Bill schemas
+    BillComputerDto:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        pricePerHour:
+          type: number
+        holdingFee:
+          type: number
+
+    BillServiceDto:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: number
+        status:
+          $ref: '#/components/schemas/ServiceStatus'
+
+    BillDto:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserDto'
+        computer:
+          $ref: '#/components/schemas/BillComputerDto'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillServiceDto'
+        startTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        endTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        maxEndTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        maxHoldingTimestamp:
+          type: string
+          format: date-time
+        totalPrice:
+          type: number
+        createTimestamp:
+          type: string
+          format: date-time
+
+    DeletedBillDto:
+      allOf:
+        - $ref: '#/components/schemas/BillDto'
+        - type: object
+          properties:
+            deleteTimestamp:
+              type: string
+              format: date-time
+
+    CreateBillServiceDto:
+      type: object
+      required:
+        - _id
+        - quantity
+      properties:
+        _id:
+          type: string
+        quantity:
+          type: number
+        status:
+          $ref: '#/components/schemas/ServiceStatus'
+
+    CreateBillDto:
+      type: object
+      required:
+        - user
+        - computer
+      properties:
+        user:
+          type: string
+        computer:
+          type: string
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateBillServiceDto'
+        startTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        endTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        maxEndTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+        maxHoldingTimestamp:
+          type: string
+          format: date-time
+
+    UpdateBillDto:
+      type: object
+      properties:
+        user:
+          type: string
+        computer:
+          type: string
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateBillServiceDto'
+        startTimestamp:
+          type: string
+          format: date-time
+        endTimestamp:
+          type: string
+          format: date-time
+        maxEndTimestamp:
+          type: string
+          format: date-time
+        maxHoldingTimestamp:
+          type: string
+          format: date-time
+
+    ServiceStatus:
+      type: string
+      enum:
+        - PENDING
+        - IN_PROGRESS
+        - COMPLETED
+        - CANCELLED
   parameters:
     page:
       name: page

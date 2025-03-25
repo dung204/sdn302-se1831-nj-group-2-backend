@@ -34,8 +34,8 @@ export const computerQueryDto = commonQueryDto
       ])
       .optional(),
     provider: z.string().optional(),
-    fromPricePerHour: z.number().optional(),
-    toPricePerHour: z.number().optional(),
+    fromPricePerHour: z.coerce.number().optional(),
+    toPricePerHour: z.coerce.number().optional(),
   })
   .transform((payload) => SortingUtils.transformSorting(payload));
 

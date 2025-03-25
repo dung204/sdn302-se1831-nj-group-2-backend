@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const createServiceTableDto = z.object({
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   price: z.coerce.number().positive(),
   category: z.string(),
   branches: z

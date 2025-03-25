@@ -14,8 +14,8 @@ export const serviceTableQueryDto = commonQueryDto
     ]),
     name: z.string().optional(),
     category: z.string().optional(),
-    fromPrice: z.number().optional(),
-    toPrice: z.number().optional(),
+    fromPrice: z.coerce.number().optional(),
+    toPrice: z.coerce.number().optional(),
     branch: z.string().optional(),
   })
   .transform((payload) => SortingUtils.transformSorting(payload));

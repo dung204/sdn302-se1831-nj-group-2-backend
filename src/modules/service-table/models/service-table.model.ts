@@ -13,7 +13,7 @@ export interface ServiceTable extends BaseModel {
 const serviceTableSchema = new Schema<ServiceTable>({
   ...baseModelSchemaDefinition,
   name: { type: String, required: true },
-  description: { type: String, required: true },
+  description: { type: String },
   price: { type: Number, required: true },
   category: { type: String, ref: 'ServiceCategory', required: true },
   branches: { type: [String], ref: 'Branch', default: [], required: true },

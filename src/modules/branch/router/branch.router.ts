@@ -6,11 +6,7 @@ import { Role } from '@/modules/user/enums/role.enum';
 
 export const branchRouter = Router();
 
-branchRouter.get(
-  '/',
-  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER]),
-  branchController.findAll,
-);
+branchRouter.get('/', AuthGuard(), branchController.findAll);
 
 branchRouter.get(
   '/deleted',

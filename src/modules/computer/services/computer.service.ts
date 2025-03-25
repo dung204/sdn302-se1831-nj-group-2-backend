@@ -142,11 +142,19 @@ class ComputerService {
     }
 
     // Check if the position exists
-    const isPositionExisted = await PositionModel.exists({
-      _id: position,
-    }).exec();
-    if (!isPositionExisted) {
+    const positionDoc = await PositionModel.findById(position).exec();
+    if (!positionDoc) {
       throw new NotFoundException(`Position not found.`);
+    }
+
+    // Check if the position is already assigned to another computer
+    const isPositionTaken = await ComputerModel.exists({
+      position,
+    }).exec();
+    if (isPositionTaken) {
+      throw new ConflictException(
+        `Position '${positionDoc.name}' is already assigned to another computer.`,
+      );
     }
 
     // Check if the provider exists

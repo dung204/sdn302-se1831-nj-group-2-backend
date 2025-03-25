@@ -14,7 +14,7 @@ export const computerQueryDto = commonQueryDto
       'deleteTimestamp',
     ]),
     name: z.string().optional(),
-    position: z.string().optional(),
+    branch: z.string().optional(),
     status: z
       .union([
         z

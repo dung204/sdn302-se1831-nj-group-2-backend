@@ -1833,9 +1833,9 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: position
+        - name: branch
           in: query
-          description: Every computer whose position ID is this ID will be returned
+          description: Every computer whose branch ID is this ID will be returned
           schema:
             type: string
             format: uuid

@@ -42,6 +42,7 @@ class ComputerService {
       toPricePerHour,
       name,
       status,
+      branch,
       ...otherFilters
     } = filter;
     const queryFilter: RootFilterQuery<Computer> = {
@@ -54,6 +55,7 @@ class ComputerService {
           },
       ...(status && { status: { $in: status } }),
       ...(name && { name: { $regex: name, $options: 'i' } }),
+      ...(branch && { position: { branch } }),
       ...otherFilters,
     };
 

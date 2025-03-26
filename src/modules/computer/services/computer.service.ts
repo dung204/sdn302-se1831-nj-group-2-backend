@@ -1,4 +1,4 @@
-import { RootFilterQuery, SortOrder } from 'mongoose';
+import { HydratedDocument, PipelineStage } from 'mongoose';
 
 import { ConflictException } from '@/base/common/exceptions';
 import { NotFoundException } from '@/base/common/exceptions/http/not-found.exception';
@@ -45,48 +45,180 @@ class ComputerService {
       branch,
       ...otherFilters
     } = filter;
-    const queryFilter: RootFilterQuery<Computer> = {
-      deleteTimestamp: !deleted
-        ? null
-        : {
-            $ne: null,
-            ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
-            ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+
+    const queryFilter: PipelineStage[] = [
+      {
+        $lookup: {
+          from: 'positions',
+          localField: 'position',
+          foreignField: '_id',
+          as: 'position',
+        },
+      },
+      { $unwind: '$position' },
+      {
+        $lookup: {
+          from: 'branches',
+          localField: 'position.branch',
+          foreignField: '_id',
+          as: 'position.branch',
+        },
+      },
+      { $unwind: '$position.branch' },
+      {
+        $lookup: {
+          from: 'providers',
+          localField: 'provider',
+          foreignField: '_id',
+          as: 'provider',
+        },
+      },
+      { $unwind: '$provider' },
+      {
+        $lookup: {
+          from: 'peripherals', // Join with the peripherals collection
+          localField: 'peripherals._id',
+          foreignField: '_id',
+          as: 'peripheralsDetails',
+        },
+      },
+      {
+        $lookup: {
+          from: 'providers', // Join with the providers collection
+          localField: 'peripheralsDetails.provider',
+          foreignField: '_id',
+          as: 'providerDetails',
+        },
+      },
+      {
+        $addFields: {
+          peripherals: {
+            $map: {
+              input: '$peripherals',
+              as: 'peripheral',
+              in: {
+                $mergeObjects: [
+                  '$$peripheral', // Original peripheral object from `computers`
+                  {
+                    _id: {
+                      $arrayElemAt: [
+                        {
+                          $filter: {
+                            input: '$peripheralsDetails',
+                            as: 'detail',
+                            cond: { $eq: ['$$detail._id', '$$peripheral._id'] },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
           },
-      ...(status && { status: { $in: status } }),
-      ...(name && { name: { $regex: name, $options: 'i' } }),
-      ...(branch && { position: { branch } }),
-      ...otherFilters,
-    };
+        },
+      },
+      // Add the `provider` field to each peripheral._id
+      {
+        $addFields: {
+          peripherals: {
+            $map: {
+              input: '$peripherals',
+              as: 'peripheral',
+              in: {
+                $mergeObjects: [
+                  '$$peripheral', // Original peripheral object from `computers`
+                  {
+                    _id: {
+                      $mergeObjects: [
+                        '$$peripheral._id', // Original peripheral._id object
+                        {
+                          provider: {
+                            $arrayElemAt: [
+                              {
+                                $filter: {
+                                  input: '$providerDetails',
+                                  as: 'detail',
+                                  cond: {
+                                    $eq: [
+                                      '$$detail._id',
+                                      '$$peripheral._id.provider',
+                                    ],
+                                  },
+                                },
+                              },
+                              0,
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          peripheralsDetails: 0, // Exclude the temporary `peripheralsDetails` field
+        },
+      },
+      {
+        $match: {
+          deleteTimestamp: !deleted
+            ? null
+            : {
+                $ne: null,
+                ...(fromDeleteTimestamp && { $gte: fromDeleteTimestamp }),
+                ...(toDeleteTimestamp && { $lte: toDeleteTimestamp }),
+              },
+          ...(status && { status: { $in: status } }),
+          ...(name && { name: { $regex: name, $options: 'i' } }),
+          ...otherFilters,
+          ...((fromCreateTimestamp || toCreateTimestamp) && {
+            createTimestamp: {
+              ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
+              ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
+            },
+          }),
+          ...((fromPricePerHour || toPricePerHour) && {
+            pricePerHour: {
+              ...(fromPricePerHour && { $gte: fromPricePerHour }),
+              ...(toPricePerHour && { $lte: toPricePerHour }),
+            },
+          }),
+          ...(branch && { $expr: { $eq: ['$position.branch._id', branch] } }),
+        },
+      },
+    ];
 
-    if (fromCreateTimestamp || toCreateTimestamp) {
-      queryFilter.createTimestamp = {
-        ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
-        ...(toCreateTimestamp && { $lte: toCreateTimestamp }),
-      };
-    }
-
-    if (fromPricePerHour || toPricePerHour) {
-      queryFilter.pricePerHour = {
-        ...(fromPricePerHour && { $gte: fromPricePerHour }),
-        ...(toPricePerHour && { $lte: toPricePerHour }),
-      };
-    }
-
-    const query = ComputerModel.find(queryFilter)
-      .limit(pageSize)
-      .skip((page - 1) * pageSize)
-      .sort(
-        sorting.map(
-          ({ field, direction }) =>
-            [field === 'id' ? '_id' : field, direction] as [string, SortOrder],
-        ),
-      )
-      .populate('position')
-      .populate('provider');
+    const query = ComputerModel.aggregate<HydratedDocument<Computer>>([
+      ...queryFilter,
+      { $limit: pageSize },
+      { $skip: (page - 1) * pageSize },
+      {
+        $sort: sorting
+          .map(
+            ({ field, direction }) =>
+              ({
+                [field]: direction === 'asc' ? 1 : -1,
+              }) as Record<string, 1 | -1>,
+          )
+          .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
+      },
+    ]);
 
     const computers = await query.exec();
-    const total = await ComputerModel.countDocuments(queryFilter).exec();
+    const total =
+      (
+        await ComputerModel.aggregate([
+          ...queryFilter,
+          { $count: 'total' },
+        ]).exec()
+      )[0]?.total ?? 0;
     const totalPage = Math.ceil(total / pageSize);
 
     return {

@@ -2708,7 +2708,7 @@ components:
           type: string
           nullable: true
           example: '+84123456789'
-        availableTime:
+        balance:
           type: number
           nullable: true
           example: 3600
@@ -2751,7 +2751,7 @@ components:
         phoneNumber:
           type: string
           example: '+84123456789'
-        availableTime:
+        balance:
           type: number
           example: 3600
     CreateUserDto:

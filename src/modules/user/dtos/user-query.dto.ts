@@ -13,7 +13,7 @@ export const userQueryDto = commonQueryDto
       'username',
       'citizenNumber',
       'phoneNumber',
-      'availableTime',
+      'balance',
       'createTimestamp',
       'deleteTimestamp',
     ]),

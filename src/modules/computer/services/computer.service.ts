@@ -43,7 +43,8 @@ class ComputerService {
       name,
       status,
       branch,
-      ...otherFilters
+      position,
+      provider,
     } = filter;
 
     const queryFilter: PipelineStage[] = [
@@ -177,7 +178,6 @@ class ComputerService {
               },
           ...(status && { status: { $in: status } }),
           ...(name && { name: { $regex: name, $options: 'i' } }),
-          ...otherFilters,
           ...((fromCreateTimestamp || toCreateTimestamp) && {
             createTimestamp: {
               ...(fromCreateTimestamp && { $gte: fromCreateTimestamp }),
@@ -191,6 +191,8 @@ class ComputerService {
             },
           }),
           ...(branch && { $expr: { $eq: ['$position.branch._id', branch] } }),
+          ...(position && { $expr: { $eq: ['$position._id', position] } }),
+          ...(provider && { $expr: { $eq: ['$provider._id', provider] } }),
         },
       },
     ];

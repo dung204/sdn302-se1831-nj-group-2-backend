@@ -15,6 +15,7 @@ export const computerQueryDto = commonQueryDto
     ]),
     name: z.string().optional(),
     branch: z.string().optional(),
+    position: z.string().optional(),
     status: z
       .union([
         z

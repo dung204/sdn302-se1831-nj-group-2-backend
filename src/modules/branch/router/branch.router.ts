@@ -14,11 +14,7 @@ branchRouter.get(
   branchController.findAllDeleted,
 );
 
-branchRouter.get(
-  '/:id',
-  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER]),
-  branchController.findOneById,
-);
+branchRouter.get('/:id', AuthGuard(), branchController.findOneById);
 
 branchRouter.post('/', AuthGuard([Role.OWNER]), branchController.createBranch);
 

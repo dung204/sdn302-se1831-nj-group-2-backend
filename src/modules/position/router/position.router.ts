@@ -8,7 +8,7 @@ export const positionRouter = Router();
 
 positionRouter.get(
   '/',
-  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER, Role.GUEST]),
   positionController.findAll,
 );
 positionRouter.get(
@@ -18,7 +18,7 @@ positionRouter.get(
 );
 positionRouter.get(
   '/:id',
-  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER]),
+  AuthGuard([Role.BRANCH_ADMIN, Role.STAFF, Role.OWNER, Role.GUEST]),
   positionController.findOneById,
 );
 positionRouter.post(

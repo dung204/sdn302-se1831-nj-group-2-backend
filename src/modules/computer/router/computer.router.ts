@@ -8,7 +8,7 @@ export const computerRouter = Router();
 
 computerRouter.get(
   '/',
-  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF, Role.GUEST]),
 
   computerController.findAll,
 );
@@ -22,7 +22,7 @@ computerRouter.get(
 
 computerRouter.get(
   '/:id',
-  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF]),
+  AuthGuard([Role.OWNER, Role.BRANCH_ADMIN, Role.STAFF, Role.GUEST]),
 
   computerController.findOneById,
 );

@@ -14,6 +14,7 @@ import { CreateComputerDto } from '@/modules/computer/dtos/create-computer.dto';
 import { UpdateComputerDto } from '@/modules/computer/dtos/update-computer.dto';
 import { Computer, ComputerModel } from '@/modules/computer/models';
 import { PeripheralModel } from '@/modules/peripheral/models';
+import { PositionStatus } from '@/modules/position/enums';
 import { PositionModel } from '@/modules/position/models';
 import { ProviderModel } from '@/modules/provider/models';
 
@@ -421,6 +422,38 @@ class ComputerService {
     return {
       data: computerDto.parse(updatedComputer),
     };
+  }
+
+  async updatePositionStatus(
+    computerId: string,
+    status: PositionStatus,
+  ): Promise<void> {
+    // Find the computer to get its position ID
+    const computer = await ComputerModel.findOne({
+      _id: computerId,
+      deleteTimestamp: null,
+    });
+
+    if (!computer) {
+      throw new NotFoundException('Computer not found.');
+    }
+
+    // Get the position ID
+    const positionId = computer.position;
+
+    // Update the position status
+    const result = await PositionModel.updateOne(
+      { _id: positionId, deleteTimestamp: null },
+      { status },
+    );
+
+    if (result.matchedCount === 0) {
+      throw new NotFoundException('Position not found.');
+    }
+
+    if (result.modifiedCount === 0) {
+      throw new ConflictException('Failed to update position status.');
+    }
   }
 }
 

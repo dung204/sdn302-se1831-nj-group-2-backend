@@ -13,7 +13,7 @@ export interface User extends BaseModel {
   branch?: string;
   citizenNumber: string | null;
   phoneNumber: string | null;
-  availableTime: number | null; // in seconds
+  balance: number;
 }
 
 const userSchema = new Schema<User>({
@@ -44,9 +44,9 @@ const userSchema = new Schema<User>({
     default: null,
     required: false,
   },
-  availableTime: {
+  balance: {
     type: Number,
-    default: null,
+    default: 0,
     required: false,
   },
 });

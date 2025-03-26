@@ -14,7 +14,7 @@ const baseUserSchema = z.object({
   role: z.enum([Role.BRANCH_ADMIN, Role.GUEST, Role.OWNER, Role.STAFF]),
   citizenNumber: z.string().nullable(),
   phoneNumber: z.string().nullable(),
-  availableTime: z.number().nullable(),
+  balance: z.number().nullable(),
   createTimestamp: z.date(),
 });
 

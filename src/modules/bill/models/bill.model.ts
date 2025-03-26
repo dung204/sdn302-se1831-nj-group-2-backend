@@ -4,6 +4,7 @@ import { BaseModel, baseModelSchemaDefinition } from '@/base/common/models';
 import { ServiceStatus } from '@/modules/bill/enums';
 import { ComputerModel } from '@/modules/computer/models';
 import { computerService } from '@/modules/computer/services';
+import { PositionStatus } from '@/modules/position/enums';
 import { ServiceTableModel } from '@/modules/service-table/models';
 import { serviceTableService } from '@/modules/service-table/services';
 import { UserModel } from '@/modules/user/models';
@@ -106,6 +107,25 @@ billSchema.pre(['save'], async function (next) {
       };
     }
 
+    // Update computer position status based on timestamps
+    const computerId = this.computer._id;
+
+    if (this.isModified('startTimestamp') || this.isModified('endTimestamp')) {
+      if (this.startTimestamp && !this.endTimestamp) {
+        // If startTimestamp exists but endTimestamp doesn't, set status to IN_USE
+        await computerService.updatePositionStatus(
+          computerId,
+          PositionStatus.IN_USE,
+        );
+      } else if (this.endTimestamp) {
+        // If endTimestamp exists, set status to AVAILABLE
+        await computerService.updatePositionStatus(
+          computerId,
+          PositionStatus.AVAILABLE,
+        );
+      }
+    }
+
     // Process services if provided
     if (this.isNew || this.isModified('services')) {
       if (this.services && this.services.length > 0) {
@@ -138,18 +158,54 @@ billSchema.pre(['save'], async function (next) {
       }
     }
 
+    // Handle maxEndTimestamp changes
+    if (
+      this.isModified('maxEndTimestamp') &&
+      this.startTimestamp &&
+      this.maxEndTimestamp
+    ) {
+      // Get the user if not already fetched
+
+      const oldBill = await BillModel.findById(this._id);
+      // Get the old maxEndTimestamp (before the change)
+      const oldMaxEndTimestamp = oldBill?.maxEndTimestamp;
+      const newMaxEndTimestamp = new Date(this.maxEndTimestamp);
+
+      // Calculate reference timestamp (old maxEndTimestamp or startTimestamp if old was null)
+      const referenceTimestamp = oldMaxEndTimestamp
+        ? new Date(oldMaxEndTimestamp)
+        : new Date(this.startTimestamp);
+
+      // Calculate the additional time in hours
+      const additionalHours =
+        (newMaxEndTimestamp.getTime() - referenceTimestamp.getTime()) /
+        (1000 * 60 * 60);
+
+      // Calculate the additional charge
+      const additionalCharge = additionalHours * this.computer.pricePerHour;
+
+      // Update the user's balance
+      if (additionalCharge > 0) {
+        await userService.updateBalance(this.user, -additionalCharge);
+      }
+    }
+
     // Update totalPrice if endTimestamp is modified
     if (
       this.isModified('endTimestamp') &&
       this.startTimestamp &&
-      this.endTimestamp
+      this.endTimestamp &&
+      this.maxEndTimestamp
     ) {
       const startTimestamp = new Date(this.startTimestamp);
-      const endTimestamp = new Date(this.endTimestamp);
+      //  const endTimestamp = new Date(this.endTimestamp);
+      const maxEndTimestamp = new Date(this.maxEndTimestamp);
       const createTimestamp = new Date(this.createTimestamp);
 
       const durationInHours =
-        (endTimestamp.getTime() - startTimestamp.getTime()) / (1000 * 60 * 60);
+        (maxEndTimestamp.getTime() - startTimestamp.getTime()) /
+        (1000 * 60 * 60);
+      // (endTimestamp.getTime() - startTimestamp.getTime()) / (1000 * 60 * 60);
       const holdingDurationInMinutes =
         (startTimestamp.getTime() - createTimestamp.getTime()) / (1000 * 60);
 

@@ -16,7 +16,7 @@ export const baseCreateUserDto = z.object({
   branch: z.string().optional(),
   citizenNumber: z.string().nullable().optional(),
   phoneNumber: z.string().nullable().optional(),
-  availableTime: z.coerce.number().nullable().optional(),
+  balance: z.coerce.number().nullable().optional(),
 });
 
 export const createUserDto = baseCreateUserDto.refine(

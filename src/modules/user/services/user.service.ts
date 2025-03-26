@@ -275,6 +275,36 @@ class UserService {
     }
   }
 
+  async updateBalance(userId: string, amount: number): Promise<void> {
+    const user = await UserModel.findOne({
+      _id: userId,
+      deleteTimestamp: null,
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    // Ensure the user has enough balance if withdrawing
+    if (amount < 0 && user.balance + amount < 0) {
+      throw new ConflictException('Insufficient balance.');
+    }
+
+    // Update the user's balance
+    const result = await UserModel.updateOne(
+      { _id: userId, deleteTimestamp: null },
+      { $inc: { balance: amount } },
+    );
+
+    if (result.matchedCount === 0) {
+      throw new NotFoundException('User not found.');
+    }
+
+    if (result.modifiedCount === 0) {
+      throw new ConflictException('Failed to update user balance.');
+    }
+  }
+
   // Mutation includes: add, update, delete
   private canMutateUserOfRole(currentUser: User, roleToMutate: Role) {
     switch (currentUser.role) {

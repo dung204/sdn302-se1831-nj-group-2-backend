@@ -13,7 +13,7 @@ export interface User extends BaseModel {
   branch?: string;
   citizenNumber: string | null;
   phoneNumber: string | null;
-  balance: number | null;
+  balance: number;
 }
 
 const userSchema = new Schema<User>({
